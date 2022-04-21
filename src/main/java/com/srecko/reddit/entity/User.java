@@ -9,6 +9,8 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
+    private String username;
+    private String password;
     private String country;
     private Date registrationDate;
 
@@ -18,10 +20,12 @@ public class User {
     // Comments
     private List<Comment> comments;
 
-    public User(String firstName, String lastName, String email, String country) {
+    public User(String firstName, String lastName, String email, String username, String password, String country) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.username = username;
+        this.password = password;
         this.country = country;
         this.registrationDate = new Date(); // check
     }
@@ -88,5 +92,21 @@ public class User {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
