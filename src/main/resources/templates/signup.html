@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up</title>
+</head>
+<body>
+    <div>
+        <h1>Sign In</h1>
+        <form>
+            <label for="firstname">First name:</label>
+            <input id="firstname" type="text" name="firstname" />
+            <label for="lastname">Last name:</label>
+            <input id="lastname" type="text" name="lastname" />
+            <label for="email">Email:</label>
+            <input id="email" type="text" name="email" />
+            <label for="username">Username:</label>
+            <input id="username" type="text" name="username" />
+            <label for="password">Password:</label>
+            <input id="password" type="password" name="password" />
+            <!-- country -->
+            <label for="countries">Country:</label>
+            <select id="countries">
+                <option th:each="countryOption : ${countries}" th:text="${countryOption}" th:value="${countryOption}"></option>
+            </select>
+            <button type="submit">Sign in</button>
+        </form>
+    </div>
+</body>
+</html>
