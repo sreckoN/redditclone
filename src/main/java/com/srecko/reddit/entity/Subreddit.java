@@ -1,17 +1,30 @@
 package com.srecko.reddit.entity;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table(name = "subreddits")
 public class Subreddit {
 
-    private int id;
+    @Id
+    @GeneratedValue
+    private Long id;
+    @NotNull
+    @Size(min = 3, max = 50)
     private String name;
     private String description;
     private Date createdDate;
-    private User creator;
-    private List<Post> posts;
     private int numberOfUsers;
+    @NotNull
+    @OneToOne
+    @JoinColumn(name = "creator_id")
+    private User creator;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "subreddit", orphanRemoval = true)
+    private List<Post> posts;
 
     public Subreddit() {
     }
@@ -23,11 +36,11 @@ public class Subreddit {
         this.numberOfUsers = 0;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
