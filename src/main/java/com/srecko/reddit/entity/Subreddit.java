@@ -11,6 +11,7 @@ public class Subreddit {
     private Date createdDate;
     private User creator;
     private List<Post> posts;
+    private int numberOfUsers;
 
     public Subreddit() {
     }
@@ -19,6 +20,7 @@ public class Subreddit {
         this.name = name;
         this.description = description;
         this.creator = creator;
+        this.numberOfUsers = 0;
     }
 
     public int getId() {

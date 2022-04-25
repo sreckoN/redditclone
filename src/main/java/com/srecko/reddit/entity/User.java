@@ -1,5 +1,6 @@
 package com.srecko.reddit.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,9 @@ public class User {
     // Comments
     private List<Comment> comments;
 
+    // Subreddits
+    private List<Subreddit> subreddits;
+
     public User(String firstName, String lastName, String email, String username, String password, String country) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -27,7 +31,8 @@ public class User {
         this.username = username;
         this.password = password;
         this.country = country;
-        this.registrationDate = new Date(); // check
+        this.registrationDate = new Date();
+        this.subreddits = new ArrayList<>();
     }
 
     public int getId() {
@@ -108,5 +113,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<Subreddit> getSubreddits() {
+        return subreddits;
+    }
+
+    public void setSubreddits(List<Subreddit> subreddits) {
+        this.subreddits = subreddits;
     }
 }
