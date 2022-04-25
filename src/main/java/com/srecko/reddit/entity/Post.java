@@ -1,25 +1,41 @@
 package com.srecko.reddit.entity;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table(name = "posts")
 public class Post {
 
-    private int id;
+    @Id
+    @GeneratedValue
+    private Long id;
     private Date dateOfCreation;
-    private User createdBy;
+    @NotNull
+    @Size(min = 3, max = 35)
     private String title;
+    @NotNull
+    @Size(min = 2, max = 1000)
     private String text;
     private int votes;
     private int commentsCounter;
+    @ManyToOne
+    private User user;
+    @ManyToOne
     private Subreddit subreddit;
 
-    // Comments
+    @OneToMany
     private List<Comment> comments;
 
+    public Post() {
+    }
+
     public Post(User createdBy, String title, String text, Subreddit subreddit) {
-        this.createdBy = createdBy;
+        this.user = createdBy;
         this.title = title;
         this.text = text;
         this.subreddit = subreddit;
@@ -29,11 +45,11 @@ public class Post {
         this.comments = new ArrayList<>();
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -45,12 +61,12 @@ public class Post {
         this.dateOfCreation = dateOfCreation;
     }
 
-    public User getCreatedBy() {
-        return createdBy;
+    public User getUser() {
+        return user;
     }
 
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getTitle() {

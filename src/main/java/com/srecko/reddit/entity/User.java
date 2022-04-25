@@ -1,28 +1,44 @@
 package com.srecko.reddit.entity;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table(name = "users")
 public class User {
 
-    private int id;
+    @Id
+    @GeneratedValue
+    private Long id;
     private String firstName;
     private String lastName;
+    @NotNull
+    @Size(min = 10)
     private String email;
+    @NotNull
+    @Size(min = 3, max = 16, message = "is required")
     private String username;
+    @NotNull
+    @Size(min = 6, max = 50)
     private String password;
     private String country;
     private Date registrationDate;
 
-    // Posts
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<Post> posts;
 
-    // Comments
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<Comment> comments;
 
-    // Subreddits
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subreddit> subreddits;
+
+    public User() {
+    }
 
     public User(String firstName, String lastName, String email, String username, String password, String country) {
         this.firstName = firstName;
@@ -32,14 +48,16 @@ public class User {
         this.password = password;
         this.country = country;
         this.registrationDate = new Date();
+        this.posts = new ArrayList<>();
+        this.comments = new ArrayList<>();
         this.subreddits = new ArrayList<>();
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
