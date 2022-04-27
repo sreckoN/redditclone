@@ -1,6 +1,7 @@
 package com.srecko.reddit.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -15,10 +16,10 @@ public class Post {
     @GeneratedValue
     private Long id;
     private Date dateOfCreation;
-    @NotNull
+    @NotEmpty
     @Size(min = 3, max = 35)
     private String title;
-    @NotNull
+    @NotEmpty
     @Size(min = 2, max = 1000)
     private String text;
     private int votes;

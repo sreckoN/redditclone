@@ -1,6 +1,7 @@
 package com.srecko.reddit.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -13,13 +14,13 @@ public class Subreddit {
     @Id
     @GeneratedValue
     private Long id;
-    @NotNull
+    @NotEmpty
     @Size(min = 3, max = 50)
     private String name;
     private String description;
     private Date createdDate;
     private int numberOfUsers;
-    @NotNull
+    @NotEmpty
     @OneToOne
     @JoinColumn(name = "creator_id")
     private User creator;
