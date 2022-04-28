@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -21,7 +22,9 @@ public class MainController {
     }
 
     @GetMapping("/")
-    public String index() {
+    public String index(Principal principal, Model model) {
+        boolean loggedIn = principal != null;
+        model.addAttribute("loggedIn", loggedIn);
         return "index";
     }
 
