@@ -25,7 +25,7 @@ public class User {
     @Size(min = 3, max = 16, message = "is required")
     private String username;
     @NotEmpty
-    @Size(min = 6, max = 50)
+    @Size(min = 6, max = 100)
     private String password;
     private String country;
     private Date registrationDate = new Date();
