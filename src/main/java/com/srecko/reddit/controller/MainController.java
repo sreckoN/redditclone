@@ -1,14 +1,24 @@
 package com.srecko.reddit.controller;
 
+import com.srecko.reddit.entity.User;
+import com.srecko.reddit.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Arrays;
 import java.util.Locale;
 
 @Controller
 public class MainController {
+
+    private final UserService userService;
+
+    public MainController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/")
     public String index() {
@@ -24,7 +34,15 @@ public class MainController {
         }
         Arrays.sort(countries);
         model.addAttribute("countries", countries);
+        model.addAttribute("newUser", new User());
         return "signup";
+    }
+
+    @PostMapping("/signup")
+    public String signupForm(@ModelAttribute User user) {
+        user.setEnabled(true);
+        userService.saveUser(user);
+        return "redirect:/";
     }
 
     @GetMapping("/login")
