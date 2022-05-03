@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/html">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Sign up</title>
@@ -7,20 +7,25 @@
 <body>
     <div>
         <h1>Sign In</h1>
-        <form>
+        <div>
+            <p th:if="${emailError}">The email you entered is already in use.</p>
+        </div>
+        <div>
+            <p th:if="${usernameError}">The username you entered is already in use.</p>
+        </div>
+        <form action="#" th:action="@{/signup}" th:object="${newUser}" method="post">
             <label for="firstname">First name:</label>
-            <input id="firstname" type="text" name="firstname" />
+            <input id="firstname" type="text" th:field="*{firstName}" />
             <label for="lastname">Last name:</label>
-            <input id="lastname" type="text" name="lastname" />
+            <input id="lastname" type="text" th:field="*{lastName}" />
             <label for="email">Email:</label>
-            <input id="email" type="text" name="email" />
+            <input id="email" type="text" th:field="*{email}" />
             <label for="username">Username:</label>
-            <input id="username" type="text" name="username" />
+            <input id="username" type="text" th:field="*{username}" />
             <label for="password">Password:</label>
-            <input id="password" type="password" name="password" />
-            <!-- country -->
+            <input id="password" type="password" th:field="*{password}" />
             <label for="countries">Country:</label>
-            <select id="countries">
+            <select id="countries" th:field="*{country}">
                 <option th:each="countryOption : ${countries}" th:text="${countryOption}" th:value="${countryOption}"></option>
             </select>
             <button type="submit">Sign in</button>

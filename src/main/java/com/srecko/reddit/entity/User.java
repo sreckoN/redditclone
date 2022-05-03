@@ -1,7 +1,8 @@
 package com.srecko.reddit.entity;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,41 +17,40 @@ public class User {
     private Long id;
     private String firstName;
     private String lastName;
-    @NotNull
+    @NotEmpty
     @Size(min = 10)
+    @Email(message = "Email is not valid", regexp = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")
     private String email;
-    @NotNull
+    @NotEmpty
     @Size(min = 3, max = 16, message = "is required")
     private String username;
-    @NotNull
-    @Size(min = 6, max = 50)
+    @NotEmpty
+    @Size(min = 6, max = 100)
     private String password;
     private String country;
-    private Date registrationDate;
+    private Date registrationDate = new Date();
+    private boolean enabled = false;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
-    private List<Post> posts;
+    private List<Post> posts = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subreddit> subreddits;
+    private List<Subreddit> subreddits = new ArrayList<>();
 
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String username, String password, String country) {
+    public User(String firstName, String lastName, String email, String username, String password, String country, boolean enabled) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.username = username;
         this.password = password;
         this.country = country;
-        this.registrationDate = new Date();
-        this.posts = new ArrayList<>();
-        this.comments = new ArrayList<>();
-        this.subreddits = new ArrayList<>();
+        this.enabled = enabled;
     }
 
     public Long getId() {
@@ -139,5 +139,13 @@ public class User {
 
     public void setSubreddits(List<Subreddit> subreddits) {
         this.subreddits = subreddits;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

@@ -1,6 +1,7 @@
 package com.srecko.reddit.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -12,12 +13,12 @@ public class Comment {
     @Id
     @GeneratedValue
     private Long id;
-    @NotNull
+    @NotEmpty
     @Size(min = 2, max = 500)
     private String text;
     private int votes;
     private Date created;
-    @NotNull
+    @NotEmpty
     @ManyToOne
     private User user;
 
