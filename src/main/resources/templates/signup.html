@@ -7,6 +7,12 @@
 <body>
     <div>
         <h1>Sign In</h1>
+        <div>
+            <p th:if="${emailError}">The email you entered is already in use.</p>
+        </div>
+        <div>
+            <p th:if="${usernameError}">The username you entered is already in use.</p>
+        </div>
         <form action="#" th:action="@{/signup}" th:object="${newUser}" method="post">
             <label for="firstname">First name:</label>
             <input id="firstname" type="text" th:field="*{firstName}" />

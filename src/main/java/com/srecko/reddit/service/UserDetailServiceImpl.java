@@ -43,8 +43,17 @@ public class UserDetailServiceImpl implements UserService {
 
     @Transactional
     public void saveUser(User user) {
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public boolean isUsernameAlreadyInUse(String username) {
+        return userRepository.existsUserByUsername(username);
+    }
+
+    @Transactional
+    public boolean isEmailAlreadyInUse(String email) {
+        return userRepository.existsUserByEmail(email);
     }
 }
