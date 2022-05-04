@@ -14,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
+// @Transactional
 public class UserDetailServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -41,10 +43,22 @@ public class UserDetailServiceImpl implements UserService {
         return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 
+    @Override
     @Transactional
-    public void saveUser(User user) {
+    public List<User> getUsers() {
+        return (List<User>) userRepository.findAll();
+    }
+
+    @Override
+    public User getUser(String username) {
+        Optional<User> user = userRepository.findUserByUsername(username);
+        return user.orElse(null);
+    }
+
+    @Transactional
+    public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Transactional
