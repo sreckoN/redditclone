@@ -1,24 +1,18 @@
 package com.srecko.reddit.controller;
 
-import com.srecko.reddit.entity.User;
 import com.srecko.reddit.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.Locale;
 
 @Controller
-public class MainController {
+public class TemplateController {
 
     private final UserService userService;
 
-    public MainController(UserService userService) {
+    public TemplateController(UserService userService) {
         this.userService = userService;
     }
 
@@ -29,7 +23,7 @@ public class MainController {
         return "index";
     }
 
-    @GetMapping("/signup")
+    /*@GetMapping("/signup")
     public String signup(Model model,
                          @RequestParam(required = false) boolean usernameError,
                          @RequestParam(required = false) boolean emailError) {
@@ -62,5 +56,5 @@ public class MainController {
     @GetMapping("/login")
     public String login() {
         return "login";
-    }
+    }*/
 }

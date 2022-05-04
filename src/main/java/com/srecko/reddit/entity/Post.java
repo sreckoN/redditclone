@@ -29,7 +29,7 @@ public class Post {
     @ManyToOne
     private Subreddit subreddit;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post")
     private List<Comment> comments;
 
     public Post() {
@@ -40,7 +40,7 @@ public class Post {
         this.title = title;
         this.text = text;
         this.subreddit = subreddit;
-        this.dateOfCreation = new Date(); // check
+        this.dateOfCreation = new Date();
         this.votes = 0;
         this.commentsCounter = 0;
         this.comments = new ArrayList<>();

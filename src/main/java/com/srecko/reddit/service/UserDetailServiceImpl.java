@@ -22,12 +22,10 @@ import java.util.Optional;
 public class UserDetailServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserDetailServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public UserDetailServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -55,10 +53,10 @@ public class UserDetailServiceImpl implements UserService {
         return user.orElse(null);
     }
 
-    @Transactional
-    public User saveUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    @Override
+    public User deleteUser(User user) {
+        userRepository.delete(user);
+        return user;
     }
 
     @Transactional

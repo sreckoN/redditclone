@@ -2,7 +2,6 @@ package com.srecko.reddit.entity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -21,13 +20,16 @@ public class Comment {
     @NotEmpty
     @ManyToOne
     private User user;
+    @ManyToOne
+    private Post post;
 
     public Comment() {
     }
 
-    public Comment(User user, String text) {
+    public Comment(User user, String text, Post post) {
         this.user = user;
         this.text = text;
+        this.post = post;
         this.votes = 0;
         this.created = new Date();
     }
@@ -70,5 +72,13 @@ public class Comment {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
     }
 }
