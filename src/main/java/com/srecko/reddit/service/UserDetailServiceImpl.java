@@ -56,12 +56,4 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
         userRepository.delete(user);
         return user;
     }
-
-    public boolean isUsernameAlreadyInUse(String username) {
-        return userRepository.existsUserByUsername(username);
-    }
-
-    public boolean isEmailAlreadyInUse(String email) {
-        return userRepository.existsUserByEmail(email);
-    }
 }

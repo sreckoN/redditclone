@@ -46,4 +46,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleDtoValidationException(DtoValidationException exception) {
         return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UsernameNotAvailableException.class)
+    public ResponseEntity<?> handleUsernameNotAvailableException(UsernameNotAvailableException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EmailAlreadyInUseException.class)
+    public ResponseEntity<?> handleEmailAlreadyInUseException(EmailAlreadyInUseException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
 }

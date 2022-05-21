@@ -24,6 +24,9 @@ public class RegistrationRequest {
         this.country = country;
     }
 
+    public RegistrationRequest() {
+    }
+
     public String getFirstName() {
         return firstName;
     }
