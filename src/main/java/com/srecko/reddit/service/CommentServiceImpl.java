@@ -4,18 +4,24 @@ import com.srecko.reddit.dto.CommentDto;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.CommentNotFoundException;
+import com.srecko.reddit.exception.PostNotFoundException;
+import com.srecko.reddit.exception.UserNotFoundException;
 import com.srecko.reddit.repository.CommentRepository;
 import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+//@Transactional(rollbackFor = {UserNotFoundException.class, PostNotFoundException.class, CommentNotFoundException.class})
+@Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = {UserNotFoundException.class, PostNotFoundException.class, CommentNotFoundException.class})
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
@@ -32,27 +38,43 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<Comment> getAllCommentsForPost(Long postId) {
         Optional<Post> postOptional = postRepository.findById(postId);
-        // custom exception
-        return postOptional.map(commentRepository::findAllByPost).orElse(null);
+        if (postOptional.isPresent()) {
+            return commentRepository.findAllByPost(postOptional.get());
+        } else {
+            throw new PostNotFoundException("Post with id " + postId + " is not found.");
+        }
     }
 
     @Override
     public List<Comment> getAllCommentsForUsername(String username) {
         Optional<User> optionalUser = userRepository.findUserByUsername(username);
-        // custom exception
-        return optionalUser.map(commentRepository::findAllByUser).orElse(null);
+        if (optionalUser.isPresent()) {
+            return commentRepository.findAllByUser(optionalUser.get());
+        } else {
+            throw new UserNotFoundException(username);
+        }
     }
 
     @Override
     public Comment save(CommentDto commentDto) {
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> user = userRepository.findUserByUsername(principal.getUsername());
-        if (user.isPresent()) {
-            Comment comment = new Comment(user.get(), commentDto.getText(), commentDto.getPost());
-            return commentRepository.save(comment);
+        // validate dto
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> userOptional = userRepository.findUserByUsername((String) principal);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            Optional<Post> postOptional = postRepository.findById(commentDto.getPostId());
+            if (postOptional.isPresent()) {
+                Post post = postOptional.get();
+                Comment comment = new Comment(user, commentDto.getText(), post);
+                user.getComments().add(comment);
+                post.getComments().add(comment);
+                post.setCommentsCounter(post.getCommentsCounter());
+                return comment;
+            } else {
+                throw new PostNotFoundException(commentDto.getPostId());
+            }
         } else {
-            // custom exception
-            return null;
+            throw new UserNotFoundException((String) principal);
         }
     }
 
@@ -63,8 +85,7 @@ public class CommentServiceImpl implements CommentService {
             commentRepository.delete(commentOptional.get());
             return commentOptional.get();
         } else {
-            // custom exception
-            return null;
+            throw new CommentNotFoundException(commentId);
         }
     }
 }

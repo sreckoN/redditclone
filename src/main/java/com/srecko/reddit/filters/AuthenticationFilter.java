@@ -1,6 +1,7 @@
 package com.srecko.reddit.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.jwt.JwtConfig;
 import com.srecko.reddit.jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -43,11 +43,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
-        User user = (User) authentication.getPrincipal();
+        UserMediator userMediator = (UserMediator) authentication.getPrincipal();
         JwtUtil jwtUtil = new JwtUtil(jwtConfig);
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", jwtUtil.getAccessToken(user, request.getRequestURL().toString()));
-        tokens.put("refresh_token", jwtUtil.getRefreshToken(user, request.getRequestURL().toString()));
+        tokens.put("access_token", jwtUtil.getAccessToken(userMediator));
+        tokens.put("refresh_token", jwtUtil.getRefreshToken(userMediator));
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), tokens);
     }

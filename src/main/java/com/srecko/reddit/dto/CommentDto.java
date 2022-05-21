@@ -1,18 +1,18 @@
 package com.srecko.reddit.dto;
 
-import com.srecko.reddit.entity.Post;
-import com.srecko.reddit.entity.User;
-
 public class CommentDto {
 
     private Long id;
     private String text;
-    private Post post;
+    private Long postId;
 
-    public CommentDto(Long id, String text, Post post) {
+    public CommentDto(Long id, String text, Long post) {
         this.id = id;
         this.text = text;
-        this.post = post;
+        this.postId = post;
+    }
+
+    public CommentDto() {
     }
 
     public Long getId() {
@@ -31,11 +31,11 @@ public class CommentDto {
         this.text = text;
     }
 
-    public Post getPost() {
-        return post;
+    public Long getPostId() {
+        return postId;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
+    public void setPostId(Long postId) {
+        this.postId = postId;
     }
 }

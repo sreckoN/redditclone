@@ -1,7 +1,10 @@
 package com.srecko.reddit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -17,9 +20,11 @@ public class Comment {
     private String text;
     private int votes;
     private Date created;
-    @NotEmpty
+    @JsonIdentityReference(alwaysAsId = true)
+    @NotNull
     @ManyToOne
     private User user;
+    @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne
     private Post post;
 

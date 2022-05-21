@@ -1,21 +1,26 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.dto.PostDto;
+import com.srecko.reddit.dto.CreatePostDto;
+import com.srecko.reddit.dto.UpdatePostDto;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.PostNotFoundException;
+import com.srecko.reddit.exception.SubredditNotFoundException;
+import com.srecko.reddit.exception.UserNotFoundException;
 import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.SubredditRepository;
 import com.srecko.reddit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(rollbackFor = {UserNotFoundException.class, SubredditNotFoundException.class, PostNotFoundException.class})
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -30,22 +35,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post save(PostDto postRequest) {
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> user = userRepository.findUserByUsername(principal.getUsername());
+    public Post save(CreatePostDto createPostDto) {
+        // validate dto
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> user = userRepository.findUserByUsername((String) principal);
         if (user.isPresent()) {
-            Optional<Subreddit> subreddit = subredditRepository.findByName(postRequest.getSubredditName());
+            Optional<Subreddit> subreddit = subredditRepository.findById(createPostDto.getSubredditId());
             if (subreddit.isPresent()) {
-                Post post = new Post(user.get(), postRequest.getTitle(), postRequest.getText(), subreddit.get());
-                post.setId(postRequest.getId());
+                Post post = new Post(user.get(), createPostDto.getTitle(), createPostDto.getText(), subreddit.get());
                 return postRepository.save(post);
             } else {
-                // custom exception
-                return null;
+                throw new SubredditNotFoundException(createPostDto.getSubredditId());
             }
         } else {
-            // custom exception
-            return null;
+            throw new UserNotFoundException((String) principal);
         }
     }
 
@@ -58,27 +61,52 @@ public class PostServiceImpl implements PostService {
     public Post getPost(Long postId) {
         Optional<Post> postOptional = postRepository.findById(postId);
         if (postOptional.isPresent()) return postOptional.get();
-        else throw new RuntimeException("Post not found"); // custom exception
+        else throw new PostNotFoundException(postId);
     }
 
     @Override
     public List<Post> getAllPostsForSubreddit(Long subredditId) {
         Optional<Subreddit> subredditOptional = subredditRepository.findById(subredditId);
-        // custom exception
-        return subredditOptional.map(postRepository::findAllBySubreddit).orElse(null);
+        if (subredditOptional.isPresent()) {
+            return postRepository.findAllBySubreddit(subredditOptional.get());
+        } else {
+            throw new SubredditNotFoundException(subredditId);
+        }
     }
 
     @Override
     public List<Post> getAllPostsForUser(String username) {
         Optional<User> userOptional = userRepository.findUserByUsername(username);
-        // custom exception
-        return userOptional.map(postRepository::findAllByUser).orElse(null);
+        if (userOptional.isPresent()) {
+            return postRepository.findAllByUser(userOptional.get());
+        } else {
+            throw new UserNotFoundException(username);
+        }
     }
 
     @Override
     public Post delete(Long postId) {
-        Post post = postRepository.getById(postId);
-        postRepository.deleteById(postId);
-        return post;
+        Optional<Post> postOptional = postRepository.findById(postId);
+        if (postOptional.isPresent()) {
+            postRepository.deleteById(postId);
+            return postOptional.get();
+        } else {
+            throw new PostNotFoundException(postId);
+        }
+    }
+
+    @Override
+    public Post update(UpdatePostDto postDto) {
+        // validate dto
+        Optional<Post> postOptional = postRepository.findById(postDto.getId());
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            post.setTitle(postDto.getTitle());
+            post.setText(postDto.getText());
+            post.setId(postDto.getId());
+            return postRepository.save(post);
+        } else {
+            throw new PostNotFoundException(postDto.getId());
+        }
     }
 }

@@ -1,14 +1,14 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Service
 // @Transactional
-public class UserDetailServiceImpl implements UserService {
+public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -34,7 +34,7 @@ public class UserDetailServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findUserByUsername(username);
         User user = userOptional
                 .orElseThrow(() -> new UsernameNotFoundException("No user found with username: " + username));
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), user.isEnabled(), true, true, true, getAuthorities("USER"));
+        return new UserMediator(user);
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {
