@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-// @Transactional
+@Transactional
 public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
@@ -29,7 +29,6 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = userRepository.findUserByUsername(username);
         User user = userOptional
@@ -42,7 +41,6 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    @Transactional
     public List<User> getUsers() {
         return (List<User>) userRepository.findAll();
     }
@@ -59,12 +57,10 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
         return user;
     }
 
-    @Transactional
     public boolean isUsernameAlreadyInUse(String username) {
         return userRepository.existsUserByUsername(username);
     }
 
-    @Transactional
     public boolean isEmailAlreadyInUse(String email) {
         return userRepository.existsUserByEmail(email);
     }

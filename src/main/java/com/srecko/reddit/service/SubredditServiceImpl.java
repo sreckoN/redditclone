@@ -48,13 +48,7 @@ public class SubredditServiceImpl implements SubredditService {
         Object o = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> user = userRepository.findUserByUsername((String) o);
         if (user.isPresent()) {
-            // dto validation
-            Subreddit subreddit = new Subreddit(subredditDto.getName(), subredditDto.getDescription(), user.get());
-            subreddit.setId(0L);
-            /*Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-            Set<ConstraintViolation<Subreddit>> constraintViolations = validator.validate(subreddit);
-            System.out.println("Violations size: " + constraintViolations.size());*/
-            return subredditRepository.save(subreddit);
+            return new Subreddit(subredditDto.getName(), subredditDto.getDescription(), user.get());
         } else {
             throw new UserNotFoundException((String) o);
         }
@@ -73,7 +67,6 @@ public class SubredditServiceImpl implements SubredditService {
 
     @Override
     public Subreddit update(SubredditDto subredditDto) {
-        // validate dto
         Optional<Subreddit> subredditOptional = subredditRepository.findById(subredditDto.getId());
         if (subredditOptional.isPresent()) {
             Subreddit subreddit = subredditOptional.get();

@@ -36,14 +36,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post save(CreatePostDto createPostDto) {
-        // validate dto
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> user = userRepository.findUserByUsername((String) principal);
         if (user.isPresent()) {
             Optional<Subreddit> subreddit = subredditRepository.findById(createPostDto.getSubredditId());
             if (subreddit.isPresent()) {
                 Post post = new Post(user.get(), createPostDto.getTitle(), createPostDto.getText(), subreddit.get());
-                return postRepository.save(post);
+                user.get().getPosts().add(post);
+                subreddit.get().getPosts().add(post);
+                return post;
             } else {
                 throw new SubredditNotFoundException(createPostDto.getSubredditId());
             }
@@ -97,7 +98,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post update(UpdatePostDto postDto) {
-        // validate dto
         Optional<Post> postOptional = postRepository.findById(postDto.getId());
         if (postOptional.isPresent()) {
             Post post = postOptional.get();

@@ -13,15 +13,13 @@ import com.srecko.reddit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-//@Transactional(rollbackFor = {UserNotFoundException.class, PostNotFoundException.class, CommentNotFoundException.class})
-@Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = {UserNotFoundException.class, PostNotFoundException.class, CommentNotFoundException.class})
+@Transactional(rollbackFor = {UserNotFoundException.class, PostNotFoundException.class, CommentNotFoundException.class})
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
@@ -57,7 +55,6 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Comment save(CommentDto commentDto) {
-        // validate dto
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> userOptional = userRepository.findUserByUsername((String) principal);
         if (userOptional.isPresent()) {
