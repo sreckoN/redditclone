@@ -1,11 +1,17 @@
 package com.srecko.reddit.dto;
 
+import javax.validation.constraints.NotEmpty;
+
 public class RegistrationRequest {
 
+    @NotEmpty
     private String firstName;
     private String lastName;
+    @NotEmpty
     private String email;
+    @NotEmpty
     private String username;
+    @NotEmpty
     private String password;
     private String country;
 

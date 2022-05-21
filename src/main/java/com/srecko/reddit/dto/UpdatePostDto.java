@@ -1,9 +1,15 @@
 package com.srecko.reddit.dto;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class UpdatePostDto {
 
+    @NotNull
     private Long id;
+    @NotEmpty
     private String title;
+    @NotEmpty
     private String text;
 
     public UpdatePostDto(Long id, String title, String text) {

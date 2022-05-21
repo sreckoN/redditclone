@@ -1,9 +1,15 @@
 package com.srecko.reddit.dto;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class CommentDto {
 
+    @NotNull
     private Long id;
+    @NotEmpty
     private String text;
+    @NotNull
     private Long postId;
 
     public CommentDto(Long id, String text, Long post) {

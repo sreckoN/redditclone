@@ -1,9 +1,15 @@
 package com.srecko.reddit.dto;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class SubredditDto {
 
+    @NotNull
     private Long id;
+    @NotEmpty
     private String name;
+    @NotEmpty
     private String description;
 
     public SubredditDto() {
