@@ -8,12 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comments/")
+@RequestMapping("/api/comments")
 public class CommentController {
 
     private final CommentService commentService;
@@ -36,7 +35,8 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody CommentDto commentDto) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/comments/").toUriString());
-        return ResponseEntity.created(uri).body(commentService.save(commentDto));
+        Comment comment = commentService.save(commentDto);
+        return ResponseEntity.created(uri).body(comment);
     }
 
     @DeleteMapping("{commentId}")

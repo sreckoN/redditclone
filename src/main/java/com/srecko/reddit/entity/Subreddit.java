@@ -1,5 +1,10 @@
 package com.srecko.reddit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -10,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "subreddits")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Subreddit {
 
     @Id
@@ -19,13 +25,15 @@ public class Subreddit {
     @Size(min = 3, max = 50)
     private String name;
     private String description;
-    private Date createdDate;
+    private Date createdDate = new Date();
     private int numberOfUsers;
-    @NotEmpty
-    @OneToOne
-    @JoinColumn(name = "creator_id")
+    @NotNull
+    @JsonIdentityReference(alwaysAsId = true)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "USER_ID_FK"))
     private User creator;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "subreddit", orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "subreddit", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Post> posts = new ArrayList<>();
 
     public Subreddit() {

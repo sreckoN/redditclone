@@ -9,6 +9,5 @@ import java.util.Optional;
 @Repository
 public interface SubredditRepository extends PagingAndSortingRepository<Subreddit, Long> {
 
-    Optional<Subreddit> findByName(String name);
     Optional<Subreddit> findById(Long id);
 }

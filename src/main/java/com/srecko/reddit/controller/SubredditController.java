@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/subreddits/")
+@RequestMapping("/api/subreddits")
 public class SubredditController {
 
     private final SubredditService subredditService;
@@ -27,7 +27,7 @@ public class SubredditController {
         return ResponseEntity.ok(subredditService.getAll());
     }
 
-    @GetMapping("{subredditId}")
+    @GetMapping("/{subredditId}")
     public ResponseEntity<Subreddit> getSubreddit(@PathVariable("subredditId") Long id) {
         return ResponseEntity.ok(subredditService.getSubredditById(id));
     }
@@ -38,7 +38,7 @@ public class SubredditController {
         return ResponseEntity.created(uri).body(subredditService.save(subredditDto));
     }
 
-    @DeleteMapping("{subredditId}")
+    @DeleteMapping("/{subredditId}")
     public ResponseEntity<Subreddit> delete(@PathVariable("subredditId") Long id) {
         return ResponseEntity.ok(subredditService.delete(id));
     }

@@ -17,8 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.crypto.SecretKey;
-
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -29,7 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtConfig jwtConfig;
 
     @Autowired
-    public SecurityConfig(UserDetailsService userDetailsService, SecretKey secretKey, JwtConfig jwtConfig) {
+    public SecurityConfig(UserDetailsService userDetailsService, JwtConfig jwtConfig) {
         this.userDetailsService = userDetailsService;
         this.jwtConfig = jwtConfig;
     }
@@ -43,20 +41,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/scripts/**",
         };
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(), jwtConfig);
-        authenticationFilter.setFilterProcessesUrl("/api/login"); // this is how we change default /login
+        authenticationFilter.setFilterProcessesUrl("/api/login");
 
         http.csrf().disable()
                 .sessionManagement().sessionCreationPolicy(STATELESS)
                 .and()
                 .authorizeRequests()
-                    .antMatchers("/", "/signup", "/login", "/api/token/refresh/**").permitAll()
+                    .antMatchers("/", "/signup", "/api/login", "/api/auth/**").permitAll()
                     .antMatchers(staticResources).permitAll()
                 .and()
-                .authorizeRequests().anyRequest().authenticated()
-                .and();
+                .authorizeRequests().anyRequest().authenticated();
 
         http.addFilter(authenticationFilter);
-        http.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new AuthorizationFilter(jwtConfig), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean

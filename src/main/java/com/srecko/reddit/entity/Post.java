@@ -1,8 +1,12 @@
 package com.srecko.reddit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "posts")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Post {
 
     @Id
@@ -24,12 +29,15 @@ public class Post {
     private String text;
     private int votes;
     private int commentsCounter;
+    @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne
     private User user;
+    @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne
     private Subreddit subreddit;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post", fetch = FetchType.LAZY)
     private List<Comment> comments;
 
     public Post() {

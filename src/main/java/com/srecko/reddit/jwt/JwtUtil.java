@@ -5,9 +5,9 @@ import com.auth0.jwt.algorithms.Algorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.stream.Collectors;
 
 public class JwtUtil {
@@ -19,22 +19,23 @@ public class JwtUtil {
         this.jwtConfig = jwtConfig;
     }
 
-    public String getAccessToken(User user, String url) {
+    public String getAccessToken(UserDetails user) {
         Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecretKey());
         return JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
-                .withIssuer(url)
+                .withExpiresAt(java.sql.Date.valueOf(LocalDate.now().plusDays(1)))
+                .withIssuer("auth0")
                 .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
     }
 
-    public String getRefreshToken(User user, String url) {
+    public String getRefreshToken(UserDetails user) {
         Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecretKey());
         return JWT.create()
                 .withSubject(user.getUsername())
                 .withExpiresAt(java.sql.Date.valueOf(LocalDate.now().plusWeeks(4)))
-                .withIssuer(url)
+                .withIssuer("auth0")
+                .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
     }
 }

@@ -3,17 +3,20 @@ package com.srecko.reddit.service;
 import com.srecko.reddit.dto.SubredditDto;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.SubredditNotFoundException;
+import com.srecko.reddit.exception.UserNotFoundException;
 import com.srecko.reddit.repository.SubredditRepository;
 import com.srecko.reddit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(rollbackFor = {UserNotFoundException.class, SubredditNotFoundException.class})
 public class SubredditServiceImpl implements SubredditService {
 
     private final SubredditRepository subredditRepository;
@@ -32,20 +35,28 @@ public class SubredditServiceImpl implements SubredditService {
 
     @Override
     public Subreddit getSubredditById(Long id) {
-        // custom exception
-        return subredditRepository.findById(id).orElse(null);
+        Optional<Subreddit> subredditOptional = subredditRepository.findById(id);
+        if (subredditOptional.isPresent()) {
+            return subredditOptional.get();
+        } else {
+            throw new SubredditNotFoundException(id);
+        }
     }
 
     @Override
     public Subreddit save(SubredditDto subredditDto) {
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> user = userRepository.findUserByUsername(principal.getUsername());
+        Object o = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> user = userRepository.findUserByUsername((String) o);
         if (user.isPresent()) {
+            // dto validation
             Subreddit subreddit = new Subreddit(subredditDto.getName(), subredditDto.getDescription(), user.get());
+            subreddit.setId(0L);
+            /*Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+            Set<ConstraintViolation<Subreddit>> constraintViolations = validator.validate(subreddit);
+            System.out.println("Violations size: " + constraintViolations.size());*/
             return subredditRepository.save(subreddit);
         } else {
-            // custom exception
-            return null;
+            throw new UserNotFoundException((String) o);
         }
     }
 
@@ -56,13 +67,13 @@ public class SubredditServiceImpl implements SubredditService {
             subredditRepository.delete(subredditOptional.get());
             return subredditOptional.get();
         } else {
-            // custom exception
-            return null;
+            throw new SubredditNotFoundException(id);
         }
     }
 
     @Override
     public Subreddit update(SubredditDto subredditDto) {
+        // validate dto
         Optional<Subreddit> subredditOptional = subredditRepository.findById(subredditDto.getId());
         if (subredditOptional.isPresent()) {
             Subreddit subreddit = subredditOptional.get();
@@ -70,8 +81,7 @@ public class SubredditServiceImpl implements SubredditService {
             subreddit.setDescription(subredditDto.getDescription());
             return subredditRepository.save(subreddit);
         } else {
-            // custom exception
-            return null;
+            throw new SubredditNotFoundException(subredditDto.getId());
         }
     }
 }

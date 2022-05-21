@@ -1,7 +1,5 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.dto.AuthResponse;
-import com.srecko.reddit.dto.LoginRequest;
 import com.srecko.reddit.dto.RegistrationRequest;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.repository.UserRepository;

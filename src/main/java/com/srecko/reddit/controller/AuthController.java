@@ -44,10 +44,10 @@ public class AuthController {
     @PostMapping("signup")
     public ResponseEntity<String> signup(@RequestBody RegistrationRequest registrationRequest) {
         authenticationService.saveUser(registrationRequest);
-        return ResponseEntity.ok("User has been registrated successfully.");
+        return ResponseEntity.ok("User has been registered successfully.");
     }
 
-    @GetMapping("/token/refresh")
+    @GetMapping("token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -61,7 +61,7 @@ public class AuthController {
                 JwtUtil jwtUtil = new JwtUtil(jwtConfig);
                 org.springframework.security.core.userdetails.User user1 = new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), new ArrayList<>());
                 Map<String, String> tokens = new HashMap<>();
-                tokens.put("access_token", jwtUtil.getAccessToken(user1, request.getRequestURL().toString()));
+                tokens.put("access_token", jwtUtil.getAccessToken(user1));
                 tokens.put("refresh_token", refreshToken);
                 response.setContentType(APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), tokens);
