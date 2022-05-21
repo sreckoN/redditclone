@@ -2,12 +2,15 @@ package com.srecko.reddit.controller;
 
 import com.srecko.reddit.dto.SubredditDto;
 import com.srecko.reddit.entity.Subreddit;
+import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.SubredditService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -33,7 +36,8 @@ public class SubredditController {
     }
 
     @PostMapping
-    public ResponseEntity<Subreddit> save(@RequestBody SubredditDto subredditDto) {
+    public ResponseEntity<Subreddit> save(@Valid @RequestBody SubredditDto subredditDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) throw new DtoValidationException(bindingResult.getAllErrors());
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/subreddits/").toUriString());
         return ResponseEntity.created(uri).body(subredditService.save(subredditDto));
     }
@@ -44,7 +48,8 @@ public class SubredditController {
     }
 
     @PutMapping
-    public ResponseEntity<Subreddit> update(@RequestBody SubredditDto subredditDto) {
+    public ResponseEntity<Subreddit> update(@Valid @RequestBody SubredditDto subredditDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) throw new DtoValidationException(bindingResult.getAllErrors());
         return ResponseEntity.ok(subredditService.update(subredditDto));
     }
 }

@@ -3,12 +3,15 @@ package com.srecko.reddit.controller;
 import com.srecko.reddit.dto.CreatePostDto;
 import com.srecko.reddit.dto.UpdatePostDto;
 import com.srecko.reddit.entity.Post;
+import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -44,7 +47,8 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Post> create(@RequestBody CreatePostDto postRequest) {
+    public ResponseEntity<Post> create(@Valid @RequestBody CreatePostDto postRequest, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) throw new DtoValidationException(bindingResult.getAllErrors());
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/posts").toUriString());
         return ResponseEntity.created(uri).body(postService.save(postRequest));
     }
@@ -55,7 +59,8 @@ public class PostController {
     }
 
     @PutMapping
-    public ResponseEntity<Post> update(@RequestBody UpdatePostDto postDto) {
+    public ResponseEntity<Post> update(@Valid @RequestBody UpdatePostDto postDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) throw new DtoValidationException(bindingResult.getAllErrors());
         return ResponseEntity.ok(postService.update(postDto));
     }
 }
