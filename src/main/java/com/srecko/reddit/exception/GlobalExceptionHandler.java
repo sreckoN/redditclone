@@ -56,4 +56,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleEmailAlreadyInUseException(EmailAlreadyInUseException exception) {
         return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(VoteNotFoundException.class)
+    public ResponseEntity<?> handleVoteNotFoundException(VoteNotFoundException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
 }
