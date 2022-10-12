@@ -6,14 +6,14 @@ import javax.validation.constraints.NotNull;
 public class UpdatePostDto {
 
     @NotNull
-    private Long id;
+    private Long postId;
     @NotEmpty
     private String title;
     @NotEmpty
     private String text;
 
     public UpdatePostDto(Long id, String title, String text) {
-        this.id = id;
+        this.postId = id;
         this.title = title;
         this.text = text;
     }
@@ -21,12 +21,12 @@ public class UpdatePostDto {
     public UpdatePostDto() {
     }
 
-    public Long getId() {
-        return id;
+    public Long getPostId() {
+        return postId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setPostId(Long postId) {
+        this.postId = postId;
     }
 
     public String getTitle() {

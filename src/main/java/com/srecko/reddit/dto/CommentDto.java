@@ -5,28 +5,17 @@ import javax.validation.constraints.NotNull;
 
 public class CommentDto {
 
-    @NotNull
-    private Long id;
     @NotEmpty
     private String text;
     @NotNull
     private Long postId;
 
-    public CommentDto(Long id, String text, Long post) {
-        this.id = id;
+    public CommentDto(String text, Long post) {
         this.text = text;
         this.postId = post;
     }
 
     public CommentDto() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getText() {

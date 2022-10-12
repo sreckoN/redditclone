@@ -98,15 +98,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post update(UpdatePostDto postDto) {
-        Optional<Post> postOptional = postRepository.findById(postDto.getId());
+        Optional<Post> postOptional = postRepository.findById(postDto.getPostId());
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
             post.setTitle(postDto.getTitle());
             post.setText(postDto.getText());
-            post.setId(postDto.getId());
+            post.setId(postDto.getPostId());
             return postRepository.save(post);
         } else {
-            throw new PostNotFoundException(postDto.getId());
+            throw new PostNotFoundException(postDto.getPostId());
         }
     }
 }

@@ -67,14 +67,14 @@ public class SubredditServiceImpl implements SubredditService {
 
     @Override
     public Subreddit update(SubredditDto subredditDto) {
-        Optional<Subreddit> subredditOptional = subredditRepository.findById(subredditDto.getId());
+        Optional<Subreddit> subredditOptional = subredditRepository.findById(subredditDto.getSubredditId());
         if (subredditOptional.isPresent()) {
             Subreddit subreddit = subredditOptional.get();
             subreddit.setName(subredditDto.getName());
             subreddit.setDescription(subredditDto.getDescription());
             return subredditRepository.save(subreddit);
         } else {
-            throw new SubredditNotFoundException(subredditDto.getId());
+            throw new SubredditNotFoundException(subredditDto.getSubredditId());
         }
     }
 }

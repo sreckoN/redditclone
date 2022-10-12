@@ -2,6 +2,7 @@ package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.UserNotFoundException;
 import com.srecko.reddit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -48,12 +49,20 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
     @Override
     public User getUser(String username) {
         Optional<User> user = userRepository.findUserByUsername(username);
-        return user.orElse(null);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException(username);
+        }
+        return user.get();
     }
 
     @Override
-    public User deleteUser(User user) {
-        userRepository.delete(user);
-        return user;
+    public User deleteUser(String username) {
+        Optional<User> userOptional = userRepository.findUserByUsername(username);
+        if (userOptional.isPresent()) {
+            userRepository.delete(userOptional.get());
+            return userOptional.get();
+        } else {
+            throw new UserNotFoundException(username);
+        }
     }
 }

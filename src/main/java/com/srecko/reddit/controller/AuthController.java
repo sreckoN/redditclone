@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.dto.RegistrationRequest;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.AuthorizationHeaderMissingException;
 import com.srecko.reddit.exception.RegistrationRequestException;
 import com.srecko.reddit.jwt.JwtConfig;
 import com.srecko.reddit.jwt.JwtUtil;
@@ -77,7 +78,7 @@ public class AuthController {
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
         } else {
-            throw new RuntimeException("Refresh token is missing.");
+            throw new AuthorizationHeaderMissingException("Authorization header is missing.");
         }
     }
 }

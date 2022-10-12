@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 public class SubredditDto {
 
     @NotNull
-    private Long id;
+    private Long subredditId;
     @NotEmpty
     private String name;
     @NotEmpty
@@ -16,17 +16,17 @@ public class SubredditDto {
     }
 
     public SubredditDto(Long id, String name, String description) {
-        this.id = id;
+        this.subredditId = id;
         this.name = name;
         this.description = description;
     }
 
-    public Long getId() {
-        return id;
+    public Long getSubredditId() {
+        return subredditId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setSubredditId(Long subredditId) {
+        this.subredditId = subredditId;
     }
 
     public String getName() {

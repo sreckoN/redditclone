@@ -64,12 +64,12 @@ public class VoteServiceImpl implements VoteService {
                 int change = (vote.getType().equals(VoteType.UPVOTE)) ? -1 : 1;
                 post.setVotes(post.getVotes() + change);
                 voteRepository.delete(vote);
+                return vote;
             } else {
                 throw new PostNotFoundException(vote.getPost().getId());
             }
         } else {
             throw new VoteNotFoundException(id);
         }
-        return null;
     }
 }
