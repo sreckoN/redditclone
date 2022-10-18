@@ -1,7 +1,7 @@
 # Reddit clone
 This is a Reddit clone.
 
-###Tech:
+### Tech:
 Language: Java  
 Framework: Spring Framework  
 Database: MySql + Hibernate  
@@ -11,7 +11,7 @@ Build: Maven
 Architecture: MVC, REST  
 Tests: ~150
 
-###Future features:
+### Future features:
 - Email verification
 - Ability to vote on Post
 - Ability to add photos to Posts
