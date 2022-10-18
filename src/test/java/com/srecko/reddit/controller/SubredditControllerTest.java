@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.dto.SubredditDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,36 +40,20 @@ class SubredditControllerTest {
     @Value("${sql.script.create.subreddit}")
     private String sqlAddSubreddit;
 
-    @Value("${sql.script.create.post}")
-    private String sqlAddPost;
-
-    @Value("${sql.script.create.comment}")
-    private String sqlAddComment;
-
     @Value("${sql.script.delete.user}")
     private String sqlDeleteUser;
 
     @Value("${sql.script.delete.subreddit}")
     private String sqlDeleteSubreddit;
 
-    @Value("${sql.script.delete.post}")
-    private String sqlDeletePost;
-
-    @Value("${sql.script.delete.comment}")
-    private String sqlDeleteComment;
-
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
         jdbc.execute(sqlAddSubreddit);
-        jdbc.execute(sqlAddPost);
-        jdbc.execute(sqlAddComment);
     }
 
     @AfterEach
     void tearDown() {
-        jdbc.execute(sqlDeleteComment);
-        jdbc.execute(sqlDeletePost);
         jdbc.execute(sqlDeleteSubreddit);
         jdbc.execute(sqlDeleteUser);
     }
@@ -103,7 +86,7 @@ class SubredditControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockCustomUser
     void save() throws Exception {
         SubredditDto subredditDto = new SubredditDto(0L, "Greeces subreddit", "Official subreddit");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -113,8 +96,8 @@ class SubredditControllerTest {
                 .content(valueAsString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is("Greeces subreddit")))
-                .andExpect(jsonPath("$.text", is("Official subreddit")));
+                .andExpect(jsonPath("$.name", is("Greeces subreddit")))
+                .andExpect(jsonPath("$.description", is("Official subreddit")));
     }
 
     @Test

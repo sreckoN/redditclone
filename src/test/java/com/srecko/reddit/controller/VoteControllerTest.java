@@ -5,7 +5,6 @@ import com.srecko.reddit.dto.VoteDto;
 import com.srecko.reddit.entity.VoteType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,9 +83,9 @@ class VoteControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockCustomUser
     void save() throws Exception {
-        VoteDto voteDto = new VoteDto(1L, VoteType.UPVOTE);
+        VoteDto voteDto = new VoteDto(2L, VoteType.UPVOTE);
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(voteDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/votes")
@@ -94,12 +93,12 @@ class VoteControllerTest {
                 .content(valueAsString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.post", is(1)))
+                .andExpect(jsonPath("$.post", is(2)))
                 .andExpect(jsonPath("$.user", is(2)));
     }
 
     @Test
-    @Disabled
+    @WithMockCustomUser
     void saveThrowsPostNotFoundException() throws Exception {
         VoteDto voteDto = new VoteDto(0L, VoteType.UPVOTE);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -126,7 +125,7 @@ class VoteControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockCustomUser
     void delete() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/{voteId}", 1))
                 .andExpect(status().isOk())
@@ -135,7 +134,7 @@ class VoteControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockCustomUser
     void deleteThrowsVoteNotFoundException() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/{voteId}", 0))
                 .andExpect(status().is4xxClientError())

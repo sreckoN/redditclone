@@ -167,7 +167,14 @@ class CommentServiceImplTest {
 
     @Test
     void saveCommentThrowsUserNotFoundException() {
-        // given when then
+        // given
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+
+        // when then
         assertThrows(UserNotFoundException.class, () -> {
             commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId()));
         });

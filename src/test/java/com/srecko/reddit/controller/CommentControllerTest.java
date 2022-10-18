@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.dto.CommentDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +15,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +35,6 @@ class CommentControllerTest {
 
     @Autowired
     private JdbcTemplate jdbc;
-
-
 
     @Value("${sql.script.create.user}")
     private String sqlAddUser;
@@ -82,14 +78,14 @@ class CommentControllerTest {
 
     @Test
     void getCommentsForPost() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", 2))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].text", is("Oh well")))
-                .andExpect(jsonPath("$[0].post", is(1)))
-                .andExpect(jsonPath("$[0].user", is(1)))
+                .andExpect(jsonPath("$[0].post", is(2)))
+                .andExpect(jsonPath("$[0].user", is(2)))
                 .andExpect(jsonPath("$[0].votes", is(5)));
     }
 
@@ -109,7 +105,7 @@ class CommentControllerTest {
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].text", is("Oh well")))
                 .andExpect(jsonPath("$[0].votes", is(5)))
-                .andExpect(jsonPath("$[0].post", is(1)));
+                .andExpect(jsonPath("$[0].post", is(2)));
     }
 
     @Test
@@ -121,33 +117,33 @@ class CommentControllerTest {
 
     @Test
     @WithMockCustomUser
-    @Disabled
     void createComment() throws Exception {
-        CommentDto commentDto = new CommentDto("New comment", 1L);
+        CommentDto commentDto = new CommentDto("New comment", 2L);
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(commentDto);
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                /*.andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$[0].text", is("New comment")))
-                .andExpect(jsonPath("$[0].votes", is(0)))
-                .andExpect(jsonPath("$[0].post", is(1)))*/
-                .andReturn();
-        String contentAsString = mvcResult.getResponse().getContentAsString();
-        System.out.println(contentAsString);
-        // {"message":"class org.springframework.security.core.userdetails.User cannot be cast to class java.lang.String (org.springframework.security.core.userdetails.User is in unnamed module of loader 'app'; java.lang.String is in module java.base of loader 'bootstrap')","dateAndTime":"14-10-2022 04:45:54"}
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.text", is("New comment")))
+                .andExpect(jsonPath("$.votes", is(0)))
+                .andExpect(jsonPath("$.post", is(2)))
+                .andExpect(jsonPath("$.user", is(2)));
     }
 
     @Test
-    void createCommentThrowsPostNotFoundException() {
-
-    }
-
-    @Test
-    void createCommentThrowsUserNotFoundException() {
-
+    @WithMockCustomUser
+    void createCommentThrowsPostNotFoundException() throws Exception {
+        CommentDto commentDto = new CommentDto("New comment", 0L);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(commentDto);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
     }
 
     @Test
@@ -158,7 +154,7 @@ class CommentControllerTest {
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.text", is("Oh well")))
                 .andExpect(jsonPath("$.votes", is(5)))
-                .andExpect(jsonPath("$.post", is(1)));
+                .andExpect(jsonPath("$.post", is(2)));
     }
 
     @Test

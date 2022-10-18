@@ -125,7 +125,14 @@ class VoteServiceImplTest {
 
     @Test
     void saveThrowsUserNotFoundException() {
-        // given when then
+        // given
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+
+        // when then
         assertThrows(UserNotFoundException.class, () -> {
             voteService.save(new VoteDto(post.getId(), VoteType.UPVOTE));
         });

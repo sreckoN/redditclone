@@ -32,40 +32,16 @@ class AuthControllerTest {
     @Value("${sql.script.create.user}")
     private String sqlAddUser;
 
-    @Value("${sql.script.create.subreddit}")
-    private String sqlAddSubreddit;
-
-    @Value("${sql.script.create.post}")
-    private String sqlAddPost;
-
-    @Value("${sql.script.create.comment}")
-    private String sqlAddComment;
-
     @Value("${sql.script.delete.user}")
     private String sqlDeleteUser;
-
-    @Value("${sql.script.delete.subreddit}")
-    private String sqlDeleteSubreddit;
-
-    @Value("${sql.script.delete.post}")
-    private String sqlDeletePost;
-
-    @Value("${sql.script.delete.comment}")
-    private String sqlDeleteComment;
 
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
-        jdbc.execute(sqlAddSubreddit);
-        jdbc.execute(sqlAddPost);
-        jdbc.execute(sqlAddComment);
     }
 
     @AfterEach
     void tearDown() {
-        jdbc.execute(sqlDeleteComment);
-        jdbc.execute(sqlDeletePost);
-        jdbc.execute(sqlDeleteSubreddit);
         jdbc.execute(sqlDeleteUser);
     }
 

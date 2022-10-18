@@ -5,7 +5,6 @@ import com.srecko.reddit.dto.CreatePostDto;
 import com.srecko.reddit.dto.UpdatePostDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,9 +45,6 @@ class PostControllerTest {
     @Value("${sql.script.create.post2}")
     private String sqlAddPostTwo;
 
-    @Value("${sql.script.create.comment}")
-    private String sqlAddComment;
-
     @Value("${sql.script.delete.user}")
     private String sqlDeleteUser;
 
@@ -58,21 +54,16 @@ class PostControllerTest {
     @Value("${sql.script.delete.post}")
     private String sqlDeletePost;
 
-    @Value("${sql.script.delete.comment}")
-    private String sqlDeleteComment;
-
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
         jdbc.execute(sqlAddSubreddit);
         jdbc.execute(sqlAddPost);
         jdbc.execute(sqlAddPostTwo);
-        jdbc.execute(sqlAddComment);
     }
 
     @AfterEach
     void tearDown() {
-        jdbc.execute(sqlDeleteComment);
         jdbc.execute(sqlDeletePost);
         jdbc.execute(sqlDeleteSubreddit);
         jdbc.execute(sqlDeleteUser);
@@ -88,10 +79,10 @@ class PostControllerTest {
 
     @Test
     void getPost() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/{postId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/{postId}", 2))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.id", is(2)))
                 .andExpect(jsonPath("$.title", is("Todays News")))
                 .andExpect(jsonPath("$.text", is("Nothing new")))
                 .andExpect(jsonPath("$.user", is(2)))
@@ -139,7 +130,7 @@ class PostControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockCustomUser
     void create() throws Exception {
         CreatePostDto postDto = new CreatePostDto(1L, "I have a huge announcement", "Thats it");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -156,7 +147,7 @@ class PostControllerTest {
     }
 
     @Test
-    @Disabled
+    @WithMockCustomUser
     void createThrowsSubredditNotFoundException() throws Exception {
         CreatePostDto postDto = new CreatePostDto(0L, "I have a huge announcement", "Thats it");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -171,10 +162,10 @@ class PostControllerTest {
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 2))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.id", is(2)))
                 .andExpect(jsonPath("$.title", is("Todays News")))
                 .andExpect(jsonPath("$.text", is("Nothing new")))
                 .andExpect(jsonPath("$.subreddit", is(1)))
@@ -193,7 +184,7 @@ class PostControllerTest {
 
     @Test
     void update() throws Exception {
-        UpdatePostDto postDto = new UpdatePostDto(1L, "Todays News", "Something new");
+        UpdatePostDto postDto = new UpdatePostDto(2L, "Todays News", "Something new");
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(postDto);
         mockMvc.perform(MockMvcRequestBuilders.put("/api/posts")
@@ -201,7 +192,7 @@ class PostControllerTest {
                         .content(valueAsString))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.id", is(2)))
                 .andExpect(jsonPath("$.title", is("Todays News")))
                 .andExpect(jsonPath("$.text", is("Something new")))
                 .andExpect(jsonPath("$.subreddit", is(1)))
