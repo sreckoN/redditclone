@@ -17,3 +17,4 @@ Tests: ~150
 - Ability to add photos to Posts
 - Ability to add profile picture
 - User messaging
+- Front-end
