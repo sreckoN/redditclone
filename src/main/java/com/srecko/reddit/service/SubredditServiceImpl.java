@@ -48,7 +48,8 @@ public class SubredditServiceImpl implements SubredditService {
         Object o = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> user = userRepository.findUserByUsername((String) o);
         if (user.isPresent()) {
-            return new Subreddit(subredditDto.getName(), subredditDto.getDescription(), user.get());
+            Subreddit subreddit = new Subreddit(subredditDto.getName(), subredditDto.getDescription(), user.get());
+            return subredditRepository.save(subreddit);
         } else {
             throw new UserNotFoundException((String) o);
         }
