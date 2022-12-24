@@ -5,7 +5,7 @@ This is a Reddit clone.
 Language: Java  
 Framework: Spring Framework  
 Database: MySql + Hibernate  
-Authentication: jwt
+Authentication: jwt  
 Testing: jUnit5, Mockito  
 Build: Maven  
 Architecture: MVC, REST  
@@ -18,3 +18,4 @@ Tests: ~150
 - Ability to add profile picture
 - User messaging
 - Front-end
+- Switch to Microservices architecture
