@@ -29,8 +29,14 @@ class AuthControllerTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Value("${sql.script.create.emailVerificationToken}")
+    private String sqlAddToken;
+
     @Value("${sql.script.create.user}")
     private String sqlAddUser;
+
+    @Value("${sql.script.delete.emailVerificationToken}")
+    private String sqlDeleteToken;
 
     @Value("${sql.script.delete.user}")
     private String sqlDeleteUser;
@@ -38,23 +44,25 @@ class AuthControllerTest {
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
+        jdbc.execute(sqlAddToken);
     }
 
     @AfterEach
     void tearDown() {
+        jdbc.execute(sqlDeleteToken);
         jdbc.execute(sqlDeleteUser);
     }
 
     @Test
     void signup() throws Exception {
-        RegistrationRequest registrationRequest = new RegistrationRequest("John", "Doe", "johndoe@example.com", "johndoe", "password", "AU");
+        RegistrationRequest registrationRequest = new RegistrationRequest("John", "Doe", "srecko.nikolic@protonmail.com", "johndoe", "password", "AU");
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(registrationRequest);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(valueAsString))
                 .andExpect(status().isOk())
-                .andExpect(content().string("User has been registered successfully."));
+                .andExpect(content().string("User has been registered successfully. Verify your email to enable the account."));
     }
 
     @Test
@@ -88,5 +96,13 @@ class AuthControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/token/refresh"))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message", is("Authorization header is missing.")));
+    }
+
+    @Test
+    void confirmRegistration() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/registrationConfirm")
+                .param("token", "ea9b3023-f4b8-45f4-8e5a-664915c4e754"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Email confirmed! User account activated."));
     }
 }

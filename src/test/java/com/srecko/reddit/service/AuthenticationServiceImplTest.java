@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
@@ -7,17 +8,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.srecko.reddit.dto.RegistrationRequest;
+import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
-import com.srecko.reddit.exception.EmailAlreadyInUseException;
-import com.srecko.reddit.exception.RegistrationRequestNullException;
-import com.srecko.reddit.exception.UsernameNotAvailableException;
+import com.srecko.reddit.exception.*;
+import com.srecko.reddit.repository.EmailVerificationRepository;
 import com.srecko.reddit.repository.UserRepository;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -41,7 +45,13 @@ class AuthenticationServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @MockBean
-    private UserRepository userRepository;
+    private UserService userService;
+
+    @MockBean
+    private EmailVerificationRepository emailVerificationRepository;
+
+    @MockBean
+    private EmailService emailService;
 
     private User user;
 
@@ -65,37 +75,37 @@ class AuthenticationServiceImplTest {
     @Test
     void testSaveUserThrowsEmailAlreadyInUse() {
         // given
-        given(userRepository.existsUserByEmail(any())).willReturn(true);
+        given(userService.existsUserByEmail(any())).willReturn(true);
 
         // when
         assertThrows(EmailAlreadyInUseException.class, () -> authenticationServiceImpl
                 .saveUser(new RegistrationRequest("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB")));
 
         // then
-        verify(userRepository).existsUserByEmail(any());
+        verify(userService).existsUserByEmail(any());
     }
 
     @Test
     void testSaveUserThrowsUsernameNotAvailableException() {
         // given
-        given(userRepository.existsUserByEmail(any())).willReturn(false);
-        given(userRepository.existsUserByUsername(any())).willReturn(true);
+        given(userService.existsUserByEmail(any())).willReturn(false);
+        given(userService.existsUserByUsername(any())).willReturn(true);
 
         // when
         assertThrows(UsernameNotAvailableException.class, () -> authenticationServiceImpl
                 .saveUser(new RegistrationRequest("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB")));
 
         // then
-        verify(userRepository).existsUserByEmail(any());
-        verify(userRepository).existsUserByUsername(any());
+        verify(userService).existsUserByEmail(any());
+        verify(userService).existsUserByUsername(any());
     }
 
     @Test
     void testSaveUserThrowsRegistrationRequestNullException() {
         // given
-        when(userRepository.existsUserByEmail((String) any())).thenReturn(true);
-        when(userRepository.existsUserByUsername((String) any())).thenReturn(true);
-        when(userRepository.save((User) any())).thenReturn(user);
+        when(userService.existsUserByEmail((String) any())).thenReturn(true);
+        when(userService.existsUserByUsername((String) any())).thenReturn(true);
+        when(userService.save((User) any())).thenReturn(user);
 
         // when then
         assertThrows(RegistrationRequestNullException.class, () -> {
@@ -106,14 +116,101 @@ class AuthenticationServiceImplTest {
     @Test
     void testSaveUser() {
         // given
-        given(userRepository.existsUserByEmail(any())).willReturn(false);
-        given(userRepository.existsUserByUsername(any())).willReturn(false);
+        given(userService.existsUserByEmail(any())).willReturn(false);
+        given(userService.existsUserByUsername(any())).willReturn(false);
 
         // when
         authenticationServiceImpl.saveUser(new RegistrationRequest(user.getFirstName(), user.getLastName(),
                 user.getEmail(), user.getUsername(), user.getPassword(), user.getCountry()));
 
         // then
-        verify(userRepository).save(any());
+        verify(userService).save(any());
+    }
+
+    @Test
+    void generateEmailVerificationToken() {
+        // given
+        // when
+        authenticationServiceImpl.generateEmailVerificationToken(user, "http://localhost:8080/api/auth");
+        // then
+    }
+
+    @Test
+    void saveEmailVerificationToken() {
+        // given
+        EmailVerificationToken token = new EmailVerificationToken();
+        given(emailVerificationRepository.save(token)).willReturn(token);
+
+        // when
+        authenticationServiceImpl.saveEmailVerificationToken(token);
+        // then
+    }
+
+    @Test
+    void getVerificationToken() throws ParseException {
+        // given
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
+        String dateString = "2025-02-15";
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        token.setExpiryDate(format.parse(dateString));
+        given(emailVerificationRepository.getEmailVerificationTokenByToken(token.getToken())).willReturn(Optional.of(token));
+
+        // when
+        EmailVerificationToken returnedToken = authenticationServiceImpl.getVerificationToken(token.getToken());
+
+        // then
+        assertEquals(token.getToken(), returnedToken.getToken());
+    }
+
+    @Test
+    void getVerificationTokenThrowsEmailVerificationTokenNotFoundException() throws ParseException {
+        // given
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
+        given(emailVerificationRepository.getEmailVerificationTokenByToken(token.getToken())).willReturn(Optional.empty());
+
+        // when then
+        assertThrows(EmailVerificationTokenNotFoundException.class, () -> {
+            authenticationServiceImpl.getVerificationToken(token.getToken());
+        });
+    }
+
+    @Test
+    void getVerificationTokenThrowsInvalidEmailVerificationTokenException() throws ParseException {
+        // given
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
+        given(emailVerificationRepository.getEmailVerificationTokenByToken(any())).willReturn(Optional.of(token));
+
+        // when then
+        assertThrows(InvalidEmailVerificationTokenException.class, () -> {
+            authenticationServiceImpl.getVerificationToken("ea9b3023-f4b8-45f4-8e5a-4e888");
+        });
+    }
+
+    @Test
+    void getVerificationTokenThrowsEmailVerificationTokenExpiredException() throws ParseException {
+        // given
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
+        String dateString = "1990-02-15";
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        token.setExpiryDate(format.parse(dateString));
+        given(emailVerificationRepository.getEmailVerificationTokenByToken(token.getToken())).willReturn(Optional.of(token));
+
+        // when then
+        assertThrows(EmailVerificationTokenExpiredException.class, () -> {
+            authenticationServiceImpl.getVerificationToken(token.getToken());
+        });
+    }
+
+    @Test
+    void enableUserAccount() {
+        //given
+        given(userService.save(any())).willReturn(null);
+
+        // when then
+        authenticationServiceImpl.enableUserAccount(user);
     }
 }

@@ -9,4 +9,8 @@ public interface UserService {
     List<User> getUsers();
     User getUser(String username);
     User deleteUser(String username);
+    boolean existsUserByEmail(String email);
+    boolean existsUserByUsername(String username);
+    User save(User user);
+    void deleteUnverifiedUsers();
 }

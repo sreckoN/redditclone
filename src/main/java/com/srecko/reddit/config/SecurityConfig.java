@@ -41,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/scripts/**",
         };
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(), jwtConfig);
-        authenticationFilter.setFilterProcessesUrl("/api/login");
+        authenticationFilter.setFilterProcessesUrl("/api/auth/login");
 
         http.csrf().disable()
                 .sessionManagement().sessionCreationPolicy(STATELESS)
