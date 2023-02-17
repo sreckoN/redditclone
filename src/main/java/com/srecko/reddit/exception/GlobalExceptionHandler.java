@@ -61,4 +61,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleVoteNotFoundException(VoteNotFoundException exception) {
         return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(EmailVerificationTokenExpiredException.class)
+    public ResponseEntity<?> handleEmailValidationTokenExpiredException(EmailVerificationTokenExpiredException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidEmailVerificationTokenException.class)
+    public ResponseEntity<?> handleInvalidEmailVerificationTokenException(InvalidEmailVerificationTokenException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EmailVerificationTokenNotFoundException.class)
+    public ResponseEntity<?> handleEmailVerificationTokenNotFoundException(EmailVerificationTokenNotFoundException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(VerificationEmailSendingErrorException.class)
+    public ResponseEntity<?> handleVerificationEmailSendingErrorException(VerificationEmailSendingErrorException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
 }

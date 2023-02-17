@@ -1,4 +1,4 @@
-# Reddit clone
+# Reddit clone 🚀
 This is a Reddit clone.
 
 ### Tech:
@@ -12,8 +12,8 @@ Architecture: MVC, REST
 Tests: ~150
 
 ### Future features:
-- Email verification
-- Ability to vote on Post
+- Email verification ✅
+- Ability to vote on Post ⏳
 - Ability to add photos to Posts
 - Ability to add profile picture
 - User messaging

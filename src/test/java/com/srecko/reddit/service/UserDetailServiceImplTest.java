@@ -1,7 +1,10 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.AccountNotEnabledException;
 import com.srecko.reddit.exception.UserNotFoundException;
+import com.srecko.reddit.repository.EmailVerificationRepository;
 import com.srecko.reddit.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,9 @@ class UserDetailServiceImplTest {
 
     @MockBean
     private UserRepository userRepository;
+
+    @MockBean
+    private EmailVerificationRepository emailVerificationRepository;
 
     @Autowired
     private UserDetailServiceImpl userService;
@@ -65,6 +71,18 @@ class UserDetailServiceImplTest {
     void loadUserByUsernameThrowsUsernameNotFoundException() {
         // given when then
         assertThrows(UsernameNotFoundException.class, () -> {
+            userService.loadUserByUsername(user.getUsername());
+        });
+    }
+
+    @Test
+    void loadUserByUsernameThrowsAccountNotEnabledException() {
+        // given
+        user.setEnabled(false);
+        given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
+
+        // when then
+        assertThrows(AccountNotEnabledException.class, () -> {
             userService.loadUserByUsername(user.getUsername());
         });
     }
@@ -131,5 +149,53 @@ class UserDetailServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             userService.deleteUser(user.getUsername());
         });
+    }
+
+    @Test
+    void existsUserByEmail() {
+        // given
+        given(userRepository.existsUserByEmail(user.getEmail())).willReturn(true);
+
+        // when
+        boolean result = userService.existsUserByEmail(user.getEmail());
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    void existsUserByUsername() {
+        // given
+        given(userRepository.existsUserByUsername(user.getUsername())).willReturn(true);
+
+        // when
+        boolean result = userService.existsUserByUsername(user.getUsername());
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    void save() {
+        // given
+        given(userRepository.save(user)).willReturn(user);
+
+        // when
+        User savedUser = userService.save(user);
+
+        // then
+        assertEquals(user.getUsername(), savedUser.getUsername());
+    }
+
+    @Test
+    void deleteUnverifiedUsers() {
+        // given
+        EmailVerificationToken token = new EmailVerificationToken();
+        given(emailVerificationRepository.findByExpiryDateBefore(any())).willReturn(List.of(token));
+
+        // when
+        userService.deleteUnverifiedUsers();
+
+        // then
     }
 }

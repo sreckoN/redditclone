@@ -34,6 +34,7 @@ public class User {
     private String password;
     private String country;
     private Date registrationDate = new Date();
+    @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
     private boolean enabled = false;
 
     @JsonIgnore

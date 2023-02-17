@@ -114,7 +114,8 @@ class SubredditServiceImplTest {
     @Test
     void save() {
         // given
-        given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
+        given(userRepository.findUserByUsername(any())).willReturn(Optional.of(user));
+        given(subredditRepository.save(any())).willReturn(subreddit);
 
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);

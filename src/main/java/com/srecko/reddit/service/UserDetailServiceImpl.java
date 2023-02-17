@@ -1,8 +1,11 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.UserMediator;
+import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.AccountNotEnabledException;
 import com.srecko.reddit.exception.UserNotFoundException;
+import com.srecko.reddit.repository.EmailVerificationRepository;
 import com.srecko.reddit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,20 +16,19 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
 public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     @Autowired
-    public UserDetailServiceImpl(UserRepository userRepository) {
+    public UserDetailServiceImpl(UserRepository userRepository, EmailVerificationRepository emailVerificationRepository) {
         this.userRepository = userRepository;
+        this.emailVerificationRepository = emailVerificationRepository;
     }
 
     @Override
@@ -34,6 +36,9 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
         Optional<User> userOptional = userRepository.findUserByUsername(username);
         User user = userOptional
                 .orElseThrow(() -> new UsernameNotFoundException("No user found with username: " + username));
+        if (!user.isEnabled()) {
+            throw new AccountNotEnabledException(username);
+        }
         return new UserMediator(user);
     }
 
@@ -64,5 +69,29 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
         } else {
             throw new UserNotFoundException(username);
         }
+    }
+
+    @Override
+    public boolean existsUserByEmail(String email) {
+        return userRepository.existsUserByEmail(email);
+    }
+
+    @Override
+    public boolean existsUserByUsername(String username) {
+        return userRepository.existsUserByUsername(username);
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUnverifiedUsers() {
+        List<EmailVerificationToken> expiredTokens = emailVerificationRepository.findByExpiryDateBefore(new Date());
+        for (EmailVerificationToken expiredToken : expiredTokens) {
+            userRepository.delete(expiredToken.getUser());
+        }
+        emailVerificationRepository.deleteAll(expiredTokens);
     }
 }
