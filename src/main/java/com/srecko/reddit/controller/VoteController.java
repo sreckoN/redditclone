@@ -1,6 +1,7 @@
 package com.srecko.reddit.controller;
 
-import com.srecko.reddit.dto.VoteDto;
+import com.srecko.reddit.dto.VoteCommentDto;
+import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.Vote;
 import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.VoteService;
@@ -24,15 +25,27 @@ public class VoteController {
         this.voteService = voteService;
     }
 
-    @PostMapping
-    public ResponseEntity<Vote> save(@Valid @RequestBody VoteDto voteDto, BindingResult bindingResult) {
+    @PostMapping("/post")
+    public ResponseEntity<Vote> savePostVote(@Valid @RequestBody VotePostDto voteDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) throw new DtoValidationException(bindingResult.getAllErrors());
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/votes").toUriString());
-        return ResponseEntity.created(uri).body(voteService.save(voteDto));
+        return ResponseEntity.created(uri).body(voteService.savePostVote(voteDto));
     }
 
-    @DeleteMapping("/{voteId}")
-    public ResponseEntity<Vote> delete(@PathVariable("voteId") Long voteId) {
-        return ResponseEntity.ok(voteService.delete(voteId));
+    @DeleteMapping("/post/{voteId}")
+    public ResponseEntity<Vote> deletePostVote(@PathVariable("voteId") Long voteId) {
+        return ResponseEntity.ok(voteService.deletePostVote(voteId));
+    }
+
+    @PostMapping("/comment")
+    public ResponseEntity<Vote> saveCommentVote(@Valid @RequestBody VoteCommentDto voteDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) throw new DtoValidationException(bindingResult.getAllErrors());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/votes").toUriString());
+        return ResponseEntity.created(uri).body(voteService.saveCommentVote(voteDto));
+    }
+
+    @DeleteMapping("/comment/{voteId}")
+    public ResponseEntity<Vote> deleteCommentVote(@PathVariable("voteId") Long voteId) {
+        return ResponseEntity.ok(voteService.deleteCommentVote(voteId));
     }
 }

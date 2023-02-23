@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 
 import javax.persistence.*;
 
-@Entity
+@Entity(name = "Vote")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "votes")
-public class Vote {
+public abstract class Vote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,16 +18,10 @@ public class Vote {
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "USER_ID_FK"))
     private User user;
 
-    @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", foreignKey = @ForeignKey(name = "POST_ID_FK"))
-    private Post post;
-
     private VoteType type;
 
-    public Vote(User user, Post post, VoteType type) {
+    public Vote(User user, VoteType type) {
         this.user = user;
-        this.post = post;
         this.type = type;
     }
 
@@ -47,14 +42,6 @@ public class Vote {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public Post getPost() {
-        return post;
-    }
-
-    public void setPost(Post post) {
-        this.post = post;
     }
 
     public VoteType getType() {

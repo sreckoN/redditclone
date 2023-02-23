@@ -1,6 +1,8 @@
 package com.srecko.reddit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -10,20 +12,26 @@ import java.util.Date;
 
 @Entity
 @Table(name = "comments")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Comment {
 
     @Id
     @GeneratedValue
     private Long id;
+
     @NotEmpty
     @Size(min = 2, max = 500)
     private String text;
+
     private int votes;
+
     private Date created;
+
     @JsonIdentityReference(alwaysAsId = true)
     @NotNull
     @ManyToOne
     private User user;
+    
     @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne
     private Post post;
