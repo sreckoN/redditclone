@@ -1,10 +1,14 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VoteDto;
+import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.*;
+import com.srecko.reddit.exception.CommentNotFoundException;
 import com.srecko.reddit.exception.PostNotFoundException;
 import com.srecko.reddit.exception.UserNotFoundException;
 import com.srecko.reddit.exception.VoteNotFoundException;
+import com.srecko.reddit.repository.CommentRepository;
 import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.UserRepository;
 import com.srecko.reddit.repository.VoteRepository;
@@ -44,6 +48,9 @@ class VoteServiceImplTest {
 
     @MockBean
     private PostRepository postRepository;
+
+    @MockBean
+    private CommentRepository commentRepository;
 
     @Autowired
     private VoteService voteService;
@@ -87,7 +94,7 @@ class VoteServiceImplTest {
     }
 
     @Test
-    void save() {
+    void savePostVote() {
         // given
         given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
         given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
@@ -99,7 +106,7 @@ class VoteServiceImplTest {
         when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
 
         // when
-        Vote saved = voteService.save(new VoteDto(post.getId(), VoteType.UPVOTE));
+        Vote saved = voteService.savePostVote(new VotePostDto(VoteType.UPVOTE, post.getId()));
 
         // then
         assertNotNull(saved);
@@ -107,7 +114,7 @@ class VoteServiceImplTest {
     }
 
     @Test
-    void saveThrowsPostNotFoundException() {
+    void savePostVoteThrowsPostNotFoundException() {
         // given
         given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
@@ -119,12 +126,12 @@ class VoteServiceImplTest {
 
         // when then
         assertThrows(PostNotFoundException.class, () -> {
-            voteService.save(new VoteDto(post.getId(), VoteType.UPVOTE));
+            voteService.savePostVote(new VotePostDto(VoteType.UPVOTE, post.getId()));
         });
     }
 
     @Test
-    void saveThrowsUserNotFoundException() {
+    void savePostVoteThrowsUserNotFoundException() {
         // given
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -134,19 +141,71 @@ class VoteServiceImplTest {
 
         // when then
         assertThrows(UserNotFoundException.class, () -> {
-            voteService.save(new VoteDto(post.getId(), VoteType.UPVOTE));
+            voteService.savePostVote(new VotePostDto(VoteType.UPVOTE, post.getId()));
         });
     }
 
     @Test
-    void delete() {
+    void saveCommentVote() {
         // given
-        Vote vote = new Vote(post.getUser(), post, VoteType.UPVOTE);
+        given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
+        given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+
+        // when
+        Vote saved = voteService.saveCommentVote(new VoteCommentDto(VoteType.UPVOTE, comment.getId()));
+
+        // then
+        assertNotNull(saved);
+        assertEquals(2, comment.getVotes());
+    }
+
+    @Test
+    void saveCommentVoteThrowsCommentNotFoundException() {
+        // given
+        given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+
+        // when then
+        assertThrows(CommentNotFoundException.class, () -> {
+            voteService.saveCommentVote(new VoteCommentDto(VoteType.UPVOTE, post.getId()));
+        });
+    }
+
+    @Test
+    void saveCommentVoteThrowsUserNotFoundException() {
+        // given
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+
+        // when then
+        assertThrows(UserNotFoundException.class, () -> {
+            voteService.saveCommentVote(new VoteCommentDto(VoteType.UPVOTE, post.getId()));
+        });
+    }
+
+    @Test
+    void deletePostVote() {
+        // given
+        VotePost vote = new VotePost(post.getUser(), VoteType.UPVOTE, post);
         given(voteRepository.findById(any())).willReturn(Optional.of(vote));
         given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
 
         // when
-        Vote deleted = voteService.delete(vote.getId());
+        VotePost deleted = (VotePost) voteService.deletePostVote(vote.getId());
 
         // then
         assertNotNull(deleted);
@@ -156,22 +215,60 @@ class VoteServiceImplTest {
     }
 
     @Test
-    void deleteThrowsPostNotFoundException() {
+    void deletePostVoteThrowsPostNotFoundException() {
         // given
-        Vote vote = new Vote(post.getUser(), post, VoteType.UPVOTE);
+        VotePost vote = new VotePost(post.getUser(), VoteType.UPVOTE, post);
         given(voteRepository.findById(any())).willReturn(Optional.of(vote));
 
         // when then
         assertThrows(PostNotFoundException.class, () -> {
-            voteService.delete(vote.getId());
+            voteService.deletePostVote(vote.getId());
         });
     }
 
     @Test
-    void deleteThrowsVoteNotFoundException() {
+    void deletePostVoteThrowsVoteNotFoundException() {
         // given when then
         assertThrows(VoteNotFoundException.class, () -> {
-            voteService.delete(1L);
+            voteService.deletePostVote(1L);
+        });
+    }
+
+
+    @Test
+    void deleteCommentVote() {
+        // given
+        VoteComment vote = new VoteComment(post.getUser(), VoteType.UPVOTE, comment);
+        given(voteRepository.findById(any())).willReturn(Optional.of(vote));
+        given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
+
+        // when
+        VoteComment deleted = (VoteComment) voteService.deleteCommentVote(vote.getId());
+
+        // then
+        assertNotNull(deleted);
+        assertEquals(vote.getUser(), deleted.getUser());
+        assertEquals(vote.getComment(), deleted.getComment());
+        assertEquals(vote.getType(), deleted.getType());
+    }
+
+    @Test
+    void deleteCommentVoteThrowsPostNotFoundException() {
+        // given
+        VoteComment vote = new VoteComment(post.getUser(), VoteType.UPVOTE, comment);
+        given(voteRepository.findById(any())).willReturn(Optional.of(vote));
+
+        // when then
+        assertThrows(PostNotFoundException.class, () -> {
+            voteService.deleteCommentVote(vote.getId());
+        });
+    }
+
+    @Test
+    void deleteCommentVoteThrowsVoteNotFoundException() {
+        // given when then
+        assertThrows(VoteNotFoundException.class, () -> {
+            voteService.deleteCommentVote(1L);
         });
     }
 }

@@ -17,18 +17,25 @@ public class Post {
     @Id
     @GeneratedValue
     private Long id;
+
     private Date dateOfCreation;
+
     @NotEmpty
     @Size(min = 3, max = 35)
     private String title;
+
     @NotEmpty
     @Size(min = 2, max = 1000)
     private String text;
+
     private int votes;
+
     private int commentsCounter;
+
     @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne
     private User user;
+
     @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne
     private Subreddit subreddit;

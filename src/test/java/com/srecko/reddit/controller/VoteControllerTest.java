@@ -1,7 +1,9 @@
 package com.srecko.reddit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VoteDto;
+import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.VoteType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +48,11 @@ class VoteControllerTest {
     @Value("${sql.script.create.comment}")
     private String sqlAddComment;
 
-    @Value("${sql.script.create.vote}")
-    private String sqlAddVote;
+    @Value("${sql.script.create.postVote}")
+    private String sqlAddPostVote;
+
+    @Value("${sql.script.create.commentVote}")
+    private String sqlAddCommentVote;
 
     @Value("${sql.script.delete.user}")
     private String sqlDeleteUser;
@@ -61,8 +66,8 @@ class VoteControllerTest {
     @Value("${sql.script.delete.comment}")
     private String sqlDeleteComment;
 
-    @Value("${sql.script.delete.vote}")
-    private String sqlDeleteVote;
+    @Value("${sql.script.delete.votes}")
+    private String sqlDeleteVotes;
 
     @BeforeEach
     void setUp() {
@@ -70,12 +75,14 @@ class VoteControllerTest {
         jdbc.execute(sqlAddSubreddit);
         jdbc.execute(sqlAddPost);
         jdbc.execute(sqlAddComment);
-        jdbc.execute(sqlAddVote);
+        jdbc.execute(sqlAddPostVote);
+        jdbc.execute(sqlAddCommentVote);
     }
 
     @AfterEach
     void tearDown() {
-        jdbc.execute(sqlDeleteVote);
+        jdbc.execute(sqlDeleteVotes
+        );
         jdbc.execute(sqlDeleteComment);
         jdbc.execute(sqlDeletePost);
         jdbc.execute(sqlDeleteSubreddit);
@@ -84,26 +91,27 @@ class VoteControllerTest {
 
     @Test
     @WithMockCustomUser
-    void save() throws Exception {
-        VoteDto voteDto = new VoteDto(2L, VoteType.UPVOTE);
+    void savePostVote() throws Exception {
+        VoteDto voteDto = new VotePostDto(VoteType.UPVOTE, 2L);
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(voteDto);
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
                 .contentType(APPLICATION_JSON)
                 .content(valueAsString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.post", is(2)))
-                .andExpect(jsonPath("$.user", is(2)));
+                .andExpect(jsonPath("$.user", is(2)))
+                .andExpect(jsonPath("$.type", is("UPVOTE")));
     }
 
     @Test
     @WithMockCustomUser
-    void saveThrowsPostNotFoundException() throws Exception {
-        VoteDto voteDto = new VoteDto(0L, VoteType.UPVOTE);
+    void savePostVoteThrowsPostNotFoundException() throws Exception {
+        VoteDto voteDto = new VotePostDto(VoteType.UPVOTE, 0L);
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(voteDto);
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
                         .contentType(APPLICATION_JSON)
                         .content(valueAsString))
                 .andExpect(status().is4xxClientError())
@@ -112,11 +120,11 @@ class VoteControllerTest {
     }
 
     @Test
-    void saveThrowsDtoValidationException() throws Exception {
-        VoteDto voteDto = new VoteDto(null, VoteType.UPVOTE);
+    void savePostVoteThrowsDtoValidationException() throws Exception {
+        VoteDto voteDto = new VotePostDto(VoteType.UPVOTE, null);
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(voteDto);
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
                         .contentType(APPLICATION_JSON)
                         .content(valueAsString))
                 .andExpect(status().is4xxClientError())
@@ -126,8 +134,51 @@ class VoteControllerTest {
 
     @Test
     @WithMockCustomUser
-    void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/{voteId}", 1))
+    void saveCommentVote() throws Exception {
+        VoteDto voteDto = new VoteCommentDto(VoteType.UPVOTE, 1L);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String valueAsString = objectMapper.writeValueAsString(voteDto);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
+                        .contentType(APPLICATION_JSON)
+                        .content(valueAsString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.comment", is(1)))
+                .andExpect(jsonPath("$.user", is(2)))
+                .andExpect(jsonPath("$.type", is("UPVOTE")));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void saveCommentVoteThrowsCommentNotFoundException() throws Exception {
+        VoteDto voteDto = new VoteCommentDto(VoteType.UPVOTE, 0L);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String valueAsString = objectMapper.writeValueAsString(voteDto);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
+                        .contentType(APPLICATION_JSON)
+                        .content(valueAsString))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.message", is("Comment with id 0 is not found.")));
+    }
+
+    @Test
+    void saveCommentVoteThrowsDtoValidationException() throws Exception {
+        VoteDto voteDto = new VoteCommentDto(VoteType.UPVOTE, null);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String valueAsString = objectMapper.writeValueAsString(voteDto);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
+                        .contentType(APPLICATION_JSON)
+                        .content(valueAsString))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.message", is("DTO validation failed for the following fields: commentId.")));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void deletePostVote() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/post/{voteId}", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)));
@@ -135,8 +186,26 @@ class VoteControllerTest {
 
     @Test
     @WithMockCustomUser
-    void deleteThrowsVoteNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/{voteId}", 0))
+    void deletePostVoteThrowsVoteNotFoundException() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/post/{voteId}", 0))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.message", is("Vote with id 0 is not found.")));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void deleteCommentVote() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/comment/{voteId}", 2))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(2)));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void deleteCommentVoteThrowsVoteNotFoundException() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/comment/{voteId}", 0))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Vote with id 0 is not found.")));
