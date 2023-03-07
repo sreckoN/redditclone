@@ -1,8 +1,7 @@
 package com.srecko.reddit.dto;
 
 import com.srecko.reddit.entity.VoteType;
-
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public abstract class VoteDto {
 

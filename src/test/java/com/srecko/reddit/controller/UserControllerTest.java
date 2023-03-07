@@ -38,6 +38,8 @@ class UserControllerTest {
     @Value("${sql.script.delete.user}")
     private String sqlDeleteUser;
 
+    private final String jwt = JwtTestUtils.getJwt();
+
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
@@ -50,7 +52,8 @@ class UserControllerTest {
 
     @Test
     void getUsers() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)));
@@ -58,7 +61,8 @@ class UserControllerTest {
 
     @Test
     void getUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.username", is("janedoe")));
@@ -66,7 +70,8 @@ class UserControllerTest {
 
     @Test
     void getUserThrowsUserNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janinedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janinedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
@@ -74,7 +79,8 @@ class UserControllerTest {
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.username", is("janedoe")));
@@ -82,7 +88,8 @@ class UserControllerTest {
 
     @Test
     void deleteThrowsUserNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janinedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janinedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));

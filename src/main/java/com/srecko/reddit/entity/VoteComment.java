@@ -1,8 +1,7 @@
 package com.srecko.reddit.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity(name = "VoteComment")
 @DiscriminatorValue(value = "Comment")

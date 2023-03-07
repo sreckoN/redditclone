@@ -5,6 +5,10 @@ import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VoteDto;
 import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.VoteType;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +22,10 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -69,6 +77,8 @@ class VoteControllerTest {
     @Value("${sql.script.delete.votes}")
     private String sqlDeleteVotes;
 
+    private final String jwt = JwtTestUtils.getJwt();
+
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
@@ -81,8 +91,7 @@ class VoteControllerTest {
 
     @AfterEach
     void tearDown() {
-        jdbc.execute(sqlDeleteVotes
-        );
+        jdbc.execute(sqlDeleteVotes);
         jdbc.execute(sqlDeleteComment);
         jdbc.execute(sqlDeletePost);
         jdbc.execute(sqlDeleteSubreddit);
@@ -96,8 +105,9 @@ class VoteControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(voteDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
-                .contentType(APPLICATION_JSON)
-                .content(valueAsString))
+                    .contentType(APPLICATION_JSON)
+                    .content(valueAsString)
+                    .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.post", is(2)))
@@ -113,7 +123,8 @@ class VoteControllerTest {
         String valueAsString = objectMapper.writeValueAsString(voteDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
                         .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
+                        .content(valueAsString)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
@@ -126,7 +137,8 @@ class VoteControllerTest {
         String valueAsString = objectMapper.writeValueAsString(voteDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
                         .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
+                        .content(valueAsString)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("DTO validation failed for the following fields: postId.")));
@@ -140,7 +152,8 @@ class VoteControllerTest {
         String valueAsString = objectMapper.writeValueAsString(voteDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
                         .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
+                        .content(valueAsString)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.comment", is(1)))
@@ -156,7 +169,8 @@ class VoteControllerTest {
         String valueAsString = objectMapper.writeValueAsString(voteDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
                         .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
+                        .content(valueAsString)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Comment with id 0 is not found.")));
@@ -169,7 +183,8 @@ class VoteControllerTest {
         String valueAsString = objectMapper.writeValueAsString(voteDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
                         .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
+                        .content(valueAsString)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("DTO validation failed for the following fields: commentId.")));
@@ -178,16 +193,18 @@ class VoteControllerTest {
     @Test
     @WithMockCustomUser
     void deletePostVote() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/post/{voteId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/post/{voteId}", 3)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)));
+                .andExpect(jsonPath("$.id", is(3)));
     }
 
     @Test
     @WithMockCustomUser
     void deletePostVoteThrowsVoteNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/post/{voteId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/post/{voteId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Vote with id 0 is not found.")));
@@ -196,16 +213,18 @@ class VoteControllerTest {
     @Test
     @WithMockCustomUser
     void deleteCommentVote() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/comment/{voteId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/comment/{voteId}", 4)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(2)));
+                .andExpect(jsonPath("$.id", is(4)));
     }
 
     @Test
     @WithMockCustomUser
     void deleteCommentVoteThrowsVoteNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/comment/{voteId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/comment/{voteId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Vote with id 0 is not found.")));

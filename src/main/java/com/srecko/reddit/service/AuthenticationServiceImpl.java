@@ -1,16 +1,24 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.dto.AuthenticationResponse;
+import com.srecko.reddit.dto.AuthenticationRequest;
 import com.srecko.reddit.dto.RegistrationRequest;
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.*;
+import com.srecko.reddit.jwt.JwtUtils;
 import com.srecko.reddit.repository.EmailVerificationRepository;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.MessagingException;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -27,32 +35,39 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailService emailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
     @Autowired
-    public AuthenticationServiceImpl(UserService userService, PasswordEncoder passwordEncoder, EmailVerificationRepository emailVerificationRepository, EmailService emailService) {
+    public AuthenticationServiceImpl(UserService userService, PasswordEncoder passwordEncoder, EmailVerificationRepository emailVerificationRepository, EmailService emailService, AuthenticationManager authenticationManager, JwtUtils jwtUtils, RefreshTokenService refreshTokenService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationRepository = emailVerificationRepository;
         this.emailService = emailService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Override
-    public User saveUser(RegistrationRequest registrationRequest) {
-        if (registrationRequest == null) {
+    public void register(RegistrationRequest request, String confirmationUrl) {
+        if (request == null) {
             throw new RegistrationRequestNullException();
-        } else if (userService.existsUserByEmail(registrationRequest.getEmail())) {
-            throw new EmailAlreadyInUseException(registrationRequest.getEmail());
-        } else if (userService.existsUserByUsername(registrationRequest.getUsername())) {
-            throw new UsernameNotAvailableException(registrationRequest.getUsername());
+        } else if (userService.existsUserByEmail(request.getEmail())) {
+            throw new EmailAlreadyInUseException(request.getEmail());
+        } else if (userService.existsUserByUsername(request.getUsername())) {
+            throw new UsernameNotAvailableException(request.getUsername());
         } else {
-            User user = new User(registrationRequest.getFirstName(),
-                    registrationRequest.getLastName(),
-                    registrationRequest.getEmail(),
-                    registrationRequest.getUsername(),
-                    passwordEncoder.encode(registrationRequest.getPassword()),
-                    registrationRequest.getCountry(),
+            User user = new User(request.getFirstName(),
+                    request.getLastName(),
+                    request.getEmail(),
+                    request.getUsername(),
+                    passwordEncoder.encode(request.getPassword()),
+                    request.getCountry(),
                     false);
-            return userService.save(user);
+            userService.save(user);
+            generateEmailVerificationToken(user, confirmationUrl);
         }
     }
     
@@ -70,6 +85,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (MessagingException e) {
             throw new VerificationEmailSendingErrorException(e.getMessage());
         }
+    }
+
+    @Override
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        authenticationManager.authenticate(token);
+        User user = userService.getUserByEmail(request.getEmail());
+        String accessToken = jwtUtils.getAccessToken(user.getEmail());
+        String refreshToken = jwtUtils.getRefreshToken(user.getEmail());
+        refreshTokenService.saveRefreshToken(refreshToken, user);
+        return new AuthenticationResponse(user.getUsername(), accessToken, refreshToken);
     }
 
     @Override
@@ -103,5 +129,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private boolean isVerificationTokenExpired(EmailVerificationToken token) {
         Instant currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant();
         return token.getExpiryDate().before(Date.from(currentTime));
+    }
+
+    @Override
+    public String getCurrentlyLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            UserMediator principal = (UserMediator) authentication.getPrincipal();
+            return principal.getUsername();
+        }
+        return null;
     }
 }

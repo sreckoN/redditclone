@@ -12,7 +12,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +31,12 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userOptional = userRepository.findUserByUsername(username);
+    public UserDetails loadUserByUsername(String email) throws UserNotFoundException {
+        Optional<User> userOptional = userRepository.findUserByEmail(email);
         User user = userOptional
-                .orElseThrow(() -> new UsernameNotFoundException("No user found with username: " + username));
+                .orElseThrow(() -> new UserNotFoundException("No user found with email: " + email));
         if (!user.isEnabled()) {
-            throw new AccountNotEnabledException(username);
+            throw new AccountNotEnabledException(email);
         }
         return new UserMediator(user);
     }
@@ -52,12 +51,21 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User getUser(String username) {
+    public User getUserByUsername(String username) {
         Optional<User> user = userRepository.findUserByUsername(username);
         if (user.isEmpty()) {
             throw new UserNotFoundException(username);
         }
         return user.get();
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        Optional<User> userByEmail = userRepository.findUserByEmail(email);
+        if (userByEmail.isEmpty()) {
+            throw new UserNotFoundException(email);
+        }
+        return userByEmail.get();
     }
 
     @Override
@@ -88,7 +96,7 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void deleteUnverifiedUsers() {
-        List<EmailVerificationToken> expiredTokens = emailVerificationRepository.findByExpiryDateBefore(new Date());
+        List<EmailVerificationToken> expiredTokens = emailVerificationRepository.findAllByExpiryDateBefore(new Date());
         for (EmailVerificationToken expiredToken : expiredTokens) {
             userRepository.delete(expiredToken.getUser());
         }

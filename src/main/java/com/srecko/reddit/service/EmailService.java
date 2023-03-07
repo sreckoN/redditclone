@@ -1,6 +1,7 @@
 package com.srecko.reddit.service;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
+
 import java.util.Map;
 
 public interface EmailService {

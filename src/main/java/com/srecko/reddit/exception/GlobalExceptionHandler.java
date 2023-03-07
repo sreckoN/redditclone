@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
+    /*@ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception exception) {
         return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.BAD_GATEWAY);
-    }
+    }*/
 
     @ExceptionHandler(AuthorizationHeaderMissingException.class)
     public ResponseEntity<?> handleAuthorizationHeaderMissing(AuthorizationHeaderMissingException exception) {
@@ -79,6 +79,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(VerificationEmailSendingErrorException.class)
     public ResponseEntity<?> handleVerificationEmailSendingErrorException(VerificationEmailSendingErrorException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RefreshTokenNotFoundException.class)
+    public ResponseEntity<?> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException exception) {
+        return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RefreshTokenInvalidException.class)
+    public ResponseEntity<?> handleRefreshTokenInvalidException(RefreshTokenInvalidException exception) {
         return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()), HttpStatus.NOT_FOUND);
     }
 }

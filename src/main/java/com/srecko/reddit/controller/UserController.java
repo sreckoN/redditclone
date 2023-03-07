@@ -28,7 +28,7 @@ public class UserController {
 
     @GetMapping("/{username}")
     public ResponseEntity<User> getUser(@PathVariable("username") String username) {
-        return ResponseEntity.ok().body(userService.getUser(username));
+        return ResponseEntity.ok().body(userService.getUserByUsername(username));
     }
 
     @DeleteMapping("/{username}")

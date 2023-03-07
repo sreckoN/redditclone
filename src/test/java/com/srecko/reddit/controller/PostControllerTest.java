@@ -16,6 +16,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 @WithMockUser(username = "janedoe", password = "iloveyou")
+@Transactional
 class PostControllerTest {
 
     @Autowired
@@ -54,6 +56,8 @@ class PostControllerTest {
     @Value("${sql.script.delete.post}")
     private String sqlDeletePost;
 
+    private final String jwt = JwtTestUtils.getJwt();
+
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
@@ -71,7 +75,8 @@ class PostControllerTest {
 
     @Test
     void getAllPosts() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)));
@@ -79,7 +84,8 @@ class PostControllerTest {
 
     @Test
     void getPost() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/{postId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/{postId}", 2)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(2)))
@@ -91,7 +97,8 @@ class PostControllerTest {
 
     @Test
     void getPostThrowsPostNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/{postId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/{postId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
@@ -99,7 +106,8 @@ class PostControllerTest {
 
     @Test
     void getAllPostsForSubreddit() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/subreddit/{subredditId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/subreddit/{subredditId}", 1)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)));
@@ -107,7 +115,8 @@ class PostControllerTest {
 
     @Test
     void getAllPostsForSubredditThrowsSubredditNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/subreddit/{subredditId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/subreddit/{subredditId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
@@ -115,7 +124,8 @@ class PostControllerTest {
 
     @Test
     void getPostsForUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/user/{username}", "janedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/user/{username}", "janedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)));
@@ -123,7 +133,8 @@ class PostControllerTest {
 
     @Test
     void getPostsForUserThrowsUserNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/user/{username}", "janinedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/user/{username}", "janinedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
@@ -136,6 +147,7 @@ class PostControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(postDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/posts")
+                .header("AUTHORIZATION", "Bearer " + jwt)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(valueAsString))
                 .andExpect(status().is2xxSuccessful())
@@ -154,7 +166,8 @@ class PostControllerTest {
         String valueAsString = objectMapper.writeValueAsString(postDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(valueAsString))
+                        .content(valueAsString)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
@@ -162,7 +175,8 @@ class PostControllerTest {
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 2)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(2)))
@@ -176,7 +190,8 @@ class PostControllerTest {
 
     @Test
     void deleteThrowsPostNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
@@ -188,6 +203,7 @@ class PostControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(postDto);
         mockMvc.perform(MockMvcRequestBuilders.put("/api/posts")
+                        .header("AUTHORIZATION", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(valueAsString))
                 .andExpect(status().isOk())
@@ -203,7 +219,8 @@ class PostControllerTest {
 
     @Test
     void updateThrowsPostNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/{postId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
@@ -216,6 +233,7 @@ class PostControllerTest {
         String valueAsString = objectMapper.writeValueAsString(postDto);
         mockMvc.perform(MockMvcRequestBuilders.put("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("AUTHORIZATION", "Bearer " + jwt)
                         .content(valueAsString))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

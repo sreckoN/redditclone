@@ -15,6 +15,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @WithMockUser(username = "janedoe", password = "iloveyou")
 @WithUserDetails("janedoe")
+@Transactional
 class SubredditControllerTest {
 
     @Autowired
@@ -46,6 +48,8 @@ class SubredditControllerTest {
     @Value("${sql.script.delete.subreddit}")
     private String sqlDeleteSubreddit;
 
+    private final String jwt = JwtTestUtils.getJwt();
+
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
@@ -60,7 +64,8 @@ class SubredditControllerTest {
 
     @Test
     void getAll() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)));
@@ -68,7 +73,8 @@ class SubredditControllerTest {
 
     @Test
     void getSubreddit() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 1)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -79,7 +85,8 @@ class SubredditControllerTest {
 
     @Test
     void getSubredditThrowsSubredditNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
@@ -92,6 +99,7 @@ class SubredditControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(subredditDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/subreddits")
+                .header("AUTHORIZATION", "Bearer " + jwt)
                 .contentType(APPLICATION_JSON)
                 .content(valueAsString))
                 .andExpect(status().is2xxSuccessful())
@@ -102,7 +110,8 @@ class SubredditControllerTest {
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/subreddits/{subredditId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/subreddits/{subredditId}", 1)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -113,7 +122,8 @@ class SubredditControllerTest {
 
     @Test
     void deleteThrowsSubredditNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
@@ -125,6 +135,7 @@ class SubredditControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(subredditDto);
         mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
+                        .header("AUTHORIZATION", "Bearer " + jwt)
                         .contentType(APPLICATION_JSON)
                         .content(valueAsString))
                 .andExpect(status().isOk())
@@ -140,6 +151,7 @@ class SubredditControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(subredditDto);
         mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
+                        .header("AUTHORIZATION", "Bearer " + jwt)
                         .contentType(APPLICATION_JSON)
                         .content(valueAsString))
                 .andExpect(status().is4xxClientError())
@@ -153,6 +165,7 @@ class SubredditControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(subredditDto);
         mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
+                        .header("AUTHORIZATION", "Bearer " + jwt)
                         .contentType(APPLICATION_JSON)
                         .content(valueAsString))
                 .andExpect(status().is4xxClientError())

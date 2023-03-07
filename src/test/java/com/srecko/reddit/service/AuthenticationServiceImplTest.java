@@ -11,6 +11,7 @@ import com.srecko.reddit.dto.RegistrationRequest;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.*;
+import com.srecko.reddit.jwt.JwtUtils;
 import com.srecko.reddit.repository.EmailVerificationRepository;
 import com.srecko.reddit.repository.UserRepository;
 
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -53,6 +55,15 @@ class AuthenticationServiceImplTest {
     @MockBean
     private EmailService emailService;
 
+    @MockBean
+    private AuthenticationManager authenticationManager;
+
+    @MockBean
+    private JwtUtils jwtUtils;
+
+    @MockBean
+    private RefreshTokenService refreshTokenService;
+
     private User user;
 
     @BeforeEach
@@ -73,55 +84,48 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void testSaveUserThrowsEmailAlreadyInUse() {
+    void testRegisterThrowsEmailAlreadyInUse() {
         // given
         given(userService.existsUserByEmail(any())).willReturn(true);
 
-        // when
+        // when then
         assertThrows(EmailAlreadyInUseException.class, () -> authenticationServiceImpl
-                .saveUser(new RegistrationRequest("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB")));
-
-        // then
-        verify(userService).existsUserByEmail(any());
+                .register(new RegistrationRequest("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB"), ""));
     }
 
     @Test
-    void testSaveUserThrowsUsernameNotAvailableException() {
+    void testRegisterThrowsUsernameNotAvailableException() {
         // given
         given(userService.existsUserByEmail(any())).willReturn(false);
         given(userService.existsUserByUsername(any())).willReturn(true);
 
         // when
         assertThrows(UsernameNotAvailableException.class, () -> authenticationServiceImpl
-                .saveUser(new RegistrationRequest("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB")));
-
-        // then
-        verify(userService).existsUserByEmail(any());
-        verify(userService).existsUserByUsername(any());
+                .register(new RegistrationRequest("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB"), ""));
     }
 
     @Test
-    void testSaveUserThrowsRegistrationRequestNullException() {
+    void testRegisterThrowsRegistrationRequestNullException() {
         // given
-        when(userService.existsUserByEmail((String) any())).thenReturn(true);
-        when(userService.existsUserByUsername((String) any())).thenReturn(true);
-        when(userService.save((User) any())).thenReturn(user);
+        when(userService.existsUserByEmail(any())).thenReturn(true);
+        when(userService.existsUserByUsername(any())).thenReturn(true);
+        when(userService.save(any())).thenReturn(user);
 
         // when then
         assertThrows(RegistrationRequestNullException.class, () -> {
-            authenticationServiceImpl.saveUser(null);
+            authenticationServiceImpl.register(null, "");
         });
     }
 
     @Test
-    void testSaveUser() {
+    void testRegister() {
         // given
         given(userService.existsUserByEmail(any())).willReturn(false);
         given(userService.existsUserByUsername(any())).willReturn(false);
 
         // when
-        authenticationServiceImpl.saveUser(new RegistrationRequest(user.getFirstName(), user.getLastName(),
-                user.getEmail(), user.getUsername(), user.getPassword(), user.getCountry()));
+        authenticationServiceImpl.register(new RegistrationRequest(user.getFirstName(), user.getLastName(),
+                user.getEmail(), user.getUsername(), user.getPassword(), user.getCountry()), "");
 
         // then
         verify(userService).save(any());

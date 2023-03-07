@@ -1,8 +1,7 @@
 package com.srecko.reddit.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity(name = "Vote")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -10,7 +9,7 @@ import javax.persistence.*;
 public abstract class Vote {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     @JsonIdentityReference(alwaysAsId = true)

@@ -1,15 +1,18 @@
 package com.srecko.reddit.dto;
 
-public class AuthResponse {
+public class AuthenticationResponse {
 
     private String username;
     private String accessToken;
     private String refreshToken;
 
-    public AuthResponse(String username, String accessToken, String refreshToken) {
+    public AuthenticationResponse(String username, String accessToken, String refreshToken) {
         this.username = username;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+    }
+
+    public AuthenticationResponse() {
     }
 
     public String getUsername() {

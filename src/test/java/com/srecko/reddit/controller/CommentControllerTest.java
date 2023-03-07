@@ -60,6 +60,8 @@ class CommentControllerTest {
     @Value("${sql.script.delete.comment}")
     private String sqlDeleteComment;
 
+    private final String jwt = JwtTestUtils.getJwt();
+
     @BeforeEach
     void setUp() {
         jdbc.execute(sqlAddUser);
@@ -78,7 +80,8 @@ class CommentControllerTest {
 
     @Test
     void getCommentsForPost() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", 2)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -91,14 +94,16 @@ class CommentControllerTest {
 
     @Test
     void getCommentsForPostThrowsPostNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
     }
 
     @Test
     void getCommentsForUsername() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", "janedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", "janedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -110,7 +115,8 @@ class CommentControllerTest {
 
     @Test
     void getCommentsForUsernameThrowsUserNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", "jakedoe"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", "jakedoe")
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message", is("User with username jakedoe is not found.")));
     }
@@ -122,6 +128,7 @@ class CommentControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(commentDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
+                        .header("AUTHORIZATION", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -139,6 +146,7 @@ class CommentControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(commentDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
+                        .header("AUTHORIZATION", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -148,7 +156,8 @@ class CommentControllerTest {
 
     @Test
     void deleteComment() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/comments/{commentId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/comments/{commentId}", 1)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -159,8 +168,9 @@ class CommentControllerTest {
 
     @Test
     void deleteCommentThrowsCommentNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/comments/{commentId}", 0))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/comments/{commentId}", 0)
+                        .header("AUTHORIZATION", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.message", is("Comment with id 0 is not found")));
+                .andExpect(jsonPath("$.message", is("Comment with id 0 is not found.")));
     }
 }

@@ -2,8 +2,8 @@ package com.srecko.reddit.exception;
 
 public class UserNotFoundException extends RuntimeException {
 
-    public UserNotFoundException(String username) {
-        super("User with username " + username + " is not found.");
+    public UserNotFoundException(String identifier) {
+        super(identifier.contains("@") ? "User with email " + identifier + " is not found." : "User with username " + identifier + " is not found.");
     }
 
     public UserNotFoundException(Long id) {
