@@ -13,9 +13,13 @@ Tests: ~150
 
 ### Future features:
 - Email verification ✅
-- Ability to vote on Post ⏳
+- Ability to vote on Post ✅
+- Switch to the latest version of Spring ✅
+- Tests for /login /logout
 - Ability to add photos to Posts
 - Ability to add profile picture
-- User messaging
+- API Docs
+- Search
+- Style checks
 - Front-end
 - Switch to Microservices architecture
