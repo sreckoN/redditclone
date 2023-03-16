@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.*;
@@ -102,7 +103,8 @@ class VoteServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when
         Vote saved = voteService.savePostVote(new VotePostDto(VoteType.UPVOTE, post.getId()));
@@ -121,7 +123,8 @@ class VoteServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when then
         assertThrows(PostNotFoundException.class, () -> {
@@ -136,7 +139,8 @@ class VoteServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when then
         assertThrows(UserNotFoundException.class, () -> {
@@ -154,7 +158,8 @@ class VoteServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when
         Vote saved = voteService.saveCommentVote(new VoteCommentDto(VoteType.UPVOTE, comment.getId()));
@@ -173,7 +178,8 @@ class VoteServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when then
         assertThrows(CommentNotFoundException.class, () -> {
@@ -188,7 +194,8 @@ class VoteServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when then
         assertThrows(UserNotFoundException.class, () -> {

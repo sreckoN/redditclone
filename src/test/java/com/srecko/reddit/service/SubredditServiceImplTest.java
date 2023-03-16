@@ -1,6 +1,7 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.SubredditDto;
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
@@ -121,7 +122,8 @@ class SubredditServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when
         Subreddit saved = subredditService.save(new SubredditDto(subreddit.getId(), subreddit.getName(), subreddit.getDescription()));
@@ -140,7 +142,8 @@ class SubredditServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when then
         assertThrows(UserNotFoundException.class, () -> {

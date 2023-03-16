@@ -1,6 +1,7 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.CommentDto;
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
@@ -150,7 +151,8 @@ class CommentServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when
         Comment savedComment = commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId()));
@@ -168,7 +170,8 @@ class CommentServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when then
         assertThrows(UserNotFoundException.class, () -> {
@@ -185,7 +188,8 @@ class CommentServiceImplTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user.getUsername());
+        UserMediator userMediator = new UserMediator(user);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userMediator);
 
         // when then
         assertThrows(PostNotFoundException.class, () -> {

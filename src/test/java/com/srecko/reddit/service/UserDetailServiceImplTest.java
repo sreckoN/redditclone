@@ -55,14 +55,14 @@ class UserDetailServiceImplTest {
     @Test
     void loadUserByUsername() {
         // given
-        given(userRepository.findUserByEmail(any())).willReturn(Optional.ofNullable(user));
+        given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
         // when
-        UserDetails userDetails = userService.loadUserByUsername(user.getEmail());
+        UserDetails userDetails = userService.loadUserByUsername(user.getUsername());
 
         // then
         assertNotNull(userDetails);
-        assertEquals(user.getEmail(), userDetails.getUsername());
+        assertEquals(user.getUsername(), userDetails.getUsername());
         assertEquals(user.isEnabled(), userDetails.isEnabled());
     }
 
@@ -78,7 +78,7 @@ class UserDetailServiceImplTest {
     void loadUserByUsernameThrowsAccountNotEnabledException() {
         // given
         user.setEnabled(false);
-        given(userRepository.findUserByEmail(any())).willReturn(Optional.ofNullable(user));
+        given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
         // when then
         assertThrows(AccountNotEnabledException.class, () -> {
