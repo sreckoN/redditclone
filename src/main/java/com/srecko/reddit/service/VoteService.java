@@ -1,7 +1,6 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.VoteCommentDto;
-import com.srecko.reddit.dto.VoteDto;
 import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.Vote;
 

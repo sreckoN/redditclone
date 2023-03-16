@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getServletPath().equals("/api/auth/register") || request.getServletPath().equals("/api/auth/registrationConfirm")
-                || request.getServletPath().equals("/api/auth/authenticate") || request.getServletPath().equals("/api/auth/token/refresh")) {
+                || request.getServletPath().equals("/api/auth/authenticate") || request.getServletPath().contains("/api/auth/token/refresh")) {
             filterChain.doFilter(request, response);
         } else {
             String authHeader = request.getHeader("AUTHORIZATION");
@@ -40,9 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }
             String jwtToken = authHeader.substring(7);
-            String userEmail = jwtUtils.extractSubject(jwtToken);
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                User userInstance = userService.getUserByEmail(userEmail);
+            String username = jwtUtils.extractSubject(jwtToken);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                User userInstance = userService.getUserByUsername(username);
                 UserMediator user = new UserMediator(userInstance);
                 if (jwtUtils.isTokenValid(jwtToken, user.getUsername())) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

@@ -1,6 +1,7 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.SubredditDto;
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.SubredditNotFoundException;
@@ -45,13 +46,13 @@ public class SubredditServiceImpl implements SubredditService {
 
     @Override
     public Subreddit save(SubredditDto subredditDto) {
-        Object o = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> user = userRepository.findUserByUsername((String) o);
+        UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> user = userRepository.findUserByUsername(userMediator.getUsername());
         if (user.isPresent()) {
             Subreddit subreddit = new Subreddit(subredditDto.getName(), subredditDto.getDescription(), user.get());
             return subredditRepository.save(subreddit);
         } else {
-            throw new UserNotFoundException((String) o);
+            throw new UserNotFoundException(userMediator.getUsername());
         }
     }
 

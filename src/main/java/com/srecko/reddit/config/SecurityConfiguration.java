@@ -1,13 +1,14 @@
 package com.srecko.reddit.config;
 
+import com.srecko.reddit.filters.AuthenticationFilter;
 import com.srecko.reddit.filters.JwtAuthenticationFilter;
+import com.srecko.reddit.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,18 +20,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
     private final AppLogoutHandler logoutHandler;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Autowired
-    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, UserDetailsService userDetailsService, AppLogoutHandler logoutHandler) {
+    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, UserDetailsService userDetailsService, AppLogoutHandler logoutHandler, AuthenticationManagerBuilder authenticationManagerBuilder) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userDetailsService = userDetailsService;
         this.logoutHandler = logoutHandler;
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
     @Bean
@@ -41,6 +44,8 @@ public class SecurityConfiguration {
                 "/fonts/**",
                 "/scripts/**",
         };
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(new JwtConfig(), authenticationManagerBuilder.getOrBuild());
+        authenticationFilter.setFilterProcessesUrl("/api/auth/authenticate");
         http
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(STATELESS)
@@ -50,9 +55,12 @@ public class SecurityConfiguration {
                     .requestMatchers(staticResources).permitAll()
                     .anyRequest().authenticated()
                 .and()
+                    .formLogin()
+                    .loginProcessingUrl("/api/auth/authenticate")
+                .and()
                 .authenticationProvider(daoAuthenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        http
+                .addFilter(authenticationFilter)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .addLogoutHandler(logoutHandler)
                         .logoutUrl("/api/auth/logout")
@@ -71,10 +79,5 @@ public class SecurityConfiguration {
         authProvider.setPasswordEncoder(passwordEncoder());
         authProvider.setUserDetailsService(userDetailsService);
         return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
     }
 }

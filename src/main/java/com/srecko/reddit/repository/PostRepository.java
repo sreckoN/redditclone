@@ -1,6 +1,5 @@
 package com.srecko.reddit.repository;
 
-import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;

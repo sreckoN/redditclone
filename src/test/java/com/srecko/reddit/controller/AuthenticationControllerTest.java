@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.dto.AuthenticationRequest;
 import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.RegistrationRequest;
-import com.srecko.reddit.dto.TokenRefreshRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,11 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -38,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 @Transactional
-class AuthControllerTest {
+class AuthenticationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -85,7 +80,7 @@ class AuthControllerTest {
 
     @Test
     void register() throws Exception {
-        RegistrationRequest registrationRequest = new RegistrationRequest("John", "Doe", "srecko.nikolic@protonmail.com", "johndoe", "password", "AU");
+        RegistrationRequest registrationRequest = new RegistrationRequest("John", "Doe", "srecko.nikolic71@hotmail.com", "johndoe", "password", "AU");
         ObjectMapper objectMapper = new ObjectMapper();
         String valueAsString = objectMapper.writeValueAsString(registrationRequest);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
@@ -136,7 +131,7 @@ class AuthControllerTest {
 
     @Test
     void authenticate() throws Exception {
-        AuthenticationRequest authRequest = new AuthenticationRequest("janedoe@example.com", "iloveyou");
+        AuthenticationRequest authRequest = new AuthenticationRequest("janedoe", "iloveyou");
         ObjectMapper objectMapper = new ObjectMapper();
         String authRequestString = objectMapper.writeValueAsString(authRequest);
 
@@ -158,7 +153,7 @@ class AuthControllerTest {
     @Test
     void refreshToken() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest("janedoe@example.com", "iloveyou");
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest("janedoe", "iloveyou");
         String authRequestString = objectMapper.writeValueAsString(authenticationRequest);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.*;
@@ -37,8 +38,8 @@ public class VoteServiceImpl implements VoteService {
 
     @Override
     public Vote savePostVote(VotePostDto voteDto) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> userOptional = userRepository.findUserByUsername((String) principal);
+        UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> userOptional = userRepository.findUserByUsername(userMediator.getUsername());
         if (userOptional.isPresent()) {
             Optional<Post> postOptional = postRepository.findById(voteDto.getPostId());
             if (postOptional.isPresent()) {
@@ -51,14 +52,14 @@ public class VoteServiceImpl implements VoteService {
                 throw new PostNotFoundException(voteDto.getPostId());
             }
         } else {
-            throw new UserNotFoundException((String) principal);
+            throw new UserNotFoundException(userMediator.getUsername());
         }
     }
 
     @Override
     public Vote saveCommentVote(VoteCommentDto voteDto) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> userOptional = userRepository.findUserByUsername((String) principal);
+        UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> userOptional = userRepository.findUserByUsername(userMediator.getUsername());
         if (userOptional.isPresent()) {
             Optional<Comment> commentOptional = commentRepository.findById(voteDto.getCommentId());
             if (commentOptional.isPresent()) {
@@ -71,7 +72,7 @@ public class VoteServiceImpl implements VoteService {
                 throw new CommentNotFoundException(voteDto.getCommentId());
             }
         } else {
-            throw new UserNotFoundException((String) principal);
+            throw new UserNotFoundException(userMediator.getUsername());
         }
     }
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth/")
-public class AuthController {
+public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
     private final JwtConfig jwtConfig;
@@ -27,7 +27,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
 
     @Autowired
-    public AuthController(AuthenticationService authenticationService, JwtConfig jwtConfig, UserService userService, RefreshTokenService refreshTokenService) {
+    public AuthenticationController(AuthenticationService authenticationService, JwtConfig jwtConfig, UserService userService, RefreshTokenService refreshTokenService) {
         this.authenticationService = authenticationService;
         this.jwtConfig = jwtConfig;
         this.userService = userService;
@@ -60,10 +60,5 @@ public class AuthController {
         if (bindingResult.hasErrors()) throw new RegistrationRequestException(bindingResult.getAllErrors());
         AuthenticationResponse newAccessToken = refreshTokenService.getNewAccessToken(tokenRefreshRequest);
         return ResponseEntity.ok(newAccessToken);
-    }
-
-    @GetMapping("currentUser")
-    public ResponseEntity<String> getCurrentlyLoggedInUser() {
-        return ResponseEntity.ok(authenticationService.getCurrentlyLoggedInUser());
     }
 }

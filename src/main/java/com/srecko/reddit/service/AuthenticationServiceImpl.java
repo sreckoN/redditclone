@@ -1,9 +1,8 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.AuthenticationRequest;
+import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.RegistrationRequest;
-import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.*;
@@ -11,10 +10,8 @@ import com.srecko.reddit.jwt.JwtUtils;
 import com.srecko.reddit.repository.EmailVerificationRepository;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,17 +32,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailService emailService;
-    private final AuthenticationManager authenticationManager;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
 
     @Autowired
-    public AuthenticationServiceImpl(UserService userService, PasswordEncoder passwordEncoder, EmailVerificationRepository emailVerificationRepository, EmailService emailService, AuthenticationManager authenticationManager, JwtUtils jwtUtils, RefreshTokenService refreshTokenService) {
+    public AuthenticationServiceImpl(UserService userService, PasswordEncoder passwordEncoder, EmailVerificationRepository emailVerificationRepository, EmailService emailService, AuthenticationManagerBuilder authenticationManagerBuilder, JwtUtils jwtUtils, RefreshTokenService refreshTokenService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationRepository = emailVerificationRepository;
         this.emailService = emailService;
-        this.authenticationManager = authenticationManager;
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
     }
@@ -89,9 +86,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
-        authenticationManager.authenticate(token);
-        User user = userService.getUserByEmail(request.getEmail());
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
+        authenticationManagerBuilder.getOrBuild().authenticate(token);
+        User user = userService.getUserByUsername(request.getUsername());
         String accessToken = jwtUtils.getAccessToken(user.getEmail());
         String refreshToken = jwtUtils.getRefreshToken(user.getEmail());
         refreshTokenService.saveRefreshToken(refreshToken, user);
@@ -129,15 +126,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private boolean isVerificationTokenExpired(EmailVerificationToken token) {
         Instant currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant();
         return token.getExpiryDate().before(Date.from(currentTime));
-    }
-
-    @Override
-    public String getCurrentlyLoggedInUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            UserMediator principal = (UserMediator) authentication.getPrincipal();
-            return principal.getUsername();
-        }
-        return null;
     }
 }

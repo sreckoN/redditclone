@@ -1,11 +1,11 @@
 package com.srecko.reddit.filters;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.jwt.JwtConfig;
 import com.srecko.reddit.jwt.JwtUtils;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,24 +25,31 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtConfig jwtConfig;
 
-    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    public AuthenticationFilter(JwtConfig jwtConfig) {
+    public AuthenticationFilter(JwtConfig jwtConfig, AuthenticationManager authenticationManager) {
         this.jwtConfig = jwtConfig;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+        String usernameJSON = "";
+        String passwordJSON = "";
+        try {
+            JsonNode jsonNode = new ObjectMapper().readTree(request.getInputStream());
+            usernameJSON = jsonNode.get("username").asText();
+            passwordJSON = jsonNode.get("password").asText();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(usernameJSON, passwordJSON);
         return authenticationManager.authenticate(authenticationToken);
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         UserMediator userMediator = (UserMediator) authentication.getPrincipal();
         JwtUtils jwtUtils = new JwtUtils(jwtConfig);
         Map<String, String> tokens = new HashMap<>();

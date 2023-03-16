@@ -1,5 +1,7 @@
 package com.srecko.reddit.controller;
 
+import com.srecko.reddit.dto.UserMediator;
+import com.srecko.reddit.entity.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,12 +17,15 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
 
     @Override
     public SecurityContext createSecurityContext(WithMockCustomUser customUser) {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         for (String authority : customUser.authorities()) {
             grantedAuthorities.add(new SimpleGrantedAuthority(authority));
         }
-        Authentication authentication = new UsernamePasswordAuthenticationToken(customUser.principal(), "iloveyou", grantedAuthorities);
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        User user = new User();
+        user.setUsername(customUser.username());
+        UserMediator userMediator = new UserMediator(user);
+        Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(userMediator, "iloveyou", grantedAuthorities);
         context.setAuthentication(authentication);
         return context;
     }

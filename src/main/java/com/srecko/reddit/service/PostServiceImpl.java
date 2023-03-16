@@ -2,6 +2,7 @@ package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.CreatePostDto;
 import com.srecko.reddit.dto.UpdatePostDto;
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
@@ -36,8 +37,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post save(CreatePostDto createPostDto) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> user = userRepository.findUserByUsername((String) principal);
+        UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> user = userRepository.findUserByUsername(userMediator.getUsername());
         if (user.isPresent()) {
             Optional<Subreddit> subreddit = subredditRepository.findById(createPostDto.getSubredditId());
             if (subreddit.isPresent()) {
@@ -49,7 +50,7 @@ public class PostServiceImpl implements PostService {
                 throw new SubredditNotFoundException(createPostDto.getSubredditId());
             }
         } else {
-            throw new UserNotFoundException((String) principal);
+            throw new UserNotFoundException(userMediator.getUsername());
         }
     }
 

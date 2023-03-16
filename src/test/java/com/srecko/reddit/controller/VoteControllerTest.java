@@ -5,10 +5,6 @@ import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VoteDto;
 import com.srecko.reddit.dto.VotePostDto;
 import com.srecko.reddit.entity.VoteType;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +18,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;

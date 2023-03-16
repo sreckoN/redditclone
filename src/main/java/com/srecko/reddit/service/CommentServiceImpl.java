@@ -1,6 +1,7 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.CommentDto;
+import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.User;
@@ -55,8 +56,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Comment save(CommentDto commentDto) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> userOptional = userRepository.findUserByUsername((String) principal);
+        UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> userOptional = userRepository.findUserByUsername(userMediator.getUsername());
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             Optional<Post> postOptional = postRepository.findById(commentDto.getPostId());
@@ -71,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
                 throw new PostNotFoundException(commentDto.getPostId());
             }
         } else {
-            throw new UserNotFoundException((String) principal);
+            throw new UserNotFoundException(userMediator.getUsername());
         }
     }
 

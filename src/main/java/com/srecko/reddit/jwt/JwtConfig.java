@@ -6,7 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.security.Key;
-import java.time.Instant;
 
 @Configuration
 @ConfigurationProperties(prefix = "application.jwt")

@@ -31,12 +31,12 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UserNotFoundException {
-        Optional<User> userOptional = userRepository.findUserByEmail(email);
+    public UserDetails loadUserByUsername(String username) throws UserNotFoundException {
+        Optional<User> userOptional = userRepository.findUserByUsername(username);
         User user = userOptional
-                .orElseThrow(() -> new UserNotFoundException("No user found with email: " + email));
+                .orElseThrow(() -> new UserNotFoundException(username));
         if (!user.isEnabled()) {
-            throw new AccountNotEnabledException(email);
+            throw new AccountNotEnabledException(username);
         }
         return new UserMediator(user);
     }
