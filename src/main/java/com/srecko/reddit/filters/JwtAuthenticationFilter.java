@@ -31,8 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/api/auth/register") || request.getServletPath().equals("/api/auth/registrationConfirm")
-                || request.getServletPath().equals("/api/auth/authenticate") || request.getServletPath().contains("/api/auth/token/refresh")) {
+        String servletPath = request.getServletPath();
+        if (servletPath.equals("/api/auth/register") || servletPath.equals("/api/auth/registrationConfirm")
+                || servletPath.equals("/api/auth/authenticate") || servletPath.contains("/api/auth/token/refresh")
+                || servletPath.contains("/api/search")) {
             filterChain.doFilter(request, response);
         } else {
             String authHeader = request.getHeader("AUTHORIZATION");

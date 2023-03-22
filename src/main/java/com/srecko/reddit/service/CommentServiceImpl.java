@@ -86,4 +86,19 @@ public class CommentServiceImpl implements CommentService {
             throw new CommentNotFoundException(commentId);
         }
     }
+
+    @Override
+    public Comment getComment(Long commentId) {
+        Optional<Comment> commentOptional = commentRepository.findById(commentId);
+        if (commentOptional.isPresent()) {
+            return commentOptional.get();
+        } else {
+            throw new CommentNotFoundException(commentId);
+        }
+    }
+
+    @Override
+    public List<Comment> getAllComments() {
+        return commentRepository.findAll();
+    }
 }

@@ -11,4 +11,6 @@ public interface CommentService {
     List<Comment> getAllCommentsForUsername(String username);
     Comment save(CommentDto commentDto);
     Comment delete(Long commentId);
+    Comment getComment(Long commentId);
+    List<Comment> getAllComments();
 }

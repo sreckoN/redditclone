@@ -35,6 +35,16 @@ public class CommentController {
         return ResponseEntity.ok(commentService.getAllCommentsForUsername(username));
     }
 
+    @GetMapping("/{commentId}")
+    public ResponseEntity<Comment> getComment(@PathVariable("commentId") Long commentId) {
+        return ResponseEntity.ok(commentService.getComment(commentId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Comment>> getAllComments() {
+        return ResponseEntity.ok(commentService.getAllComments());
+    }
+
     @PostMapping
     public ResponseEntity<Comment> createComment(@Valid @RequestBody CommentDto commentDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) throw new DtoValidationException(bindingResult.getAllErrors());
