@@ -1,7 +1,8 @@
 name: Java Code Checks
 on:
   pull_request
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   check-style:
