@@ -9,17 +9,20 @@ Authentication: jwt
 Testing: jUnit5, Mockito  
 Build: Maven  
 Architecture: MVC, REST  
-Tests: ~150
+Tests: ~160
 
 ### Future features:
 - Email verification ✅
 - Ability to vote on Post ✅
-- Switch to the latest version of Spring ✅
-- Tests for /login /logout
+- Switch to the latest version of Spring Boot & Spring Security ✅
+- Search ✅
+- Style checks CI/CD 
+- Refactor tests
+- Secure endpoints
+- SQL Pagination
+- Logging
 - Ability to add photos to Posts
-- Ability to add profile picture
+- User profile additional settings
 - API Docs
-- Search
-- Style checks
-- Front-end
 - Switch to Microservices architecture
+- Front-end
