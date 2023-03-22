@@ -11,7 +11,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Run check style
-        uses: nikitasavinov/checkstyle-action@master
+        uses: dbelyaev/action-checkstyle@v0.5.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: 'github-pr-check'
+          level: error
