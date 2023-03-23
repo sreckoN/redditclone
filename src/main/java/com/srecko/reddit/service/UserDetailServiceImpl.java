@@ -20,6 +20,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type User detail service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 @Transactional
 public class UserDetailServiceImpl implements UserService, UserDetailsService {
@@ -27,6 +32,12 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
   private final UserRepository userRepository;
   private final EmailVerificationRepository emailVerificationRepository;
 
+  /**
+   * Instantiates a new User detail service.
+   *
+   * @param userRepository              the user repository
+   * @param emailVerificationRepository the email verification repository
+   */
   @Autowired
   public UserDetailServiceImpl(UserRepository userRepository,
       EmailVerificationRepository emailVerificationRepository) {
@@ -100,8 +111,8 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public void deleteUnverifiedUsers() {
-    List<EmailVerificationToken> expiredTokens = emailVerificationRepository.findAllByExpiryDateBefore(
-        new Date());
+    List<EmailVerificationToken> expiredTokens =
+        emailVerificationRepository.findAllByExpiryDateBefore(new Date());
     for (EmailVerificationToken expiredToken : expiredTokens) {
       userRepository.delete(expiredToken.getUser());
     }

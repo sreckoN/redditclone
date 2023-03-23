@@ -1,7 +1,19 @@
 package com.srecko.reddit.entity;
 
+/**
+ * The enum Vote type.
+ *
+ * @author Srecko Nikolic
+ */
 public enum VoteType {
-  UPVOTE(1), DOWNVOTE(-1);
+  /**
+   * Upvote vote type.
+   */
+  UPVOTE(1),
+  /**
+   * Downvote vote type.
+   */
+  DOWNVOTE(-1);
 
   private final int val;
 
@@ -9,6 +21,11 @@ public enum VoteType {
     this.val = val;
   }
 
+  /**
+   * Gets val.
+   *
+   * @return the val
+   */
   public int getVal() {
     return val;
   }

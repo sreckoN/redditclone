@@ -15,6 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Search service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 public class SearchServiceImpl implements SearchService {
 
@@ -23,6 +28,14 @@ public class SearchServiceImpl implements SearchService {
   private final UserRepository userRepository;
   private final SubredditRepository subredditRepository;
 
+  /**
+   * Instantiates a new Search service.
+   *
+   * @param postRepository      the post repository
+   * @param commentRepository   the comment repository
+   * @param userRepository      the user repository
+   * @param subredditRepository the subreddit repository
+   */
   @Autowired
   public SearchServiceImpl(PostRepository postRepository, CommentRepository commentRepository,
       UserRepository userRepository, SubredditRepository subredditRepository) {

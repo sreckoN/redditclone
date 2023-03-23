@@ -13,6 +13,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type Data loader.
+ *
+ * @author Srecko Nikolic
+ */
 @Configuration
 public class DataLoader implements CommandLineRunner {
 
@@ -21,6 +26,14 @@ public class DataLoader implements CommandLineRunner {
   private final SubredditRepository subredditRepository;
   private final PostRepository postRepository;
 
+  /**
+   * Instantiates a new Data loader.
+   *
+   * @param passwordEncoder     the password encoder
+   * @param userRepository      the user repository
+   * @param subredditRepository the subreddit repository
+   * @param postRepository      the post repository
+   */
   public DataLoader(PasswordEncoder passwordEncoder, UserRepository userRepository,
       SubredditRepository subredditRepository, PostRepository postRepository) {
     this.passwordEncoder = passwordEncoder;

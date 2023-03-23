@@ -19,38 +19,78 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+/**
+ * The type Comment controller.
+ *
+ * @author Srecko Nikolic
+ */
 @RestController
 @RequestMapping("/api/comments")
 public class CommentController {
 
   private final CommentService commentService;
 
+  /**
+   * Instantiates a new Comment controller.
+   *
+   * @param commentService the comment service
+   */
   @Autowired
   public CommentController(CommentService commentService) {
     this.commentService = commentService;
   }
 
+  /**
+   * Gets comments for post.
+   *
+   * @param postId the post id
+   * @return the comments for post
+   */
   @GetMapping("/post/{postId}")
   public ResponseEntity<List<Comment>> getCommentsForPost(@PathVariable("postId") Long postId) {
     return ResponseEntity.ok(commentService.getAllCommentsForPost(postId));
   }
 
+  /**
+   * Gets comments for username.
+   *
+   * @param username the username
+   * @return the comments for username
+   */
   @GetMapping("/user/{username}")
   public ResponseEntity<List<Comment>> getCommentsForUsername(
       @PathVariable("username") String username) {
     return ResponseEntity.ok(commentService.getAllCommentsForUsername(username));
   }
 
+  /**
+   * Gets comment.
+   *
+   * @param commentId the comment id
+   * @return the comment
+   */
   @GetMapping("/{commentId}")
   public ResponseEntity<Comment> getComment(@PathVariable("commentId") Long commentId) {
     return ResponseEntity.ok(commentService.getComment(commentId));
   }
 
+  /**
+   * Gets all comments.
+   *
+   * @return the all comments
+   */
   @GetMapping
   public ResponseEntity<List<Comment>> getAllComments() {
     return ResponseEntity.ok(commentService.getAllComments());
   }
 
+  /**
+   * Create comment.
+   *
+   * @param commentDto    the comment dto
+   * @param bindingResult the binding result
+   * @return the response entity
+   */
   @PostMapping
   public ResponseEntity<Comment> createComment(@Valid @RequestBody CommentDto commentDto,
       BindingResult bindingResult) {
@@ -63,8 +103,14 @@ public class CommentController {
     return ResponseEntity.created(uri).body(comment);
   }
 
+  /**
+   * Delete comment.
+   *
+   * @param commentId the comment id
+   * @return the response entity
+   */
   @DeleteMapping("{commentId}")
-  private ResponseEntity<Comment> deleteComment(@PathVariable("commentId") Long commentId) {
+  public ResponseEntity<Comment> deleteComment(@PathVariable("commentId") Long commentId) {
     return ResponseEntity.ok(commentService.delete(commentId));
   }
 }

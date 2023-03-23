@@ -6,10 +6,20 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/**
+ * The type User Mediator which implements UserDetails.
+ *
+ * @author Srecko Nikolic
+ */
 public class UserMediator implements UserDetails {
 
   private User user;
 
+  /**
+   * Instantiates a new User mediator.
+   *
+   * @param user the user
+   */
   public UserMediator(User user) {
     this.user = user;
   }

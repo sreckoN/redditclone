@@ -4,8 +4,18 @@ import java.util.List;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
+/**
+ * The type Registration request exception.
+ *
+ * @author Srecko Nikolic
+ */
 public class RegistrationRequestException extends RuntimeException {
 
+  /**
+   * Instantiates a new Registration request exception.
+   *
+   * @param errors the errors
+   */
   public RegistrationRequestException(List<ObjectError> errors) {
     super(createMessage(errors));
   }

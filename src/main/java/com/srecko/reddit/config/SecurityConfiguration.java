@@ -19,6 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * The type Security configuration.
+ *
+ * @author Srecko Nikolic
+ */
 @Configuration
 @EnableWebSecurity(debug = true)
 public class SecurityConfiguration {
@@ -28,6 +33,14 @@ public class SecurityConfiguration {
   private final AppLogoutHandler logoutHandler;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
+  /**
+   * Instantiates a new Security configuration.
+   *
+   * @param jwtAuthenticationFilter      the jwt authentication filter
+   * @param userDetailsService           the user details service
+   * @param logoutHandler                the logout handler
+   * @param authenticationManagerBuilder the authentication manager builder
+   */
   @Autowired
   public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
       UserDetailsService userDetailsService, AppLogoutHandler logoutHandler,
@@ -38,6 +51,13 @@ public class SecurityConfiguration {
     this.authenticationManagerBuilder = authenticationManagerBuilder;
   }
 
+  /**
+   * Filter chain security filter chain.
+   *
+   * @param http the http
+   * @return the security filter chain
+   * @throws Exception the exception
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     String[] staticResources = {
@@ -72,11 +92,21 @@ public class SecurityConfiguration {
     return http.build();
   }
 
+  /**
+   * Password encoder password encoder.
+   *
+   * @return the password encoder
+   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
+  /**
+   * Dao authentication provider authentication provider.
+   *
+   * @return the authentication provider
+   */
   @Bean
   public AuthenticationProvider daoAuthenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

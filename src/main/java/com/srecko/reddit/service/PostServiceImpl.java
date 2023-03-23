@@ -19,6 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type Post service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 @Transactional(rollbackFor = {UserNotFoundException.class, SubredditNotFoundException.class,
     PostNotFoundException.class})
@@ -28,6 +33,13 @@ public class PostServiceImpl implements PostService {
   private final UserRepository userRepository;
   private final SubredditRepository subredditRepository;
 
+  /**
+   * Instantiates a new Post service.
+   *
+   * @param postRepository      the post repository
+   * @param userRepository      the user repository
+   * @param subredditRepository the subreddit repository
+   */
   @Autowired
   public PostServiceImpl(PostRepository postRepository, UserRepository userRepository,
       SubredditRepository subredditRepository) {

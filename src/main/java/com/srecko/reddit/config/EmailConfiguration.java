@@ -9,9 +9,19 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
+/**
+ * The type Email configuration.
+ *
+ * @author Srecko Nikolic
+ */
 @Configuration
 public class EmailConfiguration {
 
+  /**
+   * Thymeleaf template resolver template resolver.
+   *
+   * @return the template resolver
+   */
   @Bean
   @Qualifier("thymeleafTemplateResolver")
   @Primary
@@ -24,6 +34,11 @@ public class EmailConfiguration {
     return templateResolver;
   }
 
+  /**
+   * Thymeleaf template engine spring template engine.
+   *
+   * @return the spring template engine
+   */
   @Bean
   public SpringTemplateEngine thymeleafTemplateEngine() {
     SpringTemplateEngine templateEngine = new SpringTemplateEngine();
@@ -32,6 +47,11 @@ public class EmailConfiguration {
     return templateEngine;
   }
 
+  /**
+   * Email message source resource bundle message source.
+   *
+   * @return the resource bundle message source
+   */
   @Bean
   public ResourceBundleMessageSource emailMessageSource() {
     ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();

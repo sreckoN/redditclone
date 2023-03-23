@@ -9,6 +9,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
+/**
+ * The type Comment model assembler.
+ *
+ * @author Srecko Nikolic
+ */
 @Component
 public class CommentModelAssembler implements
     RepresentationModelAssembler<Comment, EntityModel<Comment>> {

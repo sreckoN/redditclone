@@ -29,6 +29,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type Authentication service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 @Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -41,6 +46,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final JwtUtils jwtUtils;
   private final RefreshTokenService refreshTokenService;
 
+  /**
+   * Instantiates a new Authentication service.
+   *
+   * @param userService                  the user service
+   * @param passwordEncoder              the password encoder
+   * @param emailVerificationRepository  the email verification repository
+   * @param emailService                 the email service
+   * @param authenticationManagerBuilder the authentication manager builder
+   * @param jwtUtils                     the jwt utils
+   * @param refreshTokenService          the refresh token service
+   */
   @Autowired
   public AuthenticationServiceImpl(UserService userService, PasswordEncoder passwordEncoder,
       EmailVerificationRepository emailVerificationRepository, EmailService emailService,
@@ -112,8 +128,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public EmailVerificationToken getVerificationToken(String token) {
-    Optional<EmailVerificationToken> emailVerificationTokenOptional = emailVerificationRepository.getEmailVerificationTokenByToken(
-        token);
+    Optional<EmailVerificationToken> emailVerificationTokenOptional =
+        emailVerificationRepository.getEmailVerificationTokenByToken(token);
     if (emailVerificationTokenOptional.isEmpty()) {
       throw new EmailVerificationTokenNotFoundException();
     }

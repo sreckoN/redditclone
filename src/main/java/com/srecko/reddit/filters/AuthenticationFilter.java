@@ -20,12 +20,23 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * The type Authentication filter.
+ *
+ * @author Srecko Nikolic
+ */
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
   private final JwtConfig jwtConfig;
 
   private AuthenticationManager authenticationManager;
 
+  /**
+   * Instantiates a new Authentication filter.
+   *
+   * @param jwtConfig             the jwt config
+   * @param authenticationManager the authentication manager
+   */
   @Autowired
   public AuthenticationFilter(JwtConfig jwtConfig, AuthenticationManager authenticationManager) {
     this.jwtConfig = jwtConfig;
@@ -35,17 +46,17 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
       HttpServletResponse response) throws AuthenticationException {
-    String usernameJSON = "";
-    String passwordJSON = "";
+    String usernameJson = "";
+    String passwordJson = "";
     try {
       JsonNode jsonNode = new ObjectMapper().readTree(request.getInputStream());
-      usernameJSON = jsonNode.get("username").asText();
-      passwordJSON = jsonNode.get("password").asText();
+      usernameJson = jsonNode.get("username").asText();
+      passwordJson = jsonNode.get("password").asText();
     } catch (IOException e) {
       e.printStackTrace();
     }
-    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-        usernameJSON, passwordJSON);
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken(usernameJson, passwordJson);
     return authenticationManager.authenticate(authenticationToken);
   }
 

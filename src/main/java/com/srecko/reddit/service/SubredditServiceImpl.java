@@ -15,6 +15,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type Subreddit service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 @Transactional(rollbackFor = {UserNotFoundException.class, SubredditNotFoundException.class})
 public class SubredditServiceImpl implements SubredditService {
@@ -22,6 +27,12 @@ public class SubredditServiceImpl implements SubredditService {
   private final SubredditRepository subredditRepository;
   private final UserRepository userRepository;
 
+  /**
+   * Instantiates a new Subreddit service.
+   *
+   * @param subredditRepository the subreddit repository
+   * @param userRepository      the user repository
+   */
   @Autowired
   public SubredditServiceImpl(SubredditRepository subredditRepository,
       UserRepository userRepository) {

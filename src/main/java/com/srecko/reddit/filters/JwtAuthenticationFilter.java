@@ -16,12 +16,23 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * The type Jwt authentication filter.
+ *
+ * @author Srecko Nikolic
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtUtils jwtUtils;
   private final UserService userService;
 
+  /**
+   * Instantiates a new Jwt authentication filter.
+   *
+   * @param jwtUtils    the jwt utils
+   * @param userService the user service
+   */
   @Autowired
   public JwtAuthenticationFilter(JwtUtils jwtUtils, UserService userService) {
     this.jwtUtils = jwtUtils;

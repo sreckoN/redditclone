@@ -16,6 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type Refresh token service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 @Transactional
 public class RefreshTokenServiceImpl implements RefreshTokenService {
@@ -24,6 +29,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   private final JwtUtils jwtUtils;
   private final UserService userService;
 
+  /**
+   * Instantiates a new Refresh token service.
+   *
+   * @param refreshTokenRepository the refresh token repository
+   * @param jwtUtils               the jwt utils
+   * @param userService            the user service
+   */
   @Autowired
   public RefreshTokenServiceImpl(RefreshTokenRepository refreshTokenRepository, JwtUtils jwtUtils,
       UserService userService) {

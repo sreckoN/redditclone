@@ -24,6 +24,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type Vote service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 @Transactional(rollbackFor = {PostNotFoundException.class, UserNotFoundException.class,
     VoteNotFoundException.class})
@@ -34,6 +39,14 @@ public class VoteServiceImpl implements VoteService {
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
 
+  /**
+   * Instantiates a new Vote service.
+   *
+   * @param voteRepository    the vote repository
+   * @param userRepository    the user repository
+   * @param postRepository    the post repository
+   * @param commentRepository the comment repository
+   */
   @Autowired
   public VoteServiceImpl(VoteRepository voteRepository, UserRepository userRepository,
       PostRepository postRepository, CommentRepository commentRepository) {

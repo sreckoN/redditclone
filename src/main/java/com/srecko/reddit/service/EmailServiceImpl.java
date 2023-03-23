@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+/**
+ * The type Email service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 public class EmailServiceImpl implements EmailService {
 
@@ -23,6 +28,11 @@ public class EmailServiceImpl implements EmailService {
   @Autowired
   private SpringTemplateEngine thymeleafTemplateEngine;
 
+  /**
+   * Instantiates a new Email service.
+   *
+   * @param env the env
+   */
   @Autowired
   public EmailServiceImpl(Environment env) {
     this.env = env;

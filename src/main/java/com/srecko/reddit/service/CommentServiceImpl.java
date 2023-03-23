@@ -18,6 +18,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The type Comment service.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 @Transactional(rollbackFor = {UserNotFoundException.class, PostNotFoundException.class,
     CommentNotFoundException.class})
@@ -27,6 +32,13 @@ public class CommentServiceImpl implements CommentService {
   private final PostRepository postRepository;
   private final UserRepository userRepository;
 
+  /**
+   * Instantiates a new Comment service.
+   *
+   * @param commentRepository the comment repository
+   * @param postRepository    the post repository
+   * @param userRepository    the user repository
+   */
   @Autowired
   public CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository,
       UserRepository userRepository) {
