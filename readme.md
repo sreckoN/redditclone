@@ -16,7 +16,7 @@ Tests: ~160
 - Ability to vote on Post ✅
 - Switch to the latest version of Spring Boot & Spring Security ✅
 - Search ✅
-- Style checks CI/CD 
+- Style checks CI/CD ✅
 - Refactor tests
 - Secure endpoints
 - SQL Pagination
