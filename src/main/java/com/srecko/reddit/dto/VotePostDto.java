@@ -3,24 +3,48 @@ package com.srecko.reddit.dto;
 import com.srecko.reddit.entity.VoteType;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * The type Vote post dto.
+ *
+ * @author Srecko Nikolic
+ */
 public class VotePostDto extends VoteDto {
 
-    @NotNull
-    private Long postId;
+  @NotNull
+  private Long postId;
 
-    public VotePostDto(VoteType type, Long postId) {
-        super(type);
-        this.postId = postId;
-    }
+  /**
+   * Instantiates a new Vote post dto.
+   *
+   * @param type   the type
+   * @param postId the post id
+   */
+  public VotePostDto(VoteType type, Long postId) {
+    super(type);
+    this.postId = postId;
+  }
 
-    public VotePostDto() {
-    }
+  /**
+   * Instantiates a new Vote post dto.
+   */
+  public VotePostDto() {
+  }
 
-    public Long getPostId() {
-        return postId;
-    }
+  /**
+   * Gets post id.
+   *
+   * @return the post id
+   */
+  public Long getPostId() {
+    return postId;
+  }
 
-    public void setPostId(Long postId) {
-        this.postId = postId;
-    }
+  /**
+   * Sets post id.
+   *
+   * @param postId the post id
+   */
+  public void setPostId(Long postId) {
+    this.postId = postId;
+  }
 }

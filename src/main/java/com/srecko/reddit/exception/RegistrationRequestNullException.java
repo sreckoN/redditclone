@@ -1,8 +1,16 @@
 package com.srecko.reddit.exception;
 
+/**
+ * The type Registration request null exception.
+ *
+ * @author Srecko Nikolic
+ */
 public class RegistrationRequestNullException extends RuntimeException {
 
-    public RegistrationRequestNullException() {
-        super("RegistrationRequest can't be null.");
-    }
+  /**
+   * Instantiates a new Registration request null exception.
+   */
+  public RegistrationRequestNullException() {
+    super("RegistrationRequest can't be null.");
+  }
 }

@@ -3,45 +3,92 @@ package com.srecko.reddit.dto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * The type Update post dto.
+ *
+ * @author Srecko Nikolic
+ */
 public class UpdatePostDto {
 
-    @NotNull
-    private Long postId;
-    @NotEmpty
-    private String title;
-    @NotEmpty
-    private String text;
+  @NotNull
+  private Long postId;
 
-    public UpdatePostDto(Long id, String title, String text) {
-        this.postId = id;
-        this.title = title;
-        this.text = text;
-    }
+  @NotEmpty
+  private String title;
 
-    public UpdatePostDto() {
-    }
+  @NotEmpty
+  private String text;
 
-    public Long getPostId() {
-        return postId;
-    }
+  /**
+   * Instantiates a new Update post dto.
+   *
+   * @param id    the id
+   * @param title the title
+   * @param text  the text
+   */
+  public UpdatePostDto(Long id, String title, String text) {
+    this.postId = id;
+    this.title = title;
+    this.text = text;
+  }
 
-    public void setPostId(Long postId) {
-        this.postId = postId;
-    }
+  /**
+   * Instantiates a new Update post dto.
+   */
+  public UpdatePostDto() {
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  /**
+   * Gets post id.
+   *
+   * @return the post id
+   */
+  public Long getPostId() {
+    return postId;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  /**
+   * Sets post id.
+   *
+   * @param postId the post id
+   */
+  public void setPostId(Long postId) {
+    this.postId = postId;
+  }
 
-    public String getText() {
-        return text;
-    }
+  /**
+   * Gets title.
+   *
+   * @return the title
+   */
+  public String getTitle() {
+    return title;
+  }
 
-    public void setText(String text) {
-        this.text = text;
-    }
+  /**
+   * Sets title.
+   *
+   * @param title the title
+   */
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  /**
+   * Gets text.
+   *
+   * @return the text
+   */
+  public String getText() {
+    return text;
+  }
+
+  /**
+   * Sets text.
+   *
+   * @param text the text
+   */
+  public void setText(String text) {
+    this.text = text;
+  }
 }

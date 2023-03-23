@@ -1,41 +1,88 @@
 package com.srecko.reddit.dto;
 
+/**
+ * The type Authentication response.
+ *
+ * @author Srecko Nikolic
+ */
 public class AuthenticationResponse {
 
-    private String username;
-    private String accessToken;
-    private String refreshToken;
+  private String username;
 
-    public AuthenticationResponse(String username, String accessToken, String refreshToken) {
-        this.username = username;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-    }
+  private String accessToken;
 
-    public AuthenticationResponse() {
-    }
+  private String refreshToken;
 
-    public String getUsername() {
-        return username;
-    }
+  /**
+   * Instantiates a new Authentication response.
+   *
+   * @param username     the username
+   * @param accessToken  the access token
+   * @param refreshToken the refresh token
+   */
+  public AuthenticationResponse(String username, String accessToken, String refreshToken) {
+    this.username = username;
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
+  }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+  /**
+   * Instantiates a new Authentication response.
+   */
+  public AuthenticationResponse() {
+  }
 
-    public String getAccessToken() {
-        return accessToken;
-    }
+  /**
+   * Gets username.
+   *
+   * @return the username
+   */
+  public String getUsername() {
+    return username;
+  }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
+  /**
+   * Sets username.
+   *
+   * @param username the username
+   */
+  public void setUsername(String username) {
+    this.username = username;
+  }
 
-    public String getRefreshToken() {
-        return refreshToken;
-    }
+  /**
+   * Gets access token.
+   *
+   * @return the access token
+   */
+  public String getAccessToken() {
+    return accessToken;
+  }
 
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
+  /**
+   * Sets access token.
+   *
+   * @param accessToken the access token
+   */
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  /**
+   * Gets refresh token.
+   *
+   * @return the refresh token
+   */
+  public String getRefreshToken() {
+    return refreshToken;
+  }
+
+  /**
+   * Sets refresh token.
+   *
+   * @param refreshToken the refresh token
+   */
+  public void setRefreshToken(String refreshToken) {
+    this.refreshToken = refreshToken;
+  }
 }

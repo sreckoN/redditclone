@@ -10,20 +10,31 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type App logout handler.
+ *
+ * @author Srecko Nikolic
+ */
 @Service
 public class AppLogoutHandler implements LogoutHandler {
 
-    private final RefreshTokenService refreshTokenService;
+  private final RefreshTokenService refreshTokenService;
 
-    @Autowired
-    public AppLogoutHandler(RefreshTokenService refreshTokenService) {
-        this.refreshTokenService = refreshTokenService;
-    }
+  /**
+   * Instantiates a new App logout handler.
+   *
+   * @param refreshTokenService the refresh token service
+   */
+  @Autowired
+  public AppLogoutHandler(RefreshTokenService refreshTokenService) {
+    this.refreshTokenService = refreshTokenService;
+  }
 
-    @Override
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        User principal = (User) authentication.getPrincipal();
-        refreshTokenService.deleteRefreshToken(principal);
-        SecurityContextHolder.clearContext();
-    }
+  @Override
+  public void logout(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) {
+    User principal = (User) authentication.getPrincipal();
+    refreshTokenService.deleteRefreshToken(principal);
+    SecurityContextHolder.clearContext();
+  }
 }

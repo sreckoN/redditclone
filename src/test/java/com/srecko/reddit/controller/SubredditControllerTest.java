@@ -1,5 +1,12 @@
 package com.srecko.reddit.controller;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.dto.SubredditDto;
 import org.junit.jupiter.api.AfterEach;
@@ -17,11 +24,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @TestPropertySource("/application-test.properties")
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -30,146 +32,148 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class SubredditControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @Autowired
-    private JdbcTemplate jdbc;
+  @Autowired
+  private JdbcTemplate jdbc;
 
-    @Value("${sql.script.create.user}")
-    private String sqlAddUser;
+  @Value("${sql.script.create.user}")
+  private String sqlAddUser;
 
-    @Value("${sql.script.create.subreddit}")
-    private String sqlAddSubreddit;
+  @Value("${sql.script.create.subreddit}")
+  private String sqlAddSubreddit;
 
-    @Value("${sql.script.delete.user}")
-    private String sqlDeleteUser;
+  @Value("${sql.script.delete.user}")
+  private String sqlDeleteUser;
 
-    @Value("${sql.script.delete.subreddit}")
-    private String sqlDeleteSubreddit;
+  @Value("${sql.script.delete.subreddit}")
+  private String sqlDeleteSubreddit;
 
-    private final String jwt = JwtTestUtils.getJwt();
+  private final String jwt = JwtTestUtils.getJwt();
 
-    @BeforeEach
-    void setUp() {
-        jdbc.execute(sqlAddUser);
-        jdbc.execute(sqlAddSubreddit);
-    }
+  @BeforeEach
+  void setUp() {
+    jdbc.execute(sqlAddUser);
+    jdbc.execute(sqlAddSubreddit);
+  }
 
-    @AfterEach
-    void tearDown() {
-        jdbc.execute(sqlDeleteSubreddit);
-        jdbc.execute(sqlDeleteUser);
-    }
+  @AfterEach
+  void tearDown() {
+    jdbc.execute(sqlDeleteSubreddit);
+    jdbc.execute(sqlDeleteUser);
+  }
 
-    @Test
-    void getAll() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits")
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)));
-    }
+  @Test
+  void getAll() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits")
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(1)));
+  }
 
-    @Test
-    void getSubreddit() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 1)
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", is("Serbias subreddit")))
-                .andExpect(jsonPath("$.description", is("Welcome to Serbia")))
-                .andExpect(jsonPath("$.creator", is(2)));
-    }
+  @Test
+  void getSubreddit() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 1)
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(1)))
+        .andExpect(jsonPath("$.name", is("Serbias subreddit")))
+        .andExpect(jsonPath("$.description", is("Welcome to Serbia")))
+        .andExpect(jsonPath("$.creator", is(2)));
+  }
 
-    @Test
-    void getSubredditThrowsSubredditNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0)
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
-    }
+  @Test
+  void getSubredditThrowsSubredditNotFoundException() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0)
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
+  }
 
-    @Test
-    @WithMockCustomUser
-    void save() throws Exception {
-        SubredditDto subredditDto = new SubredditDto(0L, "Greeces subreddit", "Official subreddit");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String valueAsString = objectMapper.writeValueAsString(subredditDto);
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/subreddits")
-                .header("AUTHORIZATION", "Bearer " + jwt)
-                .contentType(APPLICATION_JSON)
-                .content(valueAsString))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.name", is("Greeces subreddit")))
-                .andExpect(jsonPath("$.description", is("Official subreddit")));
-    }
+  @Test
+  @WithMockCustomUser
+  void save() throws Exception {
+    SubredditDto subredditDto = new SubredditDto(0L, "Greeces subreddit", "Official subreddit");
+    ObjectMapper objectMapper = new ObjectMapper();
+    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/subreddits")
+            .header("AUTHORIZATION", "Bearer " + jwt)
+            .contentType(APPLICATION_JSON)
+            .content(valueAsString))
+        .andExpect(status().is2xxSuccessful())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.name", is("Greeces subreddit")))
+        .andExpect(jsonPath("$.description", is("Official subreddit")));
+  }
 
-    @Test
-    void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/subreddits/{subredditId}", 1)
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", is("Serbias subreddit")))
-                .andExpect(jsonPath("$.description", is("Welcome to Serbia")))
-                .andExpect(jsonPath("$.creator", is(2)));
-    }
+  @Test
+  void delete() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.delete("/api/subreddits/{subredditId}", 1)
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(1)))
+        .andExpect(jsonPath("$.name", is("Serbias subreddit")))
+        .andExpect(jsonPath("$.description", is("Welcome to Serbia")))
+        .andExpect(jsonPath("$.creator", is(2)));
+  }
 
-    @Test
-    void deleteThrowsSubredditNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0)
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
-    }
+  @Test
+  void deleteThrowsSubredditNotFoundException() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", 0)
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
+  }
 
-    @Test
-    void update() throws Exception {
-        SubredditDto subredditDto = new SubredditDto(1L, "Serbias subreddit", "Welcome to Yugoslavia");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String valueAsString = objectMapper.writeValueAsString(subredditDto);
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
-                        .header("AUTHORIZATION", "Bearer " + jwt)
-                        .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", is("Serbias subreddit")))
-                .andExpect(jsonPath("$.description", is("Welcome to Yugoslavia")));
-    }
+  @Test
+  void update() throws Exception {
+    SubredditDto subredditDto = new SubredditDto(1L, "Serbias subreddit", "Welcome to Yugoslavia");
+    ObjectMapper objectMapper = new ObjectMapper();
+    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
+            .header("AUTHORIZATION", "Bearer " + jwt)
+            .contentType(APPLICATION_JSON)
+            .content(valueAsString))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(1)))
+        .andExpect(jsonPath("$.name", is("Serbias subreddit")))
+        .andExpect(jsonPath("$.description", is("Welcome to Yugoslavia")));
+  }
 
-    @Test
-    void updateThrowsSubredditNotFoundException() throws Exception {
-        SubredditDto subredditDto = new SubredditDto(0L, "Serbias subreddit", "Welcome to Yugoslavia");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String valueAsString = objectMapper.writeValueAsString(subredditDto);
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
-                        .header("AUTHORIZATION", "Bearer " + jwt)
-                        .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
-    }
+  @Test
+  void updateThrowsSubredditNotFoundException() throws Exception {
+    SubredditDto subredditDto = new SubredditDto(0L, "Serbias subreddit", "Welcome to Yugoslavia");
+    ObjectMapper objectMapper = new ObjectMapper();
+    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
+            .header("AUTHORIZATION", "Bearer " + jwt)
+            .contentType(APPLICATION_JSON)
+            .content(valueAsString))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
+  }
 
-    @Test
-    void updateThrowsDtoValidationException() throws Exception {
-        SubredditDto subredditDto = new SubredditDto(null, "Serbias subreddit", "Welcome to Yugoslavia");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String valueAsString = objectMapper.writeValueAsString(subredditDto);
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
-                        .header("AUTHORIZATION", "Bearer " + jwt)
-                        .contentType(APPLICATION_JSON)
-                        .content(valueAsString))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message", is("DTO validation failed for the following fields: subredditId.")));
-    }
+  @Test
+  void updateThrowsDtoValidationException() throws Exception {
+    SubredditDto subredditDto = new SubredditDto(null, "Serbias subreddit",
+        "Welcome to Yugoslavia");
+    ObjectMapper objectMapper = new ObjectMapper();
+    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
+            .header("AUTHORIZATION", "Bearer " + jwt)
+            .contentType(APPLICATION_JSON)
+            .content(valueAsString))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message",
+            is("DTO validation failed for the following fields: subredditId.")));
+  }
 }

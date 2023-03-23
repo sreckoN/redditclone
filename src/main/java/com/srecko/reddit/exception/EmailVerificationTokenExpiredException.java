@@ -1,8 +1,16 @@
 package com.srecko.reddit.exception;
 
+/**
+ * The type Email verification token expired exception.
+ *
+ * @author Srecko Nikolic
+ */
 public class EmailVerificationTokenExpiredException extends RuntimeException {
 
-    public EmailVerificationTokenExpiredException() {
-        super("Email Verification token expired. Register again.");
-    }
+  /**
+   * Instantiates a new Email verification token expired exception.
+   */
+  public EmailVerificationTokenExpiredException() {
+    super("Email Verification token expired. Register again.");
+  }
 }

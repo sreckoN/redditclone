@@ -1,8 +1,16 @@
 package com.srecko.reddit.exception;
 
+/**
+ * The type Refresh token invalid exception.
+ *
+ * @author Srecko Nikolic
+ */
 public class RefreshTokenInvalidException extends RuntimeException {
 
-    public RefreshTokenInvalidException() {
-        super("Refresh token is invalid. Log in again.");
-    }
+  /**
+   * Instantiates a new Refresh token invalid exception.
+   */
+  public RefreshTokenInvalidException() {
+    super("Refresh token is invalid. Log in again.");
+  }
 }

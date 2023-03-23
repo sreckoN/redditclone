@@ -2,23 +2,46 @@ package com.srecko.reddit.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 
+/**
+ * The type Token refresh request.
+ *
+ * @author Srecko Nikolic
+ */
 public class TokenRefreshRequest {
 
-    @NotEmpty
-    private String refreshToken;
+  @NotEmpty
+  private String refreshToken;
 
-    public TokenRefreshRequest(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
+  /**
+   * Instantiates a new Token refresh request.
+   *
+   * @param refreshToken the refresh token
+   */
+  public TokenRefreshRequest(String refreshToken) {
+    this.refreshToken = refreshToken;
+  }
 
-    public TokenRefreshRequest() {
-    }
+  /**
+   * Instantiates a new Token refresh request.
+   */
+  public TokenRefreshRequest() {
+  }
 
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
+  /**
+   * Sets refresh token.
+   *
+   * @param refreshToken the refresh token
+   */
+  public void setRefreshToken(String refreshToken) {
+    this.refreshToken = refreshToken;
+  }
 
-    public String getRefreshToken() {
-        return refreshToken;
-    }
+  /**
+   * Gets refresh token.
+   *
+   * @return the refresh token
+   */
+  public String getRefreshToken() {
+    return refreshToken;
+  }
 }
