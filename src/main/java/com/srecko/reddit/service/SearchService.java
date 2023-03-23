@@ -9,8 +9,11 @@ import org.springframework.data.domain.Pageable;
 
 public interface SearchService {
 
-    Page<User> searchUsers(String query, Pageable pageable);
-    Page<Subreddit> searchSubreddits(String query, Pageable pageable);
-    Page<Post> searchPosts(String query, Pageable pageable);
-    Page<Comment> searchComments(String query, Pageable pageable);
+  Page<User> searchUsers(String query, Pageable pageable);
+
+  Page<Subreddit> searchSubreddits(String query, Pageable pageable);
+
+  Page<Post> searchPosts(String query, Pageable pageable);
+
+  Page<Comment> searchComments(String query, Pageable pageable);
 }

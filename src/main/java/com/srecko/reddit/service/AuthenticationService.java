@@ -8,10 +8,15 @@ import com.srecko.reddit.entity.User;
 
 public interface AuthenticationService {
 
-    void register(RegistrationRequest request, String confirmationUrl);
-    void saveEmailVerificationToken(EmailVerificationToken token);
-    AuthenticationResponse authenticate(AuthenticationRequest request);
-    void generateEmailVerificationToken(User user, String appUrl);
-    EmailVerificationToken getVerificationToken(String token);
-    void enableUserAccount(User user);
+  void register(RegistrationRequest request, String confirmationUrl);
+
+  void saveEmailVerificationToken(EmailVerificationToken token);
+
+  AuthenticationResponse authenticate(AuthenticationRequest request);
+
+  void generateEmailVerificationToken(User user, String appUrl);
+
+  EmailVerificationToken getVerificationToken(String token);
+
+  void enableUserAccount(User user);
 }

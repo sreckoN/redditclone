@@ -13,17 +13,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppLogoutHandler implements LogoutHandler {
 
-    private final RefreshTokenService refreshTokenService;
+  private final RefreshTokenService refreshTokenService;
 
-    @Autowired
-    public AppLogoutHandler(RefreshTokenService refreshTokenService) {
-        this.refreshTokenService = refreshTokenService;
-    }
+  @Autowired
+  public AppLogoutHandler(RefreshTokenService refreshTokenService) {
+    this.refreshTokenService = refreshTokenService;
+  }
 
-    @Override
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        User principal = (User) authentication.getPrincipal();
-        refreshTokenService.deleteRefreshToken(principal);
-        SecurityContextHolder.clearContext();
-    }
+  @Override
+  public void logout(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) {
+    User principal = (User) authentication.getPrincipal();
+    refreshTokenService.deleteRefreshToken(principal);
+    SecurityContextHolder.clearContext();
+  }
 }

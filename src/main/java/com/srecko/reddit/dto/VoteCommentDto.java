@@ -5,22 +5,22 @@ import jakarta.validation.constraints.NotNull;
 
 public class VoteCommentDto extends VoteDto {
 
-    @NotNull
-    private Long commentId;
+  @NotNull
+  private Long commentId;
 
-    public VoteCommentDto(VoteType type, Long commentId) {
-        super(type);
-        this.commentId = commentId;
-    }
+  public VoteCommentDto(VoteType type, Long commentId) {
+    super(type);
+    this.commentId = commentId;
+  }
 
-    public VoteCommentDto() {
-    }
+  public VoteCommentDto() {
+  }
 
-    public Long getCommentId() {
-        return commentId;
-    }
+  public Long getCommentId() {
+    return commentId;
+  }
 
-    public void setCommentId(Long commentId) {
-        this.commentId = commentId;
-    }
+  public void setCommentId(Long commentId) {
+    this.commentId = commentId;
+  }
 }

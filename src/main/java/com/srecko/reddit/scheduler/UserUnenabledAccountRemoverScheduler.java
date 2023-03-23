@@ -8,15 +8,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserUnenabledAccountRemoverScheduler {
 
-    private UserService userService;
+  private UserService userService;
 
-    @Autowired
-    public UserUnenabledAccountRemoverScheduler(UserService userService) {
-        this.userService = userService;
-    }
+  @Autowired
+  public UserUnenabledAccountRemoverScheduler(UserService userService) {
+    this.userService = userService;
+  }
 
-    @Scheduled(fixedDelay = 3600000)
-    public void deleteUnverifiedUsers() {
-        userService.deleteUnverifiedUsers();
-    }
+  @Scheduled(fixedDelay = 3600000)
+  public void deleteUnverifiedUsers() {
+    userService.deleteUnverifiedUsers();
+  }
 }

@@ -6,8 +6,11 @@ import com.srecko.reddit.entity.Vote;
 
 public interface VoteService {
 
-    Vote saveCommentVote(VoteCommentDto voteDto);
-    Vote savePostVote(VotePostDto voteDto);
-    Vote deletePostVote(Long id);
-    Vote deleteCommentVote(Long id);
+  Vote saveCommentVote(VoteCommentDto voteDto);
+
+  Vote savePostVote(VotePostDto voteDto);
+
+  Vote deletePostVote(Long id);
+
+  Vote deleteCommentVote(Long id);
 }

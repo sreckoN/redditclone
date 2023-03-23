@@ -6,8 +6,11 @@ import com.srecko.reddit.entity.User;
 
 public interface RefreshTokenService {
 
-    AuthenticationResponse getNewAccessToken(TokenRefreshRequest tokenRefreshRequest);
-    void saveRefreshToken(String token, User user);
-    void deleteRefreshToken(User user);
-    void removeExpiredTokens();
+  AuthenticationResponse getNewAccessToken(TokenRefreshRequest tokenRefreshRequest);
+
+  void saveRefreshToken(String token, User user);
+
+  void deleteRefreshToken(User user);
+
+  void removeExpiredTokens();
 }

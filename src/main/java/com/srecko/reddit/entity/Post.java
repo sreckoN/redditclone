@@ -1,10 +1,20 @@
 package com.srecko.reddit.entity;
 
-import com.fasterxml.jackson.annotation.*;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,120 +24,120 @@ import java.util.List;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Post {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+  @Id
+  @GeneratedValue
+  private Long id;
 
-    private Date dateOfCreation;
+  private Date dateOfCreation;
 
-    @NotEmpty
-    @Size(min = 3, max = 35)
-    private String title;
+  @NotEmpty
+  @Size(min = 3, max = 35)
+  private String title;
 
-    @NotEmpty
-    @Size(min = 2, max = 1000)
-    private String text;
+  @NotEmpty
+  @Size(min = 2, max = 1000)
+  private String text;
 
-    private int votes;
+  private int votes;
 
-    private int commentsCounter;
+  private int commentsCounter;
 
-    @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne
-    private User user;
+  @JsonIdentityReference(alwaysAsId = true)
+  @ManyToOne
+  private User user;
 
-    @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne
-    private Subreddit subreddit;
+  @JsonIdentityReference(alwaysAsId = true)
+  @ManyToOne
+  private Subreddit subreddit;
 
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post", fetch = FetchType.LAZY)
-    private List<Comment> comments;
+  @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+  @JsonIgnore
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post", fetch = FetchType.LAZY)
+  private List<Comment> comments;
 
-    public Post() {
-    }
+  public Post() {
+  }
 
-    public Post(User createdBy, String title, String text, Subreddit subreddit) {
-        this.user = createdBy;
-        this.title = title;
-        this.text = text;
-        this.subreddit = subreddit;
-        this.dateOfCreation = new Date();
-        this.votes = 0;
-        this.commentsCounter = 0;
-        this.comments = new ArrayList<>();
-    }
+  public Post(User createdBy, String title, String text, Subreddit subreddit) {
+    this.user = createdBy;
+    this.title = title;
+    this.text = text;
+    this.subreddit = subreddit;
+    this.dateOfCreation = new Date();
+    this.votes = 0;
+    this.commentsCounter = 0;
+    this.comments = new ArrayList<>();
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public Date getDateOfCreation() {
-        return dateOfCreation;
-    }
+  public Date getDateOfCreation() {
+    return dateOfCreation;
+  }
 
-    public void setDateOfCreation(Date dateOfCreation) {
-        this.dateOfCreation = dateOfCreation;
-    }
+  public void setDateOfCreation(Date dateOfCreation) {
+    this.dateOfCreation = dateOfCreation;
+  }
 
-    public User getUser() {
-        return user;
-    }
+  public User getUser() {
+    return user;
+  }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+  public void setUser(User user) {
+    this.user = user;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public String getText() {
-        return text;
-    }
+  public String getText() {
+    return text;
+  }
 
-    public void setText(String text) {
-        this.text = text;
-    }
+  public void setText(String text) {
+    this.text = text;
+  }
 
-    public int getVotes() {
-        return votes;
-    }
+  public int getVotes() {
+    return votes;
+  }
 
-    public void setVotes(int votes) {
-        this.votes = votes;
-    }
+  public void setVotes(int votes) {
+    this.votes = votes;
+  }
 
-    public int getCommentsCounter() {
-        return commentsCounter;
-    }
+  public int getCommentsCounter() {
+    return commentsCounter;
+  }
 
-    public void setCommentsCounter(int commentsCounter) {
-        this.commentsCounter = commentsCounter;
-    }
+  public void setCommentsCounter(int commentsCounter) {
+    this.commentsCounter = commentsCounter;
+  }
 
-    public Subreddit getSubreddit() {
-        return subreddit;
-    }
+  public Subreddit getSubreddit() {
+    return subreddit;
+  }
 
-    public void setSubreddit(Subreddit subreddit) {
-        this.subreddit = subreddit;
-    }
+  public void setSubreddit(Subreddit subreddit) {
+    this.subreddit = subreddit;
+  }
 
-    public List<Comment> getComments() {
-        return comments;
-    }
+  public List<Comment> getComments() {
+    return comments;
+  }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-    }
+  public void setComments(List<Comment> comments) {
+    this.comments = comments;
+  }
 }

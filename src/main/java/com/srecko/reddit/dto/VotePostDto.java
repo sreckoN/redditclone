@@ -5,22 +5,22 @@ import jakarta.validation.constraints.NotNull;
 
 public class VotePostDto extends VoteDto {
 
-    @NotNull
-    private Long postId;
+  @NotNull
+  private Long postId;
 
-    public VotePostDto(VoteType type, Long postId) {
-        super(type);
-        this.postId = postId;
-    }
+  public VotePostDto(VoteType type, Long postId) {
+    super(type);
+    this.postId = postId;
+  }
 
-    public VotePostDto() {
-    }
+  public VotePostDto() {
+  }
 
-    public Long getPostId() {
-        return postId;
-    }
+  public Long getPostId() {
+    return postId;
+  }
 
-    public void setPostId(Long postId) {
-        this.postId = postId;
-    }
+  public void setPostId(Long postId) {
+    this.postId = postId;
+  }
 }

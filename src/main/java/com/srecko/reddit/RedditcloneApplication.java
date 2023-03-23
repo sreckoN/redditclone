@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class RedditcloneApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(RedditcloneApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(RedditcloneApplication.class, args);
+  }
 }

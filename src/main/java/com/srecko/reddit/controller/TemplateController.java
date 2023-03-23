@@ -1,27 +1,26 @@
 package com.srecko.reddit.controller;
 
 import com.srecko.reddit.service.UserService;
+import java.security.Principal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.security.Principal;
-
 @Controller
 public class TemplateController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    public TemplateController(UserService userService) {
-        this.userService = userService;
-    }
+  public TemplateController(UserService userService) {
+    this.userService = userService;
+  }
 
-    @GetMapping("/")
-    public String index(Principal principal, Model model) {
-        boolean loggedIn = principal != null;
-        model.addAttribute("loggedIn", loggedIn);
-        return "index";
-    }
+  @GetMapping("/")
+  public String index(Principal principal, Model model) {
+    boolean loggedIn = principal != null;
+    model.addAttribute("loggedIn", loggedIn);
+    return "index";
+  }
 
     /*@GetMapping("/signup")
     public String signup(Model model,

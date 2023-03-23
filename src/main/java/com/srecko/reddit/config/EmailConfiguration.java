@@ -12,30 +12,30 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 @Configuration
 public class EmailConfiguration {
 
-    @Bean
-    @Qualifier("thymeleafTemplateResolver")
-    @Primary
-    public ITemplateResolver thymeleafTemplateResolver() {
-        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-        templateResolver.setPrefix("templates/mail-templates/");
-        templateResolver.setSuffix(".html");
-        templateResolver.setTemplateMode("HTML");
-        templateResolver.setCharacterEncoding("UTF-8");
-        return templateResolver;
-    }
+  @Bean
+  @Qualifier("thymeleafTemplateResolver")
+  @Primary
+  public ITemplateResolver thymeleafTemplateResolver() {
+    ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+    templateResolver.setPrefix("templates/mail-templates/");
+    templateResolver.setSuffix(".html");
+    templateResolver.setTemplateMode("HTML");
+    templateResolver.setCharacterEncoding("UTF-8");
+    return templateResolver;
+  }
 
-    @Bean
-    public SpringTemplateEngine thymeleafTemplateEngine() {
-        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-        templateEngine.addTemplateResolver(thymeleafTemplateResolver());
-        templateEngine.setTemplateEngineMessageSource(emailMessageSource());
-        return templateEngine;
-    }
+  @Bean
+  public SpringTemplateEngine thymeleafTemplateEngine() {
+    SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+    templateEngine.addTemplateResolver(thymeleafTemplateResolver());
+    templateEngine.setTemplateEngineMessageSource(emailMessageSource());
+    return templateEngine;
+  }
 
-    @Bean
-    public ResourceBundleMessageSource emailMessageSource() {
-        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("mailMessages");
-        return messageSource;
-    }
+  @Bean
+  public ResourceBundleMessageSource emailMessageSource() {
+    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+    messageSource.setBasename("mailMessages");
+    return messageSource;
+  }
 }

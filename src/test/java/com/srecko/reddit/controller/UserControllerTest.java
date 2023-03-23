@@ -1,5 +1,12 @@
 package com.srecko.reddit.controller;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,11 +21,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @TestPropertySource("/application-test.properties")
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -26,72 +28,72 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithUserDetails("janedoe")
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @Autowired
-    private JdbcTemplate jdbc;
+  @Autowired
+  private JdbcTemplate jdbc;
 
-    @Value("${sql.script.create.user}")
-    private String sqlAddUser;
+  @Value("${sql.script.create.user}")
+  private String sqlAddUser;
 
-    @Value("${sql.script.delete.user}")
-    private String sqlDeleteUser;
+  @Value("${sql.script.delete.user}")
+  private String sqlDeleteUser;
 
-    private final String jwt = JwtTestUtils.getJwt();
+  private final String jwt = JwtTestUtils.getJwt();
 
-    @BeforeEach
-    void setUp() {
-        jdbc.execute(sqlAddUser);
-    }
+  @BeforeEach
+  void setUp() {
+    jdbc.execute(sqlAddUser);
+  }
 
-    @AfterEach
-    void tearDown() {
-        jdbc.execute(sqlDeleteUser);
-    }
+  @AfterEach
+  void tearDown() {
+    jdbc.execute(sqlDeleteUser);
+  }
 
-    @Test
-    void getUsers() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users")
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)));
-    }
+  @Test
+  void getUsers() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users")
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(1)));
+  }
 
-    @Test
-    void getUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janedoe")
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.username", is("janedoe")));
-    }
+  @Test
+  void getUser() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janedoe")
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.username", is("janedoe")));
+  }
 
-    @Test
-    void getUserThrowsUserNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janinedoe")
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
-    }
+  @Test
+  void getUserThrowsUserNotFoundException() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janinedoe")
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
+  }
 
-    @Test
-    void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janedoe")
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.username", is("janedoe")));
-    }
+  @Test
+  void delete() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janedoe")
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.username", is("janedoe")));
+  }
 
-    @Test
-    void deleteThrowsUserNotFoundException() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janinedoe")
-                        .header("AUTHORIZATION", "Bearer " + jwt))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
-    }
+  @Test
+  void deleteThrowsUserNotFoundException() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", "janinedoe")
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
+  }
 }
