@@ -5,13 +5,13 @@ import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.RegistrationRequest;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
-import com.srecko.reddit.exception.EmailAlreadyInUseException;
-import com.srecko.reddit.exception.EmailVerificationTokenExpiredException;
-import com.srecko.reddit.exception.EmailVerificationTokenNotFoundException;
-import com.srecko.reddit.exception.InvalidEmailVerificationTokenException;
-import com.srecko.reddit.exception.RegistrationRequestNullException;
-import com.srecko.reddit.exception.UsernameNotAvailableException;
-import com.srecko.reddit.exception.VerificationEmailSendingErrorException;
+import com.srecko.reddit.exception.authentication.EmailAlreadyInUseException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenExpiredException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenNotFoundException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenInvalidException;
+import com.srecko.reddit.exception.authentication.RegistrationRequestNullException;
+import com.srecko.reddit.exception.authentication.UsernameNotAvailableException;
+import com.srecko.reddit.exception.authentication.VerificationEmailSendingErrorException;
 import com.srecko.reddit.jwt.JwtUtils;
 import com.srecko.reddit.repository.EmailVerificationRepository;
 import jakarta.mail.MessagingException;
@@ -130,7 +130,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
     EmailVerificationToken verificationToken = emailVerificationTokenOptional.get();
     if (!verificationToken.getToken().equals(token)) {
-      throw new InvalidEmailVerificationTokenException();
+      throw new EmailVerificationTokenInvalidException();
     }
     if (isVerificationTokenExpired(verificationToken)) {
       throw new EmailVerificationTokenExpiredException();

@@ -1,4 +1,4 @@
-package com.srecko.reddit.exception;
+package com.srecko.reddit.exception.authentication;
 
 /**
  * The type Registration request null exception.

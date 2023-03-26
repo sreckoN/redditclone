@@ -1,4 +1,4 @@
-package com.srecko.reddit.exception;
+package com.srecko.reddit.exception.subreddit;
 
 /**
  * The type Subreddit not found exception.

@@ -1,4 +1,4 @@
-package com.srecko.reddit.exception;
+package com.srecko.reddit.exception.authentication;
 
 /**
  * The type Refresh token not found exception.

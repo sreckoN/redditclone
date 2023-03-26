@@ -1,4 +1,4 @@
-package com.srecko.reddit.exception;
+package com.srecko.reddit.exception.authentication;
 
 import org.springframework.security.core.AuthenticationException;
 
@@ -7,9 +7,9 @@ import org.springframework.security.core.AuthenticationException;
  *
  * @author Srecko Nikolic
  */
-public class AccountNotEnabledException extends AuthenticationException {
+public class AccountDisabledException extends AuthenticationException {
 
-  public AccountNotEnabledException(String username) {
+  public AccountDisabledException(String username) {
     super("Account with username " + username
         + " is not enabled. Confirm your email address or register again.");
   }

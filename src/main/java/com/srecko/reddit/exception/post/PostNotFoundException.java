@@ -1,4 +1,4 @@
-package com.srecko.reddit.exception;
+package com.srecko.reddit.exception.post;
 
 /**
  * The type Post not found exception.

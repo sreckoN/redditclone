@@ -3,8 +3,8 @@ package com.srecko.reddit.service;
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
-import com.srecko.reddit.exception.AccountNotEnabledException;
-import com.srecko.reddit.exception.UserNotFoundException;
+import com.srecko.reddit.exception.authentication.AccountDisabledException;
+import com.srecko.reddit.exception.user.UserNotFoundException;
 import com.srecko.reddit.repository.EmailVerificationRepository;
 import com.srecko.reddit.repository.UserRepository;
 import java.util.Collection;
@@ -51,7 +51,7 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
     User user = userOptional
         .orElseThrow(() -> new UserNotFoundException(username));
     if (!user.isEnabled()) {
-      throw new AccountNotEnabledException(username);
+      throw new AccountDisabledException(username);
     }
     return new UserMediator(user);
   }

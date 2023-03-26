@@ -1,4 +1,4 @@
-package com.srecko.reddit.exception;
+package com.srecko.reddit.exception.comment;
 
 /**
  * The type Comment not found exception.
