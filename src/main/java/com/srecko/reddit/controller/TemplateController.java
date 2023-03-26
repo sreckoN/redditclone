@@ -1,10 +1,10 @@
 package com.srecko.reddit.controller;
 
 import com.srecko.reddit.service.UserService;
-import java.security.Principal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * The type Template controller.
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * @author Srecko Nikolic
  */
 @Controller
+@RequestMapping("/api")
 public class TemplateController {
 
   private final UserService userService;
@@ -28,14 +29,11 @@ public class TemplateController {
   /**
    * Index string.
    *
-   * @param principal the principal
    * @param model     the model
    * @return the string
    */
-  @GetMapping("/")
-  public String index(Principal principal, Model model) {
-    boolean loggedIn = principal != null;
-    model.addAttribute("loggedIn", loggedIn);
+  @GetMapping
+  public String index(Model model) {
     return "index";
   }
 

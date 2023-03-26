@@ -88,14 +88,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
           request.getCountry(),
           false);
       userService.save(user);
-      generateEmailVerificationToken(user, confirmationUrl);
+      sendVerificationEmail(user, confirmationUrl);
     }
   }
 
   @Override
-  public void generateEmailVerificationToken(User user, String appUrl) {
+  public void sendVerificationEmail(User user, String appUrl) {
     EmailVerificationToken token = new EmailVerificationToken(user);
-    saveEmailVerificationToken(token);
+    emailVerificationRepository.save(token);
     String recipientEmail = user.getEmail();
     String confirmationUrl = appUrl + token.getToken();
     Map<String, Object> vars = new HashMap<>();
@@ -119,11 +119,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String refreshToken = jwtUtils.getRefreshToken(user.getEmail());
     refreshTokenService.saveRefreshToken(refreshToken, user);
     return new AuthenticationResponse(user.getUsername(), accessToken, refreshToken);
-  }
-
-  @Override
-  public void saveEmailVerificationToken(EmailVerificationToken token) {
-    emailVerificationRepository.save(token);
   }
 
   @Override

@@ -40,5 +40,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
    * @param pageable the pageable
    * @return the page
    */
-  Page<Comment> findByTextContaining(String query, Pageable pageable);
+  Page<Comment> findByTextContainingIgnoreCase(String query, Pageable pageable);
 }

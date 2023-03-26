@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.jwt.JwtConfig;
 import com.srecko.reddit.jwt.JwtUtils;
+import com.srecko.reddit.service.RefreshTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,18 +30,23 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
   private final JwtConfig jwtConfig;
 
-  private AuthenticationManager authenticationManager;
+  private final AuthenticationManager authenticationManager;
+
+  private final RefreshTokenService refreshTokenService;
 
   /**
    * Instantiates a new Authentication filter.
    *
    * @param jwtConfig             the jwt config
    * @param authenticationManager the authentication manager
+   * @param refreshTokenService   the refresh token service
    */
   @Autowired
-  public AuthenticationFilter(JwtConfig jwtConfig, AuthenticationManager authenticationManager) {
+  public AuthenticationFilter(JwtConfig jwtConfig, AuthenticationManager authenticationManager,
+      RefreshTokenService refreshTokenService) {
     this.jwtConfig = jwtConfig;
     this.authenticationManager = authenticationManager;
+    this.refreshTokenService = refreshTokenService;
   }
 
   @Override
@@ -66,8 +72,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     UserMediator userMediator = (UserMediator) authentication.getPrincipal();
     JwtUtils jwtUtils = new JwtUtils(jwtConfig);
     Map<String, String> tokens = new HashMap<>();
-    tokens.put("access_token", jwtUtils.getAccessToken(userMediator.getUsername()));
-    tokens.put("refresh_token", jwtUtils.getRefreshToken(userMediator.getUsername()));
+    tokens.put("accessToken", jwtUtils.getAccessToken(userMediator.getUsername()));
+    String refreshToken = jwtUtils.getRefreshToken(userMediator.getUsername());
+    tokens.put("refreshToken", refreshToken);
+    refreshTokenService.saveRefreshToken(refreshToken, userMediator.getUsername());
     response.setContentType(APPLICATION_JSON_VALUE);
     new ObjectMapper().writeValue(response.getOutputStream(), tokens);
   }

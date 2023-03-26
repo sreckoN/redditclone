@@ -9,14 +9,14 @@ import org.springframework.validation.ObjectError;
  *
  * @author Srecko Nikolic
  */
-public class RegistrationRequestException extends RuntimeException {
+public class RegistrationRequestInvalidException extends RuntimeException {
 
   /**
    * Instantiates a new Registration request exception.
    *
    * @param errors the errors
    */
-  public RegistrationRequestException(List<ObjectError> errors) {
+  public RegistrationRequestInvalidException(List<ObjectError> errors) {
     super(createMessage(errors));
   }
 

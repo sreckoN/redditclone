@@ -5,6 +5,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 import com.srecko.reddit.filters.AuthenticationFilter;
 import com.srecko.reddit.filters.JwtAuthenticationFilter;
 import com.srecko.reddit.jwt.JwtConfig;
+import com.srecko.reddit.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,7 @@ public class SecurityConfiguration {
   private final UserDetailsService userDetailsService;
   private final AppLogoutHandler logoutHandler;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
+  private final RefreshTokenService refreshTokenService;
 
   /**
    * Instantiates a new Security configuration.
@@ -40,15 +42,18 @@ public class SecurityConfiguration {
    * @param userDetailsService           the user details service
    * @param logoutHandler                the logout handler
    * @param authenticationManagerBuilder the authentication manager builder
+   * @param refreshTokenService          the refresh token service
    */
   @Autowired
   public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
       UserDetailsService userDetailsService, AppLogoutHandler logoutHandler,
-      AuthenticationManagerBuilder authenticationManagerBuilder) {
+      AuthenticationManagerBuilder authenticationManagerBuilder,
+      RefreshTokenService refreshTokenService) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.userDetailsService = userDetailsService;
     this.logoutHandler = logoutHandler;
     this.authenticationManagerBuilder = authenticationManagerBuilder;
+    this.refreshTokenService = refreshTokenService;
   }
 
   /**
@@ -67,7 +72,7 @@ public class SecurityConfiguration {
         "/scripts/**",
     };
     AuthenticationFilter authenticationFilter = new AuthenticationFilter(new JwtConfig(),
-        authenticationManagerBuilder.getOrBuild());
+        authenticationManagerBuilder.getOrBuild(), refreshTokenService);
     authenticationFilter.setFilterProcessesUrl("/api/auth/authenticate");
     http
         .csrf().disable()
@@ -77,6 +82,7 @@ public class SecurityConfiguration {
         .requestMatchers(staticResources).permitAll()
         .requestMatchers("/api/auth/**").permitAll()
         .requestMatchers("/api/search/**").permitAll()
+        .requestMatchers("/api").permitAll()
         .anyRequest().authenticated()
         .and()
         .formLogin()

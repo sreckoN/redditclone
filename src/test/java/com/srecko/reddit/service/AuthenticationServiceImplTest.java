@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.srecko.reddit.dto.AuthenticationRequest;
+import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.RegistrationRequest;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
@@ -18,6 +21,7 @@ import com.srecko.reddit.exception.RegistrationRequestNullException;
 import com.srecko.reddit.exception.UsernameNotAvailableException;
 import com.srecko.reddit.jwt.JwtUtils;
 import com.srecko.reddit.repository.EmailVerificationRepository;
+import jakarta.mail.MessagingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -25,12 +29,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,7 +91,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void testRegisterThrowsEmailAlreadyInUse() {
+  void register_ThrowsEmailAlreadyInUse_WhenGivenAlreadyUsedEmail() {
     // given
     given(userService.existsUserByEmail(any())).willReturn(true);
 
@@ -96,7 +103,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void testRegisterThrowsUsernameNotAvailableException() {
+  void register_ThrowsUsernameNotAvailableException_WhenGivenUnavailableUsername() {
     // given
     given(userService.existsUserByEmail(any())).willReturn(false);
     given(userService.existsUserByUsername(any())).willReturn(true);
@@ -109,7 +116,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void testRegisterThrowsRegistrationRequestNullException() {
+  void register_ThrowsRegistrationRequestNullException_WhenGivenNullRegistrationRequest() {
     // given
     when(userService.existsUserByEmail(any())).thenReturn(true);
     when(userService.existsUserByUsername(any())).thenReturn(true);
@@ -122,7 +129,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void testRegister() {
+  void register_ReturnsStringMessage_WhenUserSuccessfullyRegistered() {
     // given
     given(userService.existsUserByEmail(any())).willReturn(false);
     given(userService.existsUserByUsername(any())).willReturn(false);
@@ -137,27 +144,17 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void generateEmailVerificationToken() {
+  void sendVerificationEmail() throws MessagingException {
     // given
     // when
-    authenticationServiceImpl.generateEmailVerificationToken(user,
+    authenticationServiceImpl.sendVerificationEmail(user,
         "http://localhost:8080/api/auth");
     // then
+    verify(emailService).sendMessageUsingThymeleafTemplate(any(String.class), any(String.class), any(Map.class));
   }
 
   @Test
-  void saveEmailVerificationToken() {
-    // given
-    EmailVerificationToken token = new EmailVerificationToken();
-    given(emailVerificationRepository.save(token)).willReturn(token);
-
-    // when
-    authenticationServiceImpl.saveEmailVerificationToken(token);
-    // then
-  }
-
-  @Test
-  void getVerificationToken() throws ParseException {
+  void getVerificationToken_ReturnsEmailVerificationToken_WhenSuccessfullyCreated() throws ParseException {
     // given
     EmailVerificationToken token = new EmailVerificationToken();
     token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
@@ -177,7 +174,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void getVerificationTokenThrowsEmailVerificationTokenNotFoundException() throws ParseException {
+  void getVerificationToken_ThrowsEmailVerificationTokenNotFoundException_WhenTokenDoesNotExist() throws ParseException {
     // given
     EmailVerificationToken token = new EmailVerificationToken();
     token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
@@ -192,7 +189,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void getVerificationTokenThrowsInvalidEmailVerificationTokenException() throws ParseException {
+  void getVerificationToken_ThrowsInvalidEmailVerificationTokenException_WhenInvalidTokenGiven() throws ParseException {
     // given
     EmailVerificationToken token = new EmailVerificationToken();
     token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
@@ -206,7 +203,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
-  void getVerificationTokenThrowsEmailVerificationTokenExpiredException() throws ParseException {
+  void getVerificationToken_ThrowsEmailVerificationTokenExpiredException_WhenTokenExpired() throws ParseException {
     // given
     EmailVerificationToken token = new EmailVerificationToken();
     token.setToken("ea9b3023-f4b8-45f4-8e5a-664915c4e888");
@@ -228,7 +225,34 @@ class AuthenticationServiceImplTest {
     //given
     given(userService.save(any())).willReturn(null);
 
-    // when then
+    // when
     authenticationServiceImpl.enableUserAccount(user);
+
+    // then
+    verify(userService).save(any(User.class));
+  }
+
+  @Test
+  void authenticate_ReturnsAuthenticationResponse_WhenUserSuccessfullyAuthenticated() {
+    // given
+    String accessToken = "testAccessToken";
+    String refreshToken = "testRefreshToken";
+    User user = new User("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB", true);
+    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+    AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+    given(authenticationManagerBuilder.getOrBuild()).willReturn(authenticationManager);
+    given(authenticationManager.authenticate(token)).willReturn(null);
+    given(userService.getUserByUsername(user.getUsername())).willReturn(user);
+    given(jwtUtils.getAccessToken(any())).willReturn(accessToken);
+    given(jwtUtils.getRefreshToken(any())).willReturn(refreshToken);
+
+    // when
+    AuthenticationRequest authenticationRequest = new AuthenticationRequest(user.getUsername(), user.getPassword());
+    AuthenticationResponse authenticationResponse = authenticationServiceImpl.authenticate(authenticationRequest);
+
+    // then
+    assertEquals(user.getUsername(), authenticationResponse.getUsername());
+    assertEquals(accessToken, authenticationResponse.getAccessToken());
+    assertEquals(refreshToken, authenticationResponse.getRefreshToken());
   }
 }

@@ -102,7 +102,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void savePostVote() {
+  void savePostVote_ReturnsPostVote_WhenSuccessfullySaved() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
@@ -124,7 +124,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void savePostVoteThrowsPostNotFoundException() {
+  void savePostVote_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
@@ -143,7 +143,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void savePostVoteThrowsUserNotFoundException() {
+  void savePostVote_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -160,7 +160,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void saveCommentVote() {
+  void saveCommentVote_ReturnsCommentVote_WhenSuccessfullySaved() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
     given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
@@ -182,7 +182,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void saveCommentVoteThrowsCommentNotFoundException() {
+  void saveCommentVote_ThrowsCommentNotFoundException_WhenCommentDoesNotExist() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
@@ -201,7 +201,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void saveCommentVoteThrowsUserNotFoundException() {
+  void saveCommentVote_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -218,7 +218,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void deletePostVote() {
+  void deletePostVote_ReturnsPostVote_WhenSuccessfullyDeleted() {
     // given
     VotePost vote = new VotePost(post.getUser(), VoteType.UPVOTE, post);
     given(voteRepository.findById(any())).willReturn(Optional.of(vote));
@@ -235,7 +235,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void deletePostVoteThrowsPostNotFoundException() {
+  void deletePostVote_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given
     VotePost vote = new VotePost(post.getUser(), VoteType.UPVOTE, post);
     given(voteRepository.findById(any())).willReturn(Optional.of(vote));
@@ -247,7 +247,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void deletePostVoteThrowsVoteNotFoundException() {
+  void deletePostVote_ThrowsVoteNotFoundException_WhenVoteDoesNotExist() {
     // given when then
     assertThrows(VoteNotFoundException.class, () -> {
       voteService.deletePostVote(1L);
@@ -256,7 +256,7 @@ class VoteServiceImplTest {
 
 
   @Test
-  void deleteCommentVote() {
+  void deleteCommentVote_ReturnsCommentVote_WhenSuccessfullyDeleted() {
     // given
     VoteComment vote = new VoteComment(post.getUser(), VoteType.UPVOTE, comment);
     given(voteRepository.findById(any())).willReturn(Optional.of(vote));
@@ -273,7 +273,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void deleteCommentVoteThrowsPostNotFoundException() {
+  void deleteCommentVote_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given
     VoteComment vote = new VoteComment(post.getUser(), VoteType.UPVOTE, comment);
     given(voteRepository.findById(any())).willReturn(Optional.of(vote));
@@ -285,7 +285,7 @@ class VoteServiceImplTest {
   }
 
   @Test
-  void deleteCommentVoteThrowsVoteNotFoundException() {
+  void deleteCommentVote_ThrowsVoteNotFoundException_WhenVoteDoesNotExist() {
     // given when then
     assertThrows(VoteNotFoundException.class, () -> {
       voteService.deleteCommentVote(1L);

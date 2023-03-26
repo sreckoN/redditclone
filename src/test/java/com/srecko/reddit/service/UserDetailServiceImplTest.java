@@ -1,11 +1,13 @@
 package com.srecko.reddit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
@@ -55,7 +57,7 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void loadUserByUsername() {
+  void loadUserByUsername_ReturnsUserDetailsOfUser_WhenSuccessfullyLoaded() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
@@ -69,7 +71,7 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void loadUserByUsernameThrowsUserNotFoundExceptionException() {
+  void loadUserByUsername_ThrowsUserNotFoundExceptionException_WhenUserDoesNotExist() {
     // given when then
     assertThrows(UserNotFoundException.class, () -> {
       userService.loadUserByUsername(user.getUsername());
@@ -77,7 +79,7 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void loadUserByUsernameThrowsAccountNotEnabledException() {
+  void loadUserByUsername_ThrowsAccountNotEnabledException_WhenUserAccountIsNotEnabler() {
     // given
     user.setEnabled(false);
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
@@ -89,7 +91,7 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void getUsers() {
+  void getUsers_ReturnsListOfAllUsers() {
     // given
     given(userRepository.findAll()).willReturn(List.of(user));
 
@@ -102,33 +104,8 @@ class UserDetailServiceImplTest {
     assertTrue(users.contains(user));
   }
 
-    /*@Test
-    void getUser() {
-        // given
-        given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
-
-        // when
-        User userGotten = userService.getUser(user.getUsername());
-
-        // then
-        assertNotNull(userGotten);
-        assertEquals(user.getUsername(), userGotten.getUsername());
-        assertEquals(user.getFirstName(), userGotten.getFirstName());
-        assertEquals(user.getLastName(), userGotten.getLastName());
-        assertEquals(user.getEmail(), userGotten.getEmail());
-        assertEquals(user.isEnabled(), userGotten.isEnabled());
-    }
-
-    @Test
-    void getUserThrowsUserNotFoundException() {
-        // given when then
-        assertThrows(UserNotFoundException.class, () -> {
-            userService.getUser(user.getUsername());
-        });
-    }*/
-
   @Test
-  void deleteUser() {
+  void deleteUser_ReturnsDeletedUser_WhenSuccessfullyDeleted() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
@@ -145,7 +122,7 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void deleteUserThrowsUserNotFoundException() {
+  void deleteUser_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given when then
     assertThrows(UserNotFoundException.class, () -> {
       userService.deleteUser(user.getUsername());
@@ -153,7 +130,7 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void existsUserByEmail() {
+  void existsUserByEmail_ReturnsTrue_WhenUSerExists() {
     // given
     given(userRepository.existsUserByEmail(user.getEmail())).willReturn(true);
 
@@ -165,7 +142,19 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void existsUserByUsername() {
+  void existsUserByEmail_ReturnsFalse_WhenUserDoesNotExists() {
+    // given
+    given(userRepository.existsUserByEmail(user.getEmail())).willReturn(false);
+
+    // when
+    boolean result = userService.existsUserByEmail(user.getEmail());
+
+    // then
+    assertFalse(result);
+  }
+
+  @Test
+  void existsUserByUsername_ReturnsTrue_WhenUserExists() {
     // given
     given(userRepository.existsUserByUsername(user.getUsername())).willReturn(true);
 
@@ -177,7 +166,19 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void save() {
+  void existsUserByUsername_ReturnsFalse_WhenUserDoesNotExists() {
+    // given
+    given(userRepository.existsUserByUsername(user.getUsername())).willReturn(false);
+
+    // when
+    boolean result = userService.existsUserByUsername(user.getUsername());
+
+    // then
+    assertFalse(result);
+  }
+
+  @Test
+  void save_ReturnsSavedUser_WhenSuccessfullySaved() {
     // given
     given(userRepository.save(user)).willReturn(user);
 
@@ -189,7 +190,7 @@ class UserDetailServiceImplTest {
   }
 
   @Test
-  void deleteUnverifiedUsers() {
+  void deleteUnverifiedUsers_DeletesUnverifiedUsers() {
     // given
     EmailVerificationToken token = new EmailVerificationToken();
     given(emailVerificationRepository.findAllByExpiryDateBefore(any())).willReturn(List.of(token));
@@ -198,5 +199,8 @@ class UserDetailServiceImplTest {
     userService.deleteUnverifiedUsers();
 
     // then
+    verify(emailVerificationRepository).findAllByExpiryDateBefore(any());
+    verify(userRepository).delete(any());
+    verify(emailVerificationRepository).deleteAll(any());
   }
 }

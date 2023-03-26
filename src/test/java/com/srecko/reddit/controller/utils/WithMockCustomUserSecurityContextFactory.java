@@ -1,4 +1,4 @@
-package com.srecko.reddit.controller;
+package com.srecko.reddit.controller.utils;
 
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.User;

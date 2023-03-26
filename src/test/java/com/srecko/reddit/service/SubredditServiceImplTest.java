@@ -79,7 +79,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void getAll() {
+  void getAll_ReturnsAllSubreddits() {
     // given
     given(subredditRepository.findAll()).willReturn(List.of(subreddit));
 
@@ -92,7 +92,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void getSubredditById() {
+  void getSubredditById_ReturnsSubreddit() {
     // given
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
 
@@ -107,7 +107,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void getSubredditByIdThrowsSubredditNotFoundException() {
+  void getSubredditById_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() {
     // given when then
     assertThrows(SubredditNotFoundException.class, () -> {
       subredditService.getSubredditById(subreddit.getId());
@@ -115,7 +115,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void save() {
+  void save_ReturnsSavedSubreddit_WhenSuccessfullySaved() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.of(user));
     given(subredditRepository.save(any())).willReturn(subreddit);
@@ -140,7 +140,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void saveThrowsUserNotFoundException() {
+  void save_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -158,7 +158,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void delete() {
+  void delete_ReturnsDeletedSubreddit_WhenSuccessfullyDeleted() {
     // given
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
 
@@ -172,7 +172,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void deleteThrowsSubredditNotFoundException() {
+  void delete_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() {
     // given when then
     assertThrows(SubredditNotFoundException.class, () -> {
       subredditService.delete(subreddit.getId());
@@ -180,7 +180,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void update() {
+  void update_ReturnsUpdatedSubreddit_WhenSuccessfullyUpdated() {
     // given
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
     given(subredditRepository.save(any())).willReturn(
@@ -197,7 +197,7 @@ class SubredditServiceImplTest {
   }
 
   @Test
-  void updateThrowsSubredditNotFoundException() {
+  void update_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() {
     // given when then
     assertThrows(SubredditNotFoundException.class, () -> {
       subredditService.update(new SubredditDto(subreddit.getId(), "New name", "New description"));

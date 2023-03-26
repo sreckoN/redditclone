@@ -5,7 +5,9 @@ import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.RegistrationRequest;
 import com.srecko.reddit.dto.TokenRefreshRequest;
 import com.srecko.reddit.entity.EmailVerificationToken;
-import com.srecko.reddit.exception.RegistrationRequestException;
+import com.srecko.reddit.exception.AuthenticationRequestInvalidException;
+import com.srecko.reddit.exception.RegistrationRequestInvalidException;
+import com.srecko.reddit.exception.TokenRefreshRequestInvalidException;
 import com.srecko.reddit.jwt.JwtConfig;
 import com.srecko.reddit.service.AuthenticationService;
 import com.srecko.reddit.service.RefreshTokenService;
@@ -65,7 +67,7 @@ public class AuthenticationController {
   public ResponseEntity<String> register(HttpServletRequest request,
       @Valid @RequestBody RegistrationRequest registrationRequest, BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
-      throw new RegistrationRequestException(bindingResult.getAllErrors());
+      throw new RegistrationRequestInvalidException(bindingResult.getAllErrors());
     }
     String confirmationUrl =
         request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
@@ -100,7 +102,7 @@ public class AuthenticationController {
       @Valid @RequestBody AuthenticationRequest authenticationRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
-      throw new RegistrationRequestException(bindingResult.getAllErrors());
+      throw new AuthenticationRequestInvalidException(bindingResult.getAllErrors());
     }
     return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
   }
@@ -116,7 +118,7 @@ public class AuthenticationController {
   public ResponseEntity<AuthenticationResponse> refreshToken(
       @Valid @RequestBody TokenRefreshRequest tokenRefreshRequest, BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
-      throw new RegistrationRequestException(bindingResult.getAllErrors());
+      throw new TokenRefreshRequestInvalidException(bindingResult.getAllErrors());
     }
     AuthenticationResponse newAccessToken = refreshTokenService.getNewAccessToken(
         tokenRefreshRequest);
