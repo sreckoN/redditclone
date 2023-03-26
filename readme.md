@@ -17,7 +17,7 @@ Tests: ~160
 - Switch to the latest version of Spring Boot & Spring Security ✅
 - Search ✅
 - Style checks CI/CD ✅
-- Refactor tests
+- Refactor tests ✅
 - Secure endpoints
 - SQL Pagination
 - Logging
