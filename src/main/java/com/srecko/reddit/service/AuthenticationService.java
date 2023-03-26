@@ -22,13 +22,6 @@ public interface AuthenticationService {
   void register(RegistrationRequest request, String confirmationUrl);
 
   /**
-   * Save email verification token.
-   *
-   * @param token the token
-   */
-  void saveEmailVerificationToken(EmailVerificationToken token);
-
-  /**
    * Authenticate authentication response.
    *
    * @param request the request
@@ -42,7 +35,7 @@ public interface AuthenticationService {
    * @param user   the user
    * @param appUrl the app url
    */
-  void generateEmailVerificationToken(User user, String appUrl);
+  void sendVerificationEmail(User user, String appUrl);
 
   /**
    * Gets verification token.

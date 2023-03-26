@@ -1,4 +1,4 @@
-package com.srecko.reddit.controller;
+package com.srecko.reddit.controller.utils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

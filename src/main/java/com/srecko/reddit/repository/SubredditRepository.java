@@ -24,5 +24,5 @@ public interface SubredditRepository extends JpaRepository<Subreddit, Long> {
    * @param pageable the pageable
    * @return the page
    */
-  Page<Subreddit> findByNameContaining(String query, Pageable pageable);
+  Page<Subreddit> findByNameContainingIgnoreCase(String query, Pageable pageable);
 }

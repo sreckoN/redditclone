@@ -1,6 +1,8 @@
 package com.srecko.reddit.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,20 +32,19 @@ class EmailServiceImplTest {
   private EmailServiceImpl emailService;
 
   @Test
-  void sendEmail() {
+  void sendEmail_SendsEmail() {
     // given
-    SimpleMailMessage email = new SimpleMailMessage();
-    mailSender.send(email);
     given(env.getProperty("spring.mail.username")).willReturn("example@gmail.com");
 
     // when
     emailService.sendEmail("example@gmail.com", "Verify TEST", "Testing...");
 
     // then
+    verify(mailSender).send(any(SimpleMailMessage.class));
   }
 
   @Test
-  void sendVerificationEmail() {
+  void sendVerificationEmail_SendsVerificationEmail() {
     // given when then
     emailService.sendVerificationEmail("example@gmail.com", "/api/auth/confirmRegistration");
   }

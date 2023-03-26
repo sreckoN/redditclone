@@ -93,7 +93,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void testGetAllCommentsForPost() {
+  void testGetAllCommentsForPost_ReturnsComments() {
     // given
     Comment comment2 = new Comment(user, "Yeah, me neither", post);
     post.getComments().add(comment2);
@@ -110,7 +110,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void testGetAllCommentsForPostThrowsPostNotFoundException() {
+  void testGetAllCommentsForPost_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given
     assertThrows(PostNotFoundException.class, () -> {
       commentServiceImpl.getAllCommentsForPost(post.getId());
@@ -118,7 +118,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void getAllCommentsForUsername() {
+  void getAllCommentsForUsername_ReturnsComments() {
     // given
     Comment comment2 = new Comment(user, "Yeah, me neither", post);
     user.getComments().add(comment2);
@@ -136,7 +136,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void getAllCommentsForUsernameThrowsUserNotFoundException() {
+  void getAllCommentsForUsername_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given when then
     assertThrows(UserNotFoundException.class, () -> {
       commentServiceImpl.getAllCommentsForUsername(user.getUsername());
@@ -144,7 +144,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void saveComment() {
+  void saveComment_ReturnsSavedComment_WhenSuccessfullySaved() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
@@ -168,7 +168,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void saveCommentThrowsUserNotFoundException() {
+  void saveComment_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -185,7 +185,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void saveCommentThrowsPostNotFoundException() {
+  void saveComment_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
@@ -204,7 +204,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void delete() {
+  void delete_ReturnsDeletedComment_WhenSuccessfullyDeleted() {
     // given
     given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
 
@@ -216,7 +216,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void deleteThrowsCommentNotFoundException() {
+  void delete_ThrowsCommentNotFoundException_WhenCommentNotFound() {
     // given when then
     assertThrows(CommentNotFoundException.class, () -> {
       commentServiceImpl.delete(comment.getId());

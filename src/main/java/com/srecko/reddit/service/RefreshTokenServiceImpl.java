@@ -52,7 +52,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
       throw new RefreshTokenNotFoundException();
     }
     User user = userService.getUserByEmail(token.get().getUser().getEmail());
-    if (!jwtUtils.isTokenValid(refreshToken, user.getEmail())) {
+    if (!jwtUtils.isTokenValid(refreshToken, user.getUsername())) {
       throw new RefreshTokenInvalidException();
     }
     String accessToken = jwtUtils.getAccessToken(user.getEmail());
@@ -64,6 +64,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     Date expirationDate = jwtUtils.extractExpiration(token);
     RefreshToken refreshToken = new RefreshToken(user, token, expirationDate.toInstant());
     refreshTokenRepository.save(refreshToken);
+  }
+
+  @Override
+  public void saveRefreshToken(String token, String username) {
+    User user = userService.getUserByUsername(username);
+    saveRefreshToken(token, user);
   }
 
   @Override

@@ -210,4 +210,43 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
+
+  /**
+   * Handle registration request invalid exception response entity.
+   *
+   * @param exception the exception
+   * @return the response entity
+   */
+  @ExceptionHandler(RegistrationRequestInvalidException.class)
+  public ResponseEntity<?> handleRegistrationRequestInvalidException(
+      RegistrationRequestInvalidException exception) {
+    return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
+        HttpStatus.NOT_FOUND);
+  }
+
+  /**
+   * Handle token refresh request invalid response entity.
+   *
+   * @param exception the exception
+   * @return the response entity
+   */
+  @ExceptionHandler(TokenRefreshRequestInvalidException.class)
+  public ResponseEntity<?> handleTokenRefreshRequestInvalid(
+      TokenRefreshRequestInvalidException exception) {
+    return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
+        HttpStatus.NOT_FOUND);
+  }
+
+  /**
+   * Handle authentication request invalid exception response entity.
+   *
+   * @param exception the exception
+   * @return the response entity
+   */
+  @ExceptionHandler(AuthenticationRequestInvalidException.class)
+  public ResponseEntity<?> handleAuthenticationRequestInvalidException(
+      AuthenticationRequestInvalidException exception) {
+    return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
+        HttpStatus.NOT_FOUND);
+  }
 }

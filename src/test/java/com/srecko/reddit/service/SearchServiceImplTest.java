@@ -35,7 +35,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ContextConfiguration(classes = {SearchServiceImpl.class})
 @ExtendWith(SpringExtension.class)
-class SearchServiceTest {
+class SearchServiceImplTest {
 
   @MockBean
   private PostRepository postRepository;
@@ -77,10 +77,10 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchPosts() {
+  void searchPosts_ReturnsPageOfPosts() {
     // given
     Post post = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
-    given(postRepository.findByTitleContaining(any(), any())).willReturn(
+    given(postRepository.findByTitleContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(post)));
 
     // when
@@ -94,7 +94,7 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchPostsDoesDefaultSortWhenWrongSortGiven() {
+  void searchPosts_ReturnsPageOfPosts_WithDefaultSortWhenWrongSortGiven() {
     // given
     Post post1 = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
     Post post2 = new Post(user, "What's good in Serbia", "Everything is good in Serbia", subreddit);
@@ -102,7 +102,7 @@ class SearchServiceTest {
     calendar.setTime(new Date());
     calendar.add(Calendar.DATE, -7);
     post2.setDateOfCreation(calendar.getTime());
-    given(postRepository.findByTitleContaining(any(), any())).willReturn(
+    given(postRepository.findByTitleContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(post1, post2)));
 
     // when
@@ -120,11 +120,11 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchComments() {
+  void searchComments_ReturnsPageOfComments() {
     // given
     Post post = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
     Comment comment = new Comment(user, "What's the best place in Serbia?", post);
-    given(commentRepository.findByTextContaining(any(), any())).willReturn(
+    given(commentRepository.findByTextContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(comment)));
 
     // when
@@ -138,12 +138,12 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchCommentsDoesDefaultSortWhenWrongSortGiven() {
+  void searchComments_ReturnsPageOfComments_WithDefaultSortWhenWrongSortGiven() {
     // given
     Post post = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
     Comment comment1 = new Comment(user, "What's the best place in Serbia?", post);
     Comment comment2 = new Comment(user, "I love Serbia", post);
-    given(commentRepository.findByTextContaining(any(), any())).willReturn(
+    given(commentRepository.findByTextContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(comment1, comment2)));
 
     // when
@@ -161,9 +161,9 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchUsers() {
+  void searchUsers_ReturnsPageOfUsers() {
     // given
-    given(userRepository.findByUsernameContaining(any(), any())).willReturn(
+    given(userRepository.findByUsernameContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(user)));
 
     // when
@@ -177,11 +177,11 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchUsersDoesDefaultSortWhenWrongSortGiven() {
+  void searchUsers_ReturnsPageOfUsers_WithDefaultSortWhenWrongSortGiven() {
     // given
     User user2 = new User("Jane", "Smith", "jane.smith@example.org", "jane.smith", "iloveyou", "GB",
         true);
-    given(userRepository.findByUsernameContaining(any(), any())).willReturn(
+    given(userRepository.findByUsernameContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(user, user2)));
 
     // when
@@ -198,9 +198,9 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchSubreddits() {
+  void searchSubreddits_ReturnsPageOfSubreddits() {
     // given
-    given(subredditRepository.findByNameContaining(any(), any())).willReturn(
+    given(subredditRepository.findByNameContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(subreddit)));
 
     // when
@@ -214,10 +214,10 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchSubredditsDoesDefaultSortWhenWrongSortGiven() {
+  void searchSubreddits_ReturnsPageOfSubreddits_WithDefaultSortWhenWrongSortGiven() {
     // given
     Subreddit subreddit2 = new Subreddit("Programming Serbia", "Serbian programmers unite!", user);
-    given(subredditRepository.findByNameContaining(any(), any())).willReturn(
+    given(subredditRepository.findByNameContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(subreddit, subreddit2)));
 
     // when

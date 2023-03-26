@@ -85,7 +85,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void save() {
+  void save_ReturnsSavedPost_WhenSuccessfullySaved() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
@@ -111,7 +111,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void saveThrowsSubredditNotFoundException() {
+  void save_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
@@ -130,7 +130,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void saveThrowsUserNotFoundException() {
+  void save_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -147,7 +147,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getAllPosts() {
+  void getAllPosts_ReturnsAllPosts() {
     // given
     given(postRepository.findAll()).willReturn(List.of(post));
 
@@ -159,7 +159,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getPost() {
+  void getPost_ReturnsPost() {
     // given
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
 
@@ -174,7 +174,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getPostThrowsPostNotFoundException() {
+  void getPost_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given when then
     assertThrows(PostNotFoundException.class, () -> {
       postService.getPost(post.getId());
@@ -182,7 +182,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getAllPostsForSubreddit() {
+  void getAllPostsForSubreddit_ReturnsPosts() {
     // given
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
     given(postRepository.findAllBySubreddit(any())).willReturn(List.of(post));
@@ -196,7 +196,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getAllPostsForSubredditThrowsSubredditNotFoundException() {
+  void getAllPostsForSubreddit_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() {
     // given when then
     assertThrows(SubredditNotFoundException.class, () -> {
       postService.getAllPostsForSubreddit(subreddit.getId());
@@ -204,7 +204,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getAllPostsForUser() {
+  void getAllPostsForUser_ReturnsPosts() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
     given(postRepository.findAllByUser(any())).willReturn(List.of(post));
@@ -218,7 +218,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getAllPostsForUserThrowsUserNotFoundException() {
+  void getAllPostsForUser_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given when then
     assertThrows(UserNotFoundException.class, () -> {
       postService.getAllPostsForUser(user.getUsername());
@@ -226,7 +226,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void delete() {
+  void delete_ReturnsDeletedUser_WhenSuccessfullyDeleted() {
     // given
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
 
@@ -242,7 +242,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void deleteThrowsPostNotFoundException() {
+  void delete_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given when then
     assertThrows(PostNotFoundException.class, () -> {
       postService.delete(post.getId());
@@ -250,7 +250,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void update() {
+  void update_ReturnsUpdatedPost_WhenSuccessfullyUpdated() {
     // given
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
     given(postRepository.save(any())).willReturn(
@@ -266,7 +266,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void updateThrowsPostNotFoundException() {
+  void update_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given when then
     assertThrows(PostNotFoundException.class, () -> {
       postService.update(new UpdatePostDto(post.getId(), post.getTitle(), post.getText()));

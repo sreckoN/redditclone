@@ -28,6 +28,14 @@ public interface RefreshTokenService {
   void saveRefreshToken(String token, User user);
 
   /**
+   * Save refresh token.
+   *
+   * @param token    the token
+   * @param username the username
+   */
+  void saveRefreshToken(String token, String username);
+
+  /**
    * Delete refresh token.
    *
    * @param user the user

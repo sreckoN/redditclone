@@ -1,30 +1,35 @@
 package com.srecko.reddit.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.srecko.reddit.controller.utils.JwtTestUtils;
 import com.srecko.reddit.dto.AuthenticationRequest;
 import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.RegistrationRequest;
+import com.srecko.reddit.dto.TokenRefreshRequest;
+import com.srecko.reddit.entity.EmailVerificationToken;
+import com.srecko.reddit.entity.User;
+import com.srecko.reddit.repository.EmailVerificationRepository;
+import com.srecko.reddit.repository.RefreshTokenRepository;
+import com.srecko.reddit.repository.UserRepository;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -40,52 +45,43 @@ class AuthenticationControllerTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @Autowired
-  private JdbcTemplate jdbc;
-
   @MockBean
   private AuthenticationManager authenticationManager;
 
-  @Value("${sql.script.create.emailVerificationToken}")
-  private String sqlAddEmailToken;
+  @Autowired
+  private UserRepository userRepository;
 
-  @Value("${sql.script.create.user}")
-  private String sqlAddUser;
+  @Autowired
+  private EmailVerificationRepository emailVerificationRepository;
 
-  @Value("${sql.script.create.refreshToken}")
-  private String sqlAddRefreshToken;
+  @Autowired
+  private RefreshTokenRepository refreshTokenRepository;
 
-  @Value("${sql.script.delete.emailVerificationToken}")
-  private String sqlDeleteEmailToken;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
-  @Value("${sql.script.delete.user}")
-  private String sqlDeleteUser;
-
-  @Value("${sql.script.delete.refreshToken}")
-  private String sqlDeleteRefreshToken;
-
-  private final String jwt = JwtTestUtils.getJwt();
+  private User user;
 
   @BeforeEach
   void setUp() {
-    jdbc.execute(sqlAddUser);
-    jdbc.execute(sqlAddEmailToken);
-    jdbc.execute(sqlAddRefreshToken);
+    userRepository.deleteAll();
+    user = new User("Jane", "Doe", "jane.doe@example.org", "janedoe", "iloveyou", "GB", true);
   }
 
   @AfterEach
   void tearDown() {
-    jdbc.execute(sqlDeleteEmailToken);
-    jdbc.execute(sqlDeleteRefreshToken);
-    jdbc.execute(sqlDeleteUser);
+    emailVerificationRepository.deleteAll();
+    refreshTokenRepository.deleteAll();
+    userRepository.deleteAll();
   }
 
   @Test
-  void register() throws Exception {
+  void register_ReturnsStringJson_WhenUSerSuccessfullyRegistered() throws Exception {
     RegistrationRequest registrationRequest = new RegistrationRequest("John", "Doe",
         "srecko.nikolic71@hotmail.com", "johndoe", "password", "AU");
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(registrationRequest);
+
     mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
             .contentType(MediaType.APPLICATION_JSON)
             .content(valueAsString)
@@ -96,26 +92,30 @@ class AuthenticationControllerTest {
   }
 
   @Test
-  void registerThrowsEmailAlreadyInUseException() throws Exception {
+  void register_ThrowsEmailAlreadyInUseException_WhenGivenEmailIsAlreadyRegistered() throws Exception {
+    userRepository.save(user);
     RegistrationRequest registrationRequest = new RegistrationRequest("John", "Doe",
-        "janedoe@example.com", "johndoe", "password", "AU");
+        user.getEmail(), "johndoe", "password", "AU");
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(registrationRequest);
+
     mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
             .contentType(MediaType.APPLICATION_JSON)
             .content(valueAsString)
             .servletPath("/api/auth/register"))
         .andExpect(status().is4xxClientError())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message", is("Email janedoe@example.com is already in use")));
+        .andExpect(jsonPath("$.message", is("Email " + user.getEmail() + " is already in use")));
   }
 
   @Test
-  void registerThrowsUsernameNotAvailableException() throws Exception {
+  void register_ThrowsUsernameNotAvailableException_WhenGivenUsernameAlreadyInUse() throws Exception {
+    userRepository.save(user);
     RegistrationRequest registrationRequest = new RegistrationRequest("John", "Doe",
         "johndoe@example.com", "janedoe", "password", "AU");
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(registrationRequest);
+
     mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
             .contentType(MediaType.APPLICATION_JSON)
             .content(valueAsString)
@@ -126,8 +126,33 @@ class AuthenticationControllerTest {
   }
 
   @Test
-  void confirmRegistration() throws Exception {
+  void register_RegistrationRequestException_WhenInvalidRegistrationRequest() throws Exception {
+    RegistrationRequest registrationRequest = new RegistrationRequest();
+    ObjectMapper objectMapper = new ObjectMapper();
+    String valueAsString = objectMapper.writeValueAsString(registrationRequest);
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(valueAsString)
+            .servletPath("/api/auth/register"))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value(containsString("firstName")))
+        .andExpect(jsonPath("$.message").value(containsString("email")))
+        .andExpect(jsonPath("$.message").value(containsString("password")))
+        .andExpect(jsonPath("$.message").value(containsString("username")));
+  }
+
+  @Test
+  void confirmRegistration_ReturnsJsonString_WhenRegistrationConfirmed() throws Exception {
+    userRepository.save(user);
     String token = "ea9b3023-f4b8-45f4-8e5a-664915c4e754";
+    EmailVerificationToken emailToken = new EmailVerificationToken(user);
+    emailToken.setToken(token);
+    LocalDate currentDatePlusOneDay = LocalDate.now().plusDays(1);
+    emailToken.setExpiryDate(Date.from(currentDatePlusOneDay.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    emailVerificationRepository.save(emailToken);
+
     mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/registrationConfirm")
             .servletPath("/api/auth/registrationConfirm")
             .param("token", token))
@@ -136,14 +161,12 @@ class AuthenticationControllerTest {
   }
 
   @Test
-  void authenticate() throws Exception {
-    AuthenticationRequest authRequest = new AuthenticationRequest("janedoe", "iloveyou");
+  void authenticate_ReturnsAuthenticationResponse_WhenSuccessfullyAuthenticated() throws Exception {
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    userRepository.save(user);
+    AuthenticationRequest authRequest = new AuthenticationRequest(user.getUsername(), "iloveyou");
     ObjectMapper objectMapper = new ObjectMapper();
     String authRequestString = objectMapper.writeValueAsString(authRequest);
-
-    Authentication authentication = mock(Authentication.class);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    given(authenticationManager.authenticate(any(Authentication.class))).willReturn(authentication);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/authenticate")
             .servletPath("/api/auth/authenticate")
@@ -151,26 +174,29 @@ class AuthenticationControllerTest {
             .content(authRequestString))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.username", is("janedoe")))
         .andExpect(jsonPath("$.accessToken").isNotEmpty())
         .andExpect(jsonPath("$.refreshToken").isNotEmpty());
   }
 
   @Test
   void refreshToken() throws Exception {
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    userRepository.save(user);
     ObjectMapper objectMapper = new ObjectMapper();
     AuthenticationRequest authenticationRequest = new AuthenticationRequest("janedoe", "iloveyou");
     String authRequestString = objectMapper.writeValueAsString(authenticationRequest);
+
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/authenticate")
             .contentType(MediaType.APPLICATION_JSON)
             .content(authRequestString)
             .servletPath("/api/auth/authenticate"))
         .andExpect(status().isOk())
         .andReturn();
+
     AuthenticationResponse authenticationResponse = objectMapper.readValue(
         mvcResult.getResponse().getContentAsString(), AuthenticationResponse.class);
-    String refreshToken = authenticationResponse.getRefreshToken();
-    String refreshTokenString = objectMapper.writeValueAsString(refreshToken);
+    TokenRefreshRequest tokenRefreshRequest = new TokenRefreshRequest(authenticationResponse.getRefreshToken());
+    String refreshTokenString = objectMapper.writeValueAsString(tokenRefreshRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/token/refresh")
             .contentType(MediaType.APPLICATION_JSON)
@@ -184,15 +210,30 @@ class AuthenticationControllerTest {
   }
 
   @Test
-  void refreshTokenThrowsRefreshTokenNotFoundException() throws Exception {
+  void refreshToken_ThrowsRefreshTokenNotFoundException_WhenTokenNotFound() throws Exception {
     ObjectMapper objectMapper = new ObjectMapper();
-    String refreshToken = JwtTestUtils.getJwt();
-    String refreshTokenString = objectMapper.writeValueAsString(refreshToken);
+    TokenRefreshRequest tokenRefreshRequest = new TokenRefreshRequest(JwtTestUtils.getJwt());
+    String refreshTokenString = objectMapper.writeValueAsString(tokenRefreshRequest);
+
     mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/token/refresh")
             .contentType(MediaType.APPLICATION_JSON)
             .content(refreshTokenString)
             .servletPath("/api/auth/token/refresh"))
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.message", is("Refresh token not found.")));
+  }
+
+  @Test
+  void refreshToken_ThrowsTokenRefreshRequestInvalidException_WhenInvalidTokenRefreshRequest() throws Exception {
+    ObjectMapper objectMapper = new ObjectMapper();
+    TokenRefreshRequest tokenRefreshRequest = new TokenRefreshRequest();
+    String refreshTokenRequestString = objectMapper.writeValueAsString(tokenRefreshRequest);
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/token/refresh")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(refreshTokenRequestString)
+            .servletPath("/api/auth/token/refresh"))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.message", is("Token refresh request validation failed for the following fields: refreshToken.")));
   }
 }
