@@ -5,8 +5,8 @@ import com.srecko.reddit.exception.authentication.AuthenticationRequestInvalidEx
 import com.srecko.reddit.exception.authentication.AuthorizationHeaderMissingException;
 import com.srecko.reddit.exception.authentication.EmailAlreadyInUseException;
 import com.srecko.reddit.exception.authentication.EmailVerificationTokenExpiredException;
-import com.srecko.reddit.exception.authentication.EmailVerificationTokenNotFoundException;
 import com.srecko.reddit.exception.authentication.EmailVerificationTokenInvalidException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenNotFoundException;
 import com.srecko.reddit.exception.authentication.RefreshTokenInvalidException;
 import com.srecko.reddit.exception.authentication.RefreshTokenNotFoundException;
 import com.srecko.reddit.exception.authentication.RegistrationRequestInvalidException;
