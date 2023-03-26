@@ -1,4 +1,4 @@
-package com.srecko.reddit.exception;
+package com.srecko.reddit.exception.vote;
 
 /**
  * The type Vote not found exception.

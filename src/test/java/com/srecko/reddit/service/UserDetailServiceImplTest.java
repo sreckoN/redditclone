@@ -11,8 +11,8 @@ import static org.mockito.Mockito.verify;
 
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
-import com.srecko.reddit.exception.AccountNotEnabledException;
-import com.srecko.reddit.exception.UserNotFoundException;
+import com.srecko.reddit.exception.authentication.AccountDisabledException;
+import com.srecko.reddit.exception.user.UserNotFoundException;
 import com.srecko.reddit.repository.EmailVerificationRepository;
 import com.srecko.reddit.repository.UserRepository;
 import java.time.LocalDate;
@@ -85,7 +85,7 @@ class UserDetailServiceImplTest {
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
     // when then
-    assertThrows(AccountNotEnabledException.class, () -> {
+    assertThrows(AccountDisabledException.class, () -> {
       userService.loadUserByUsername(user.getUsername());
     });
   }

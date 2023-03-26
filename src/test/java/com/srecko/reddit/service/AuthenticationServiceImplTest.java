@@ -13,12 +13,12 @@ import com.srecko.reddit.dto.AuthenticationResponse;
 import com.srecko.reddit.dto.RegistrationRequest;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
-import com.srecko.reddit.exception.EmailAlreadyInUseException;
-import com.srecko.reddit.exception.EmailVerificationTokenExpiredException;
-import com.srecko.reddit.exception.EmailVerificationTokenNotFoundException;
-import com.srecko.reddit.exception.InvalidEmailVerificationTokenException;
-import com.srecko.reddit.exception.RegistrationRequestNullException;
-import com.srecko.reddit.exception.UsernameNotAvailableException;
+import com.srecko.reddit.exception.authentication.EmailAlreadyInUseException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenExpiredException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenNotFoundException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenInvalidException;
+import com.srecko.reddit.exception.authentication.RegistrationRequestNullException;
+import com.srecko.reddit.exception.authentication.UsernameNotAvailableException;
 import com.srecko.reddit.jwt.JwtUtils;
 import com.srecko.reddit.repository.EmailVerificationRepository;
 import jakarta.mail.MessagingException;
@@ -197,7 +197,7 @@ class AuthenticationServiceImplTest {
         Optional.of(token));
 
     // when then
-    assertThrows(InvalidEmailVerificationTokenException.class, () -> {
+    assertThrows(EmailVerificationTokenInvalidException.class, () -> {
       authenticationServiceImpl.getVerificationToken("ea9b3023-f4b8-45f4-8e5a-4e888");
     });
   }

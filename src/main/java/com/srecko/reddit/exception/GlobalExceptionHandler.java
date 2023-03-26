@@ -1,6 +1,23 @@
 package com.srecko.reddit.exception;
 
 import com.srecko.reddit.dto.ExceptionResponse;
+import com.srecko.reddit.exception.authentication.AuthenticationRequestInvalidException;
+import com.srecko.reddit.exception.authentication.AuthorizationHeaderMissingException;
+import com.srecko.reddit.exception.authentication.EmailAlreadyInUseException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenExpiredException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenInvalidException;
+import com.srecko.reddit.exception.authentication.EmailVerificationTokenNotFoundException;
+import com.srecko.reddit.exception.authentication.RefreshTokenInvalidException;
+import com.srecko.reddit.exception.authentication.RefreshTokenNotFoundException;
+import com.srecko.reddit.exception.authentication.RegistrationRequestInvalidException;
+import com.srecko.reddit.exception.authentication.TokenRefreshRequestInvalidException;
+import com.srecko.reddit.exception.authentication.UsernameNotAvailableException;
+import com.srecko.reddit.exception.authentication.VerificationEmailSendingErrorException;
+import com.srecko.reddit.exception.comment.CommentNotFoundException;
+import com.srecko.reddit.exception.post.PostNotFoundException;
+import com.srecko.reddit.exception.subreddit.SubredditNotFoundException;
+import com.srecko.reddit.exception.user.UserNotFoundException;
+import com.srecko.reddit.exception.vote.VoteNotFoundException;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -152,9 +169,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    * @param exception the exception
    * @return the response entity
    */
-  @ExceptionHandler(InvalidEmailVerificationTokenException.class)
+  @ExceptionHandler(EmailVerificationTokenInvalidException.class)
   public ResponseEntity<?> handleInvalidEmailVerificationTokenException(
-      InvalidEmailVerificationTokenException exception) {
+      EmailVerificationTokenInvalidException exception) {
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
