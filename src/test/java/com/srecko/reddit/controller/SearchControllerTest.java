@@ -2,6 +2,7 @@ package com.srecko.reddit.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -331,10 +332,6 @@ class SearchControllerTest {
   }
 
   @Test
-  void searchUsers() {
-  }
-
-  @Test
   void searchUsers_ReturnsPostsPage_WithDefaultSort() throws Exception {
     User user1 = new User("Jane", "Doe", "jane.doe@example.org", "serbiadoe", "iloveyou", "GB", true);
     User user2 = new User("Jane", "Doe", "jane.doe@example.org", "janeSerbia", "iloveyou", "GB", true);
@@ -411,5 +408,86 @@ class SearchControllerTest {
         .andExpect(jsonPath("$.page.size", is(10)))
         .andExpect(jsonPath("$.page.totalElements", is(0)))
         .andExpect(jsonPath("$.page.totalPages", is(0)));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ReturnsPostsForSubreddit() throws Exception {
+    Subreddit subreddit = new Subreddit("Serbia", "Serbia's official subreddit", user);
+    subredditRepository.save(subreddit);
+    Post post1 = new Post(user, "How is the weather in Serbia?", "Is it warm?", subreddit);
+    Post post2 = new Post(user, "Serbia's player just won", "Congrats", subreddit);
+    postRepository.saveAll(List.of(post1, post2));
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/search/posts/{subredditId}", subreddit.getId())
+        .servletPath("/api/search/posts/" + subreddit.getId())
+        .param("q", "Serbia"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ReturnsPostsForSubreddit_IsCaseInsensitive() throws Exception {
+    Subreddit subreddit = new Subreddit("Serbia", "Serbia's official subreddit", user);
+    subredditRepository.save(subreddit);
+    Post post1 = new Post(user, "How is the weather in Serbia?", "Is it warm?", subreddit);
+    Post post2 = new Post(user, "Serbia's player just won", "Congrats", subreddit);
+    postRepository.saveAll(List.of(post1, post2));
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/search/posts/{subredditId}", subreddit.getId())
+            .servletPath("/api/search/posts/" + subreddit.getId())
+            .param("q", "serbia"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ReturnsPostsPage_WithWrongSortProvided() throws Exception {
+    Subreddit subreddit = new Subreddit("Serbia", "Serbia's official subreddit", user);
+    subredditRepository.save(subreddit);
+    Post post1 = new Post(user, "How is the weather in Serbia?", "Is it warm?", subreddit);
+    post1.setDateOfCreation(new Date(System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000));
+    Post post2 = new Post(user, "Serbia's player just won", "Congrats", subreddit);
+    postRepository.saveAll(List.of(post1, post2));
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/search/posts/{subredditId}", subreddit.getId())
+            .servletPath("/api/search/posts/" + subreddit.getId())
+            .param("q", "serbia")
+            .param("sort", "id"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ThrowsSubredditNotFoundException_WhenSubredditNotFound() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/search/posts/{subredditId}", 0)
+            .servletPath("/api/search/posts/" + 0)
+            .param("q", "serbia"))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
   }
 }
