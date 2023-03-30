@@ -9,11 +9,13 @@ import com.srecko.reddit.repository.CommentRepository;
 import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.SubredditRepository;
 import com.srecko.reddit.repository.UserRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 /**
@@ -48,42 +50,22 @@ public class SearchServiceImpl implements SearchService {
 
   @Override
   public Page<User> searchUsers(String query, Pageable pageable) {
-    PageRequest pageRequest;
-    if (pageable.getSort().get().anyMatch(order -> order.getProperty().equals("username"))) {
-      pageRequest =
-          PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-    } else {
-      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-          Sort.by(Sort.Direction.ASC, "username"));
-    }
+    PageRequest pageRequest = getPageRequest(pageable, List.of("username"),
+        Sort.by(Direction.ASC, "username"));
     return userRepository.findByUsernameContainingIgnoreCase(query, pageRequest);
   }
 
   @Override
   public Page<Subreddit> searchSubreddits(String query, Pageable pageable) {
-    PageRequest pageRequest;
-    if (pageable.getSort().get().anyMatch(order -> order.getProperty().equals("name"))) {
-      pageRequest =
-          PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-    } else {
-      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-          Sort.by(Sort.Direction.ASC, "name"));
-    }
+    PageRequest pageRequest = getPageRequest(pageable, List.of("name"),
+        Sort.by(Direction.ASC, "name"));
     return subredditRepository.findByNameContainingIgnoreCase(query, pageRequest);
   }
 
   @Override
   public Page<Post> searchPosts(String query, Pageable pageable) {
-    PageRequest pageRequest;
-    if (pageable.getSort().get().anyMatch(
-        order -> order.getProperty().equals("dateOfCreation") || order.getProperty().equals("title")
-            || order.getProperty().equals("votes"))) {
-      pageRequest =
-          PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-    } else {
-      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-          Sort.by(Sort.Direction.ASC, "dateOfCreation"));
-    }
+    PageRequest pageRequest = getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
+        Sort.by(Direction.ASC, "dateOfCreation"));
     return postRepository.findByTitleContainingIgnoreCase(query, pageRequest);
   }
 
@@ -92,31 +74,28 @@ public class SearchServiceImpl implements SearchService {
     if (!subredditRepository.existsById(subredditId)) {
       throw new SubredditNotFoundException(subredditId);
     }
-    PageRequest pageRequest;
-    if (pageable.getSort().get().anyMatch(
-        order -> order.getProperty().equals("dateOfCreation") || order.getProperty().equals("title")
-            || order.getProperty().equals("votes"))) {
-      pageRequest =
-          PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-    } else {
-      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-          Sort.by(Sort.Direction.ASC, "dateOfCreation"));
-    }
+    PageRequest pageRequest = getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
+        Sort.by(Direction.ASC, "dateOfCreation"));
     return postRepository
         .findBySubredditIdAndTitleContainingIgnoreCase(subredditId, query, pageRequest);
   }
 
   @Override
   public Page<Comment> searchComments(String query, Pageable pageable) {
+    PageRequest pageRequest = getPageRequest(pageable, List.of("text", "created"),
+        Sort.by(Direction.ASC, "text"));
+    return commentRepository.findByTextContainingIgnoreCase(query, pageRequest);
+  }
+
+  private PageRequest getPageRequest(Pageable pageable, List<String> sortings, Sort defaultSort) {
     PageRequest pageRequest;
-    if (pageable.getSort().get().anyMatch(
-        order -> order.getProperty().equals("text") || order.getProperty().equals("created"))) {
+    String sort = pageable.getSort().toString();
+    if (sortings.stream().anyMatch(s -> s.equals(sort))) {
       pageRequest = PageRequest
           .of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
     } else {
-      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-          Sort.by(Sort.Direction.ASC, "text"));
+      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
     }
-    return commentRepository.findByTextContainingIgnoreCase(query, pageRequest);
+    return pageRequest;
   }
 }
