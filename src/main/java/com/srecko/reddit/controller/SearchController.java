@@ -19,6 +19,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -96,6 +97,26 @@ public class SearchController {
   }
 
   /**
+   * Search posts in subreddit response entity.
+   *
+   * @param subredditId the subreddit id
+   * @param query       the query
+   * @param pageable    the pageable
+   * @param assembler   the assembler
+   * @return the response entity
+   */
+  @GetMapping("/posts/{subredditId}")
+  public ResponseEntity<PagedModel<EntityModel<Post>>> searchPostsInSubreddit(
+      @PathVariable("subredditId") Long subredditId,
+      @RequestParam(name = "q") String query,
+      @PageableDefault(sort = "dateOfCreation", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Post> assembler) {
+    Page<Post> page = searchService.searchPostsInSubreddit(subredditId, query, pageable);
+    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+    return ResponseEntity.ok(pagedModel);
+  }
+
+  /**
    * Search comment.
    *
    * @param query     the query
@@ -130,39 +151,4 @@ public class SearchController {
     PagedModel<EntityModel<User>> pagedModel = assembler.toModel(page, userModelAssembler);
     return ResponseEntity.ok(pagedModel);
   }
-
-  /* Unable to type cast
-  @GetMapping("/")
-  public ResponseEntity<PagedModel<EntityModel<?>>> search(
-  @RequestParam(name = "q", required = true) String query,
-  @RequestParam(name = "type", defaultValue = "posts") String type,
-  @PageableDefault(page = 0, size = 10, sort = "title", direction = Sort.Direction.ASC)
-  Pageable pageable,
-  PagedResourcesAssembler<?> assembler) {
-      switch (type) {
-          case "posts":
-              Page<Post> postPage = searchService.searchPosts(query, pageable);
-              PagedModel<EntityModel<Post>> pagedPostModel = assembler
-              .toModel(postPage, postModelAssembler);
-              return ResponseEntity.ok(pagedPostModel);
-          case "comments":
-              Page<Comment> commentPage = searchService.searchComments(query, pageable);
-              PagedModel<EntityModel<Comment>> pagedCommentModel =
-              assembler.toModel(commentPage, commentModelAssembler);
-              return ResponseEntity.ok(pagedCommentModel);
-          case "users":
-              Page<User> userPage = searchService.searchUsers(query, pageable);
-              PagedModel<EntityModel<User>> pagedUserModel =
-              assembler.toModel(userPage, userModelAssembler);
-              return ResponseEntity.ok(pagedUserModel);
-          case "subreddits":
-              Page<Subreddit> subredditPage = searchService.searchSubreddits(query, pageable);
-              PagedModel<EntityModel<Subreddit>> pagedSubredditModel =
-              assembler.toModel(subredditPage, subredditModelAssembler);
-              return ResponseEntity.ok(pagedSubredditModel);
-          default:
-              throw new IllegalArgumentException("Invalid type parameter: " + type);
-      }
-      return ResponseEntity.ok(searchService.search(query, type, pageable));
-  }*/
 }

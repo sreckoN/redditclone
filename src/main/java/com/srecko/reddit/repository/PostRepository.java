@@ -46,4 +46,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
    * @return the page
    */
   Page<Post> findByTitleContainingIgnoreCase(String query, Pageable pageable);
+
+  /**
+   * Find by subreddit id and title containing ignore case page.
+   *
+   * @param subredditId the subreddit id
+   * @param query       the query
+   * @param pageable    the pageable
+   * @return the page
+   */
+  Page<Post> findBySubredditIdAndTitleContainingIgnoreCase(Long subredditId, String query,
+      Pageable pageable);
 }

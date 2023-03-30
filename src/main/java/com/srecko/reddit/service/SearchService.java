@@ -49,4 +49,14 @@ public interface SearchService {
    * @return the page
    */
   Page<Comment> searchComments(String query, Pageable pageable);
+
+  /**
+   * Search posts in subreddit page.
+   *
+   * @param subredditId the subreddit id
+   * @param query       the query
+   * @param pageable    the pageable
+   * @return the page
+   */
+  Page<Post> searchPostsInSubreddit(Long subredditId, String query, Pageable pageable);
 }

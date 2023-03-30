@@ -2,6 +2,7 @@ package com.srecko.reddit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -9,6 +10,7 @@ import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.subreddit.SubredditNotFoundException;
 import com.srecko.reddit.repository.CommentRepository;
 import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.SubredditRepository;
@@ -232,5 +234,66 @@ class SearchServiceImplTest {
     List<Subreddit> content = result.getContent();
     assertEquals(subreddit, content.get(0));
     assertEquals(subreddit2, content.get(1));
+  }
+
+  // ##########################################
+
+  @Test
+  void searchPostsInSubreddit_ReturnsPageOfPostsFromSubreddit() {
+    // given
+    Post post1 = new Post(user, "How is the weather in Serbia?", "Is it warm?", subreddit);
+    post1.setDateOfCreation(new Date(System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000));
+    Post post2 = new Post(user, "Serbia's player just won", "Congrats", subreddit);
+    given(subredditRepository.existsById(any())).willReturn(true);
+    given(postRepository.findBySubredditIdAndTitleContainingIgnoreCase(any(), any(), any())).willReturn(
+        new PageImpl<>(List.of(post1, post2)));
+
+    // when
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
+    Page<Post> result = searchService.searchPostsInSubreddit(subreddit.getId(), "Serbia", pageRequest);
+
+    // then
+    assertNotNull(result);
+    assertEquals(2, result.getTotalElements());
+    assertEquals(1, result.getTotalPages());
+  }
+
+  @Test
+  void searchPostsInSubreddit_ReturnsPageOfPosts_WithDefaultSortWhenWrongSortGiven() {
+    // given
+    Post post1 = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
+    Post post2 = new Post(user, "What's good in Serbia", "Everything is good in Serbia", subreddit);
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(new Date());
+    calendar.add(Calendar.DATE, -7);
+    post2.setDateOfCreation(calendar.getTime());
+    given(subredditRepository.existsById(any())).willReturn(true);
+    given(postRepository.findBySubredditIdAndTitleContainingIgnoreCase(any(), any(), any())).willReturn(
+        new PageImpl<>(List.of(post1, post2)));
+
+    // when
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
+    Page<Post> result = searchService.searchPostsInSubreddit(subreddit.getId(), "Serbia", pageRequest);
+
+    // then
+    assertNotNull(result);
+    assertEquals(2, result.getTotalElements());
+    assertEquals(1, result.getTotalPages());
+
+    List<Post> content = result.getContent();
+    assertEquals(post1, content.get(0));
+    assertEquals(post2, content.get(1));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ThrowsSubredditNotFoundException_WhenSubredditNotFound() {
+    // given
+    given(subredditRepository.existsById(any())).willReturn(false);
+
+    // when then
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
+    assertThrows(SubredditNotFoundException.class, () -> {
+      searchService.searchPostsInSubreddit(0L, "Serbia", pageRequest);
+    });
   }
 }

@@ -4,6 +4,7 @@ import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
+import com.srecko.reddit.exception.subreddit.SubredditNotFoundException;
 import com.srecko.reddit.repository.CommentRepository;
 import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.SubredditRepository;
@@ -84,6 +85,25 @@ public class SearchServiceImpl implements SearchService {
           Sort.by(Sort.Direction.ASC, "dateOfCreation"));
     }
     return postRepository.findByTitleContainingIgnoreCase(query, pageRequest);
+  }
+
+  @Override
+  public Page<Post> searchPostsInSubreddit(Long subredditId, String query, Pageable pageable) {
+    if (!subredditRepository.existsById(subredditId)) {
+      throw new SubredditNotFoundException(subredditId);
+    }
+    PageRequest pageRequest;
+    if (pageable.getSort().get().anyMatch(
+        order -> order.getProperty().equals("dateOfCreation") || order.getProperty().equals("title")
+            || order.getProperty().equals("votes"))) {
+      pageRequest =
+          PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+    } else {
+      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+          Sort.by(Sort.Direction.ASC, "dateOfCreation"));
+    }
+    return postRepository
+        .findBySubredditIdAndTitleContainingIgnoreCase(subredditId, query, pageRequest);
   }
 
   @Override

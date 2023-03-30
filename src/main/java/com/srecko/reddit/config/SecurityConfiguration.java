@@ -109,7 +109,7 @@ public class SecurityConfiguration {
   }
 
   /**
-   * Dao authentication provider authentication provider.
+   * Dao authentication provider.
    *
    * @return the authentication provider
    */
