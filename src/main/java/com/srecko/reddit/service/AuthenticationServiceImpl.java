@@ -22,6 +22,8 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -45,6 +47,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final JwtUtils jwtUtils;
   private final RefreshTokenService refreshTokenService;
+
+  private static final Logger logger = LogManager.getLogger(AuthenticationServiceImpl.class);
 
   /**
    * Instantiates a new Authentication service.
@@ -87,7 +91,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
           passwordEncoder.encode(request.getPassword()),
           request.getCountry(),
           false);
+      logger.info("Saving user into database: {}", user.getId());
       userService.save(user);
+      logger.info("Sending verification email to user email: {}", user.getEmail());
       sendVerificationEmail(user, confirmationUrl);
     }
   }
@@ -95,6 +101,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public void sendVerificationEmail(User user, String appUrl) {
     EmailVerificationToken token = new EmailVerificationToken(user);
+    logger.debug("Saving email verification token");
     emailVerificationRepository.save(token);
     String recipientEmail = user.getEmail();
     String confirmationUrl = appUrl + token.getToken();
@@ -104,6 +111,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     try {
       emailService.sendMessageUsingThymeleafTemplate(recipientEmail, "Verify your email address",
           vars);
+      logger.info("Verification email sent");
     } catch (MessagingException e) {
       throw new VerificationEmailSendingErrorException(e.getMessage());
     }
@@ -111,6 +119,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    logger.info("Authenticating user");
     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
         request.getUsername(), request.getPassword());
     authenticationManagerBuilder.getOrBuild().authenticate(token);
@@ -135,6 +144,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (isVerificationTokenExpired(verificationToken)) {
       throw new EmailVerificationTokenExpiredException();
     }
+    logger.info("Returning email verification token");
     return verificationToken;
   }
 
@@ -142,6 +152,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public void enableUserAccount(User user) {
     user.setEnabled(true);
     userService.save(user);
+    logger.info("Enabled user account for: {}", user.getId());
     emailVerificationRepository.deleteByUser_Id(user.getId());
   }
 

@@ -20,14 +20,6 @@ public interface EmailService {
   void sendEmail(String address, String title, String message);
 
   /**
-   * Send verification email.
-   *
-   * @param address         the address
-   * @param confirmationUrl the confirmation url
-   */
-  void sendVerificationEmail(String address, String confirmationUrl);
-
-  /**
    * Send html email.
    *
    * @param address  the address

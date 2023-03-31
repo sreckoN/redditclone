@@ -1,6 +1,8 @@
 package com.srecko.reddit.controller;
 
 import com.srecko.reddit.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class TemplateController {
 
   private final UserService userService;
+
+  private static final Logger logger = LogManager.getLogger(TemplateController.class);
 
   /**
    * Instantiates a new Template controller.
@@ -34,6 +38,7 @@ public class TemplateController {
    */
   @GetMapping
   public String index(Model model) {
+    logger.info("Returning index.html");
     return "index";
   }
 

@@ -13,6 +13,8 @@ import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,8 @@ public class CommentServiceImpl implements CommentService {
   private final PostRepository postRepository;
   private final UserRepository userRepository;
 
+  private static final Logger logger = LogManager.getLogger(CommentServiceImpl.class);
+
   /**
    * Instantiates a new Comment service.
    *
@@ -49,6 +53,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public List<Comment> getAllCommentsForPost(Long postId) {
+    logger.info("Getting all comments for post: {}", postId);
     Optional<Post> postOptional = postRepository.findById(postId);
     if (postOptional.isPresent()) {
       return commentRepository.findAllByPost(postOptional.get());
@@ -59,6 +64,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public List<Comment> getAllCommentsForUsername(String username) {
+    logger.info("Getting all comments for user: {}", username);
     Optional<User> optionalUser = userRepository.findUserByUsername(username);
     if (optionalUser.isPresent()) {
       return commentRepository.findAllByUser(optionalUser.get());
@@ -81,6 +87,7 @@ public class CommentServiceImpl implements CommentService {
         user.getComments().add(comment);
         post.getComments().add(comment);
         post.setCommentsCounter(post.getCommentsCounter());
+        logger.info("Saved new comment to database: {}", comment.getId());
         return comment;
       } else {
         throw new PostNotFoundException(commentDto.getPostId());
@@ -94,8 +101,10 @@ public class CommentServiceImpl implements CommentService {
   public Comment delete(Long commentId) {
     Optional<Comment> commentOptional = commentRepository.findById(commentId);
     if (commentOptional.isPresent()) {
-      commentRepository.delete(commentOptional.get());
-      return commentOptional.get();
+      Comment comment = commentOptional.get();
+      logger.info("Deleting comment: {}", comment.getId());
+      commentRepository.delete(comment);
+      return comment;
     } else {
       throw new CommentNotFoundException(commentId);
     }
@@ -103,6 +112,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public Comment getComment(Long commentId) {
+    logger.info("Getting comment: {}", commentId);
     Optional<Comment> commentOptional = commentRepository.findById(commentId);
     if (commentOptional.isPresent()) {
       return commentOptional.get();
@@ -113,6 +123,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public List<Comment> getAllComments() {
+    logger.info("Getting all comments");
     return commentRepository.findAll();
   }
 }

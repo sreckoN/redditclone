@@ -1,5 +1,7 @@
 package com.srecko.reddit.config;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +19,10 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 @Configuration
 public class EmailConfiguration {
 
+  private static final Logger logger = LogManager.getLogger(EmailConfiguration.class);
+
   /**
-   * Thymeleaf template resolver template resolver.
+   * Thymeleaf template resolver.
    *
    * @return the template resolver
    */
@@ -31,6 +35,7 @@ public class EmailConfiguration {
     templateResolver.setSuffix(".html");
     templateResolver.setTemplateMode("HTML");
     templateResolver.setCharacterEncoding("UTF-8");
+    logger.debug("Created a bean of type: {}", ITemplateResolver.class);
     return templateResolver;
   }
 
@@ -44,6 +49,7 @@ public class EmailConfiguration {
     SpringTemplateEngine templateEngine = new SpringTemplateEngine();
     templateEngine.addTemplateResolver(thymeleafTemplateResolver());
     templateEngine.setTemplateEngineMessageSource(emailMessageSource());
+    logger.debug("Created a bean of type: {}", SpringTemplateEngine.class);
     return templateEngine;
   }
 
@@ -56,6 +62,7 @@ public class EmailConfiguration {
   public ResourceBundleMessageSource emailMessageSource() {
     ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
     messageSource.setBasename("mailMessages");
+    logger.debug("Created a bean of type: {}", ResourceBundleMessageSource.class);
     return messageSource;
   }
 }

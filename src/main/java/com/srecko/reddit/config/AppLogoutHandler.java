@@ -1,9 +1,12 @@
 package com.srecko.reddit.config;
 
+import com.srecko.reddit.controller.VoteController;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +22,8 @@ import org.springframework.stereotype.Service;
 public class AppLogoutHandler implements LogoutHandler {
 
   private final RefreshTokenService refreshTokenService;
+
+  private static final Logger logger = LogManager.getLogger(AppLogoutHandler.class);
 
   /**
    * Instantiates a new App logout handler.
@@ -36,5 +41,6 @@ public class AppLogoutHandler implements LogoutHandler {
     User principal = (User) authentication.getPrincipal();
     refreshTokenService.deleteRefreshToken(principal);
     SecurityContextHolder.clearContext();
+    logger.info("Logged out user: {}", principal.getEmail());
   }
 }

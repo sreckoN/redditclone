@@ -7,6 +7,8 @@ import com.srecko.reddit.service.CommentService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -30,6 +32,8 @@ public class CommentController {
 
   private final CommentService commentService;
 
+  private static final Logger logger = LogManager.getLogger(CommentController.class);
+
   /**
    * Instantiates a new Comment controller.
    *
@@ -48,7 +52,9 @@ public class CommentController {
    */
   @GetMapping("/post/{postId}")
   public ResponseEntity<List<Comment>> getCommentsForPost(@PathVariable("postId") Long postId) {
-    return ResponseEntity.ok(commentService.getAllCommentsForPost(postId));
+    List<Comment> allCommentsForPost = commentService.getAllCommentsForPost(postId);
+    logger.info("Returning all comments for post with id: {}", postId);
+    return ResponseEntity.ok(allCommentsForPost);
   }
 
   /**
@@ -60,7 +66,9 @@ public class CommentController {
   @GetMapping("/user/{username}")
   public ResponseEntity<List<Comment>> getCommentsForUsername(
       @PathVariable("username") String username) {
-    return ResponseEntity.ok(commentService.getAllCommentsForUsername(username));
+    List<Comment> allCommentsForUsername = commentService.getAllCommentsForUsername(username);
+    logger.info("Returning all comments for username: {}", username);
+    return ResponseEntity.ok(allCommentsForUsername);
   }
 
   /**
@@ -71,7 +79,9 @@ public class CommentController {
    */
   @GetMapping("/{commentId}")
   public ResponseEntity<Comment> getComment(@PathVariable("commentId") Long commentId) {
-    return ResponseEntity.ok(commentService.getComment(commentId));
+    Comment comment = commentService.getComment(commentId);
+    logger.info("Returning comment by id: {}", commentId);
+    return ResponseEntity.ok(comment);
   }
 
   /**
@@ -81,7 +91,9 @@ public class CommentController {
    */
   @GetMapping
   public ResponseEntity<List<Comment>> getAllComments() {
-    return ResponseEntity.ok(commentService.getAllComments());
+    List<Comment> allComments = commentService.getAllComments();
+    logger.info("Returning all comments");
+    return ResponseEntity.ok(allComments);
   }
 
   /**
@@ -100,6 +112,7 @@ public class CommentController {
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/comments/").toUriString());
     Comment comment = commentService.save(commentDto);
+    logger.info("Successfully created a new comment: {}", comment.getId());
     return ResponseEntity.created(uri).body(comment);
   }
 
@@ -111,6 +124,8 @@ public class CommentController {
    */
   @DeleteMapping("{commentId}")
   public ResponseEntity<Comment> deleteComment(@PathVariable("commentId") Long commentId) {
-    return ResponseEntity.ok(commentService.delete(commentId));
+    Comment deletedComment = commentService.delete(commentId);
+    logger.info("Deleted the comment with id: {}", commentId);
+    return ResponseEntity.ok(deletedComment);
   }
 }

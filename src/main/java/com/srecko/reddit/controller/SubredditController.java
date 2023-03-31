@@ -7,6 +7,8 @@ import com.srecko.reddit.service.SubredditService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -31,6 +33,8 @@ public class SubredditController {
 
   private final SubredditService subredditService;
 
+  private static final Logger logger = LogManager.getLogger(SubredditController.class);
+
   /**
    * Instantiates a new Subreddit controller.
    *
@@ -48,7 +52,9 @@ public class SubredditController {
    */
   @GetMapping
   public ResponseEntity<List<Subreddit>> getAll() {
-    return ResponseEntity.ok(subredditService.getAll());
+    List<Subreddit> all = subredditService.getAll();
+    logger.info("Returning all subreddits");
+    return ResponseEntity.ok(all);
   }
 
   /**
@@ -59,7 +65,9 @@ public class SubredditController {
    */
   @GetMapping("/{subredditId}")
   public ResponseEntity<Subreddit> getSubreddit(@PathVariable("subredditId") Long id) {
-    return ResponseEntity.ok(subredditService.getSubredditById(id));
+    Subreddit subreddit = subredditService.getSubredditById(id);
+    logger.info("Returning a subreddit with id: {}", id);
+    return ResponseEntity.ok(subreddit);
   }
 
   /**
@@ -78,7 +86,9 @@ public class SubredditController {
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/subreddits/")
             .toUriString());
-    return ResponseEntity.created(uri).body(subredditService.save(subredditDto));
+    Subreddit saved = subredditService.save(subredditDto);
+    logger.info("Successfully created a subreddit: {}", saved.getId());
+    return ResponseEntity.created(uri).body(saved);
   }
 
   /**
@@ -89,7 +99,9 @@ public class SubredditController {
    */
   @DeleteMapping("/{subredditId}")
   public ResponseEntity<Subreddit> delete(@PathVariable("subredditId") Long id) {
-    return ResponseEntity.ok(subredditService.delete(id));
+    Subreddit deleted = subredditService.delete(id);
+    logger.info("Deleted subreddit with id: {}", deleted.getId());
+    return ResponseEntity.ok(deleted);
   }
 
   /**
@@ -105,6 +117,8 @@ public class SubredditController {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
-    return ResponseEntity.ok(subredditService.update(subredditDto));
+    Subreddit updated = subredditService.update(subredditDto);
+    logger.info("Updated subreddit with id: {}", updated.getId());
+    return ResponseEntity.ok(updated);
   }
 }

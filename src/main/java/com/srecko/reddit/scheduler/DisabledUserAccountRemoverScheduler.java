@@ -1,19 +1,24 @@
 package com.srecko.reddit.scheduler;
 
 import com.srecko.reddit.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * The type User unenabled account remover scheduler.
+ * The type User disabled account remover scheduler.
  *
  * @author Srecko Nikolic
  */
 @Component
-public class UserUnenabledAccountRemoverScheduler {
+public class DisabledUserAccountRemoverScheduler {
 
-  private UserService userService;
+  private final UserService userService;
+
+  private static final Logger logger = LogManager
+      .getLogger(DisabledUserAccountRemoverScheduler.class);
 
   /**
    * Instantiates a new User unenabled account remover scheduler.
@@ -21,7 +26,7 @@ public class UserUnenabledAccountRemoverScheduler {
    * @param userService the user service
    */
   @Autowired
-  public UserUnenabledAccountRemoverScheduler(UserService userService) {
+  public DisabledUserAccountRemoverScheduler(UserService userService) {
     this.userService = userService;
   }
 
@@ -30,6 +35,7 @@ public class UserUnenabledAccountRemoverScheduler {
    */
   @Scheduled(fixedDelay = 3600000)
   public void deleteUnverifiedUsers() {
+    logger.info("Deleting expired user accounts from database");
     userService.deleteUnverifiedUsers();
   }
 }

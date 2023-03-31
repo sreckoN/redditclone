@@ -9,6 +9,8 @@ import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.service.SearchService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +40,8 @@ public class SearchController {
   private final CommentModelAssembler commentModelAssembler;
   private final UserModelAssembler userModelAssembler;
   private final SubredditModelAssembler subredditModelAssembler;
+
+  private static final Logger logger = LogManager.getLogger(SearchController.class);
 
   /**
    * Instantiates a new Search controller.
@@ -75,6 +79,7 @@ public class SearchController {
     Page<Subreddit> page = searchService.searchSubreddits(query, pageable);
     PagedModel<EntityModel<Subreddit>> pagedModel = assembler.toModel(page,
         subredditModelAssembler);
+    logger.info("Returning a page {} of subreddits", page.getNumber());
     return ResponseEntity.ok(pagedModel);
   }
 
@@ -93,6 +98,7 @@ public class SearchController {
       PagedResourcesAssembler<Post> assembler) {
     Page<Post> page = searchService.searchPosts(query, pageable);
     PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+    logger.info("Returning a page {} of posts", page.getNumber());
     return ResponseEntity.ok(pagedModel);
   }
 
@@ -113,6 +119,7 @@ public class SearchController {
       PagedResourcesAssembler<Post> assembler) {
     Page<Post> page = searchService.searchPostsInSubreddit(subredditId, query, pageable);
     PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+    logger.info("Returning a page {} of posts for subreddit: {}", page.getNumber(), subredditId);
     return ResponseEntity.ok(pagedModel);
   }
 
@@ -131,6 +138,7 @@ public class SearchController {
       PagedResourcesAssembler<Comment> assembler) {
     Page<Comment> page = searchService.searchComments(query, pageable);
     PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
+    logger.info("Returning a page {} of comments", page.getNumber());
     return ResponseEntity.ok(pagedModel);
   }
 
@@ -149,6 +157,7 @@ public class SearchController {
       PagedResourcesAssembler<User> assembler) {
     Page<User> page = searchService.searchUsers(query, pageable);
     PagedModel<EntityModel<User>> pagedModel = assembler.toModel(page, userModelAssembler);
+    logger.info("Returning a page {} of users", page.getNumber());
     return ResponseEntity.ok(pagedModel);
   }
 }

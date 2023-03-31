@@ -2,6 +2,8 @@ package com.srecko.reddit.exception;
 
 import com.srecko.reddit.exception.util.DtoValidationMessageCreator;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -12,6 +14,8 @@ import org.springframework.validation.ObjectError;
  */
 public class DtoValidationException extends RuntimeException {
 
+  private static final Logger logger = LogManager.getLogger(DtoValidationException.class);
+
   /**
    * Instantiates a new Dto validation exception.
    *
@@ -19,6 +23,7 @@ public class DtoValidationException extends RuntimeException {
    */
   public DtoValidationException(List<ObjectError> errors) {
     super(createMessage(errors));
+    logger.error("DTO validation error");
   }
 
   private static String createMessage(List<ObjectError> errors) {

@@ -14,6 +14,8 @@ import com.srecko.reddit.repository.SubredditRepository;
 import com.srecko.reddit.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,8 @@ public class PostServiceImpl implements PostService {
   private final PostRepository postRepository;
   private final UserRepository userRepository;
   private final SubredditRepository subredditRepository;
+
+  private static final Logger logger = LogManager.getLogger(PostServiceImpl.class);
 
   /**
    * Instantiates a new Post service.
@@ -52,6 +56,7 @@ public class PostServiceImpl implements PostService {
   public Post save(CreatePostDto createPostDto) {
     UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
+    logger.info("Saving post to the database");
     Optional<User> user = userRepository.findUserByUsername(userMediator.getUsername());
     if (user.isPresent()) {
       Optional<Subreddit> subreddit = subredditRepository.findById(createPostDto.getSubredditId());
@@ -71,11 +76,13 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<Post> getAllPosts() {
+    logger.info("Getting all posts");
     return postRepository.findAll();
   }
 
   @Override
   public Post getPost(Long postId) {
+    logger.info("Getting post: {}", postId);
     Optional<Post> postOptional = postRepository.findById(postId);
     if (postOptional.isPresent()) {
       return postOptional.get();
@@ -86,6 +93,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<Post> getAllPostsForSubreddit(Long subredditId) {
+    logger.info("Getting posts for subreddit: {}", subredditId);
     Optional<Subreddit> subredditOptional = subredditRepository.findById(subredditId);
     if (subredditOptional.isPresent()) {
       return postRepository.findAllBySubreddit(subredditOptional.get());
@@ -96,6 +104,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<Post> getAllPostsForUser(String username) {
+    logger.info("Getting posts for user: {}", username);
     Optional<User> userOptional = userRepository.findUserByUsername(username);
     if (userOptional.isPresent()) {
       return postRepository.findAllByUser(userOptional.get());
@@ -106,6 +115,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public Post delete(Long postId) {
+    logger.info("Deleting post: {}", postId);
     Optional<Post> postOptional = postRepository.findById(postId);
     if (postOptional.isPresent()) {
       postRepository.deleteById(postId);
@@ -117,6 +127,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public Post update(UpdatePostDto postDto) {
+    logger.info("Updating post: {}", postDto.getPostId());
     Optional<Post> postOptional = postRepository.findById(postDto.getPostId());
     if (postOptional.isPresent()) {
       Post post = postOptional.get();

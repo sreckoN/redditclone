@@ -19,6 +19,8 @@ import com.srecko.reddit.exception.subreddit.SubredditNotFoundException;
 import com.srecko.reddit.exception.user.UserNotFoundException;
 import com.srecko.reddit.exception.vote.VoteNotFoundException;
 import java.time.LocalDateTime;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,6 +34,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+  private static final Logger logger = LogManager.getLogger(GlobalExceptionHandler.class);
 
   /*@ExceptionHandler(Exception.class)
   public ResponseEntity<?> handleException(Exception exception) {
@@ -49,6 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(AuthorizationHeaderMissingException.class)
   public ResponseEntity<?> handleAuthorizationHeaderMissing(
       AuthorizationHeaderMissingException exception) {
+    logger.debug("Handling {}", AuthorizationHeaderMissingException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.UNAUTHORIZED);
   }
@@ -61,6 +66,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(SubredditNotFoundException.class)
   public ResponseEntity<?> handleSubredditNotFoundException(SubredditNotFoundException exception) {
+    logger.debug("Handling {}", SubredditNotFoundException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -73,6 +79,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(PostNotFoundException.class)
   public ResponseEntity<?> handlePostNotFoundException(PostNotFoundException exception) {
+    logger.debug("Handling {}", PostNotFoundException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -85,6 +92,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<?> handleUserNotFoundException(UserNotFoundException exception) {
+    logger.debug("Handling {}", UserNotFoundException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -97,6 +105,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(CommentNotFoundException.class)
   public ResponseEntity<?> handleCommentNotFoundException(CommentNotFoundException exception) {
+    logger.debug("Handling {}", CommentNotFoundException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -109,6 +118,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(DtoValidationException.class)
   public ResponseEntity<?> handleDtoValidationException(DtoValidationException exception) {
+    logger.debug("Handling {}", DtoValidationException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -122,6 +132,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(UsernameNotAvailableException.class)
   public ResponseEntity<?> handleUsernameNotAvailableException(
       UsernameNotAvailableException exception) {
+    logger.debug("Handling {}", UsernameNotAvailableException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -134,6 +145,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(EmailAlreadyInUseException.class)
   public ResponseEntity<?> handleEmailAlreadyInUseException(EmailAlreadyInUseException exception) {
+    logger.debug("Handling {}", EmailAlreadyInUseException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -146,6 +158,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(VoteNotFoundException.class)
   public ResponseEntity<?> handleVoteNotFoundException(VoteNotFoundException exception) {
+    logger.debug("Handling {}", VoteNotFoundException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -159,6 +172,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(EmailVerificationTokenExpiredException.class)
   public ResponseEntity<?> handleEmailValidationTokenExpiredException(
       EmailVerificationTokenExpiredException exception) {
+    logger.debug("Handling {}", EmailVerificationTokenExpiredException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -172,6 +186,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(EmailVerificationTokenInvalidException.class)
   public ResponseEntity<?> handleInvalidEmailVerificationTokenException(
       EmailVerificationTokenInvalidException exception) {
+    logger.debug("Handling {}", EmailVerificationTokenInvalidException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -185,6 +200,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(EmailVerificationTokenNotFoundException.class)
   public ResponseEntity<?> handleEmailVerificationTokenNotFoundException(
       EmailVerificationTokenNotFoundException exception) {
+    logger.debug("Handling {}", EmailVerificationTokenNotFoundException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -198,6 +214,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(VerificationEmailSendingErrorException.class)
   public ResponseEntity<?> handleVerificationEmailSendingErrorException(
       VerificationEmailSendingErrorException exception) {
+    logger.debug("Handling {}", VerificationEmailSendingErrorException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -211,6 +228,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(RefreshTokenNotFoundException.class)
   public ResponseEntity<?> handleRefreshTokenNotFoundException(
       RefreshTokenNotFoundException exception) {
+    logger.debug("Handling {}", RefreshTokenNotFoundException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -224,6 +242,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(RefreshTokenInvalidException.class)
   public ResponseEntity<?> handleRefreshTokenInvalidException(
       RefreshTokenInvalidException exception) {
+    logger.debug("Handling {}", RefreshTokenInvalidException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -237,6 +256,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(RegistrationRequestInvalidException.class)
   public ResponseEntity<?> handleRegistrationRequestInvalidException(
       RegistrationRequestInvalidException exception) {
+    logger.debug("Handling {}", RegistrationRequestInvalidException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -250,6 +270,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(TokenRefreshRequestInvalidException.class)
   public ResponseEntity<?> handleTokenRefreshRequestInvalid(
       TokenRefreshRequestInvalidException exception) {
+    logger.debug("Handling {}", TokenRefreshRequestInvalidException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
@@ -263,6 +284,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(AuthenticationRequestInvalidException.class)
   public ResponseEntity<?> handleAuthenticationRequestInvalidException(
       AuthenticationRequestInvalidException exception) {
+    logger.debug("Handling {}", AuthenticationRequestInvalidException.class);
     return new ResponseEntity<>(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }

@@ -3,6 +3,8 @@ package com.srecko.reddit.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
@@ -21,6 +23,8 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 public class EmailServiceImpl implements EmailService {
 
   private Environment env;
+
+  private static final Logger logger = LogManager.getLogger(EmailServiceImpl.class);
 
   @Autowired
   private JavaMailSender mailSender;
@@ -49,13 +53,6 @@ public class EmailServiceImpl implements EmailService {
   }
 
   @Override
-  public void sendVerificationEmail(String address, String confirmationUrl) {
-    String message = "Click on the button to verify your email address." + "\r\n"
-        + "http://localhost:8080/api/auth" + confirmationUrl;
-    sendEmail(address, "Verify your email address", message);
-  }
-
-  @Override
   public void sendHtmlEmail(String address, String title, String htmlBody)
       throws MessagingException {
     MimeMessage email = mailSender.createMimeMessage();
@@ -71,7 +68,9 @@ public class EmailServiceImpl implements EmailService {
       Map<String, Object> model) throws MessagingException {
     Context context = new Context();
     context.setVariables(model);
-    String html = thymeleafTemplateEngine.process("verification_email_template.html", context);
+    String template = "verification_email_template.html";
+    String html = thymeleafTemplateEngine.process(template, context);
+    logger.info("Sending email using template: {}", template);
     sendHtmlEmail(address, subject, html);
   }
 }

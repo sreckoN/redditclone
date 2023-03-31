@@ -8,6 +8,8 @@ import com.srecko.reddit.service.PostService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -32,6 +34,8 @@ public class PostController {
 
   private final PostService postService;
 
+  private static final Logger logger = LogManager.getLogger(PostController.class);
+
   /**
    * Instantiates a new Post controller.
    *
@@ -49,7 +53,9 @@ public class PostController {
    */
   @GetMapping
   public ResponseEntity<List<Post>> getAllPosts() {
-    return ResponseEntity.ok(postService.getAllPosts());
+    List<Post> allPosts = postService.getAllPosts();
+    logger.info("Returning all posts");
+    return ResponseEntity.ok(allPosts);
   }
 
   /**
@@ -60,7 +66,9 @@ public class PostController {
    */
   @GetMapping("/{postId}")
   public ResponseEntity<Post> getPost(@PathVariable("postId") Long postId) {
-    return ResponseEntity.ok(postService.getPost(postId));
+    Post post = postService.getPost(postId);
+    logger.info("Returning a post with id: {}", post.getId());
+    return ResponseEntity.ok(post);
   }
 
   /**
@@ -72,7 +80,9 @@ public class PostController {
   @GetMapping("/subreddit/{subredditId}")
   public ResponseEntity<List<Post>> getAllPostsForSubreddit(
       @PathVariable("subredditId") Long subredditId) {
-    return ResponseEntity.ok(postService.getAllPostsForSubreddit(subredditId));
+    List<Post> allPostsForSubreddit = postService.getAllPostsForSubreddit(subredditId);
+    logger.info("Returning posts for subreddit: {}", subredditId);
+    return ResponseEntity.ok(allPostsForSubreddit);
   }
 
   /**
@@ -83,7 +93,9 @@ public class PostController {
    */
   @GetMapping("/user/{username}")
   public ResponseEntity<List<Post>> getPostsForUser(@PathVariable("username") String username) {
-    return ResponseEntity.ok(postService.getAllPostsForUser(username));
+    List<Post> allPostsForUser = postService.getAllPostsForUser(username);
+    logger.info("Returning posts for user: {}", username);
+    return ResponseEntity.ok(allPostsForUser);
   }
 
   /**
@@ -101,7 +113,9 @@ public class PostController {
     }
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/posts").toUriString());
-    return ResponseEntity.created(uri).body(postService.save(postRequest));
+    Post savedPost = postService.save(postRequest);
+    logger.info("Successfully created a new post: {}", savedPost.getId());
+    return ResponseEntity.created(uri).body(savedPost);
   }
 
   /**
@@ -112,7 +126,9 @@ public class PostController {
    */
   @DeleteMapping("/{postId}")
   public ResponseEntity<Post> delete(@PathVariable("postId") Long postId) {
-    return ResponseEntity.ok(postService.delete(postId));
+    Post deletedPost = postService.delete(postId);
+    logger.info("Deleted a post with id: {}", postId);
+    return ResponseEntity.ok(deletedPost);
   }
 
   /**
@@ -128,6 +144,8 @@ public class PostController {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
-    return ResponseEntity.ok(postService.update(postDto));
+    Post updatedPost = postService.update(postDto);
+    logger.info("Updated post: {}", updatedPost.getId());
+    return ResponseEntity.ok(updatedPost);
   }
 }

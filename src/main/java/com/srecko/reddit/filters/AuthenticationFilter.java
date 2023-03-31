@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +36,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
   private final RefreshTokenService refreshTokenService;
 
+  private static final Logger logger = LogManager.getLogger(AuthenticationFilter.class);
+
   /**
    * Instantiates a new Authentication filter.
    *
@@ -52,17 +56,19 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
       HttpServletResponse response) throws AuthenticationException {
+    logger.info("Attempting authentication");
     String usernameJson = "";
     String passwordJson = "";
     try {
       JsonNode jsonNode = new ObjectMapper().readTree(request.getInputStream());
       usernameJson = jsonNode.get("username").asText();
       passwordJson = jsonNode.get("password").asText();
-    } catch (IOException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken(usernameJson, passwordJson);
+    logger.debug("Created authentication token. Authenticating {}", usernameJson);
     return authenticationManager.authenticate(authenticationToken);
   }
 
@@ -77,6 +83,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     tokens.put("refreshToken", refreshToken);
     refreshTokenService.saveRefreshToken(refreshToken, userMediator.getUsername());
     response.setContentType(APPLICATION_JSON_VALUE);
+    logger.info("Authenticated successfully: {}", userMediator.getUsername());
     new ObjectMapper().writeValue(response.getOutputStream(), tokens);
   }
 }
