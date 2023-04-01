@@ -2,7 +2,8 @@ package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.SubredditDto;
 import com.srecko.reddit.entity.Subreddit;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface Subreddit service.
@@ -14,9 +15,10 @@ public interface SubredditService {
   /**
    * Gets all.
    *
+   * @param pageable the pageable
    * @return the all
    */
-  List<Subreddit> getAll();
+  Page<Subreddit> getAll(Pageable pageable);
 
   /**
    * Gets subreddit by id.

@@ -1,7 +1,8 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.entity.User;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface User service.
@@ -13,9 +14,10 @@ public interface UserService {
   /**
    * Gets users.
    *
+   * @param pageable the pageable
    * @return the users
    */
-  List<User> getUsers();
+  Page<User> getUsers(Pageable pageable);
 
   /**
    * Gets user by username.

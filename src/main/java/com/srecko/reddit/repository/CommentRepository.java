@@ -3,7 +3,6 @@ package com.srecko.reddit.repository;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.User;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,18 +19,20 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
   /**
    * Find all by post list.
    *
-   * @param post the post
+   * @param post     the post
+   * @param pageable the pageable
    * @return the list
    */
-  List<Comment> findAllByPost(Post post);
+  Page<Comment> findAllByPost(Post post, Pageable pageable);
 
   /**
    * Find all by user list.
    *
-   * @param user the user
+   * @param user     the user
+   * @param pageable the pageable
    * @return the list
    */
-  List<Comment> findAllByUser(User user);
+  Page<Comment> findAllByUser(User user, Pageable pageable);
 
   /**
    * Find by text containing page.

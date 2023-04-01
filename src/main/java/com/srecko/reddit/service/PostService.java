@@ -3,7 +3,8 @@ package com.srecko.reddit.service;
 import com.srecko.reddit.dto.CreatePostDto;
 import com.srecko.reddit.dto.UpdatePostDto;
 import com.srecko.reddit.entity.Post;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface Post service.
@@ -23,9 +24,10 @@ public interface PostService {
   /**
    * Gets all posts.
    *
+   * @param pageable the pageable
    * @return the all posts
    */
-  List<Post> getAllPosts();
+  Page<Post> getAllPosts(Pageable pageable);
 
   /**
    * Gets post.
@@ -39,17 +41,19 @@ public interface PostService {
    * Gets all posts for subreddit.
    *
    * @param subredditId the subreddit id
+   * @param pageable    the pageable
    * @return the all posts for subreddit
    */
-  List<Post> getAllPostsForSubreddit(Long subredditId);
+  Page<Post> getAllPostsForSubreddit(Long subredditId, Pageable pageable);
 
   /**
    * Gets all posts for user.
    *
    * @param username the username
+   * @param pageable the pageable
    * @return the all posts for user
    */
-  List<Post> getAllPostsForUser(String username);
+  Page<Post> getAllPostsForUser(String username, Pageable pageable);
 
   /**
    * Delete post.

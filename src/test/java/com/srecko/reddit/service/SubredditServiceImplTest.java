@@ -30,6 +30,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -81,14 +85,16 @@ class SubredditServiceImplTest {
   @Test
   void getAll_ReturnsAllSubreddits() {
     // given
-    given(subredditRepository.findAll()).willReturn(List.of(subreddit));
+    given(subredditRepository.findAll(any(PageRequest.class)))
+        .willReturn(new PageImpl<>(List.of(subreddit)));
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
 
     // when
-    List<Subreddit> all = subredditService.getAll();
+    Page<Subreddit> page = subredditService.getAll(pageRequest);
 
     // then
-    assertEquals(1, all.size());
-    assertTrue(all.contains(subreddit));
+    assertEquals(1, page.getTotalElements());
+    assertTrue(page.getContent().contains(subreddit));
   }
 
   @Test

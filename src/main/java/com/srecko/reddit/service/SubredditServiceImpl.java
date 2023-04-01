@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.assembler.PageRequestAssembler;
 import com.srecko.reddit.dto.SubredditDto;
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.Subreddit;
@@ -13,6 +14,11 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +51,11 @@ public class SubredditServiceImpl implements SubredditService {
   }
 
   @Override
-  public List<Subreddit> getAll() {
+  public Page<Subreddit> getAll(Pageable pageable) {
     logger.info("Getting all subreddits");
-    return subredditRepository.findAll();
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("name"),
+        Sort.by(Direction.ASC, "name"));
+    return subredditRepository.findAll(pageRequest);
   }
 
   @Override

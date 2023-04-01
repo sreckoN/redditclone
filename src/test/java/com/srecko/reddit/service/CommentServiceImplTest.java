@@ -32,6 +32,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,7 +59,6 @@ class CommentServiceImplTest {
   private UserRepository userRepository;
 
   private User user;
-  private Subreddit subreddit;
   private Post post;
   private Comment comment;
 
@@ -68,7 +71,8 @@ class CommentServiceImplTest {
     LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
     user.setRegistrationDate(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
 
-    subreddit = new Subreddit("Name", "The characteristics of someone or something", user);
+    Subreddit subreddit = new Subreddit("Name", "The characteristics of someone or something",
+        user);
     LocalDateTime atStartOfDayResult1 = LocalDate.of(1970, 1, 1).atStartOfDay();
     subreddit.setCreatedDate(Date.from(atStartOfDayResult1.atZone(ZoneId.of("UTC")).toInstant()));
     subreddit.setId(123L);
@@ -98,23 +102,26 @@ class CommentServiceImplTest {
     Comment comment2 = new Comment(user, "Yeah, me neither", post);
     post.getComments().add(comment2);
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
-    given(commentRepository.findAllByPost(post)).willReturn(post.getComments());
+    given(commentRepository.findAllByPost(any(), any())).willReturn(new PageImpl<>(List.of(comment, comment2)));
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
 
     // when
-    List<Comment> commentsForPost = commentServiceImpl.getAllCommentsForPost(post.getId());
+    Page<Comment> page = commentServiceImpl.getAllCommentsForPost(post.getId(), pageRequest);
 
     // then
-    assertEquals(2, commentsForPost.size());
-    assertTrue(commentsForPost.contains(comment));
-    assertTrue(commentsForPost.contains(comment2));
+    assertEquals(2, page.getTotalElements());
+    assertTrue(page.getContent().contains(comment));
+    assertTrue(page.getContent().contains(comment2));
   }
 
   @Test
   void testGetAllCommentsForPost_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given
-    assertThrows(PostNotFoundException.class, () -> {
-      commentServiceImpl.getAllCommentsForPost(post.getId());
-    });
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
+
+    // when then
+    assertThrows(PostNotFoundException.class, () ->
+        commentServiceImpl.getAllCommentsForPost(post.getId(), pageRequest));
   }
 
   @Test
@@ -123,24 +130,28 @@ class CommentServiceImplTest {
     Comment comment2 = new Comment(user, "Yeah, me neither", post);
     user.getComments().add(comment2);
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
-    given(commentRepository.findAllByUser(user)).willReturn(user.getComments());
+    given(commentRepository.findAllByUser(any(), any()))
+        .willReturn(new PageImpl<>(List.of(comment, comment2)));
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
 
     // when
-    List<Comment> commentsForPost = commentServiceImpl.getAllCommentsForUsername(
-        user.getUsername());
+    Page<Comment> page = commentServiceImpl.getAllCommentsForUsername(
+        user.getUsername(), pageRequest);
 
     // then
-    assertEquals(2, commentsForPost.size());
-    assertTrue(commentsForPost.contains(comment));
-    assertTrue(commentsForPost.contains(comment2));
+    assertEquals(2, page.getTotalElements());
+    assertTrue(page.getContent().contains(comment));
+    assertTrue(page.getContent().contains(comment2));
   }
 
   @Test
   void getAllCommentsForUsername_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
-    // given when then
-    assertThrows(UserNotFoundException.class, () -> {
-      commentServiceImpl.getAllCommentsForUsername(user.getUsername());
-    });
+    // given
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
+
+    // when then
+    assertThrows(UserNotFoundException.class, () ->
+        commentServiceImpl.getAllCommentsForUsername(user.getUsername(), pageRequest));
   }
 
   @Test
@@ -179,9 +190,8 @@ class CommentServiceImplTest {
         userMediator);
 
     // when then
-    assertThrows(UserNotFoundException.class, () -> {
-      commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId()));
-    });
+    assertThrows(UserNotFoundException.class, () ->
+        commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId())));
   }
 
   @Test
@@ -198,9 +208,8 @@ class CommentServiceImplTest {
         userMediator);
 
     // when then
-    assertThrows(PostNotFoundException.class, () -> {
-      commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId()));
-    });
+    assertThrows(PostNotFoundException.class, () ->
+        commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId())));
   }
 
   @Test
@@ -218,8 +227,6 @@ class CommentServiceImplTest {
   @Test
   void delete_ThrowsCommentNotFoundException_WhenCommentNotFound() {
     // given when then
-    assertThrows(CommentNotFoundException.class, () -> {
-      commentServiceImpl.delete(comment.getId());
-    });
+    assertThrows(CommentNotFoundException.class, () -> commentServiceImpl.delete(comment.getId()));
   }
 }

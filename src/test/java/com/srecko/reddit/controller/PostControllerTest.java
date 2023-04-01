@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -77,15 +78,22 @@ class PostControllerTest {
 
   @Test
   void getAllPosts_ReturnsPosts() throws Exception {
-    Post p1 = new Post(user, "I love you.", "I do.", subreddit);
-    Post p2 = new Post(user, "What's up.", "Not much.", subreddit);
-    postRepository.saveAll(List.of(p1, p2));
+    Post post1 = new Post(user, "I love you.", "I do.", subreddit);
+    Post post2 = new Post(user, "What's up.", "Not much.", subreddit);
+    postRepository.saveAll(List.of(post1, post2));
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/posts")
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(2)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
   @Test
@@ -119,15 +127,22 @@ class PostControllerTest {
 
   @Test
   void getAllPostsForSubreddit_ReturnsPosts_WhenSubredditExists() throws Exception {
-    Post p1 = new Post(user, "I love you.", "I do.", subreddit);
-    Post p2 = new Post(user, "What's up.", "Not much.", subreddit);
-    postRepository.saveAll(List.of(p1, p2));
+    Post post1 = new Post(user, "I love you.", "I do.", subreddit);
+    Post post2 = new Post(user, "What's up.", "Not much.", subreddit);
+    postRepository.saveAll(List.of(post1, post2));
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/subreddit/{subredditId}", subreddit.getId())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(2)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
   @Test
@@ -141,15 +156,22 @@ class PostControllerTest {
 
   @Test
   void getPostsForUser_ReturnsPosts_WhenUserExists() throws Exception {
-    Post p1 = new Post(user, "I love you.", "I do.", subreddit);
-    Post p2 = new Post(user, "What's up.", "Not much.", subreddit);
-    postRepository.saveAll(List.of(p1, p2));
+    Post post1 = new Post(user, "I love you.", "I do.", subreddit);
+    Post post2 = new Post(user, "What's up.", "Not much.", subreddit);
+    postRepository.saveAll(List.of(post1, post2));
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/user/{username}", user.getUsername())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(2)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
   @Test

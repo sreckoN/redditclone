@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -96,8 +97,15 @@ class CommentControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", post.getId())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(2)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].commentList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.commentList[0].text", is(comment1.getText())))
+        .andExpect(jsonPath("$._embedded.commentList[1].text", is(comment2.getText())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
   @Test
@@ -117,8 +125,15 @@ class CommentControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", user.getUsername())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(2)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].commentList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.commentList[0].text", is(comment1.getText())))
+        .andExpect(jsonPath("$._embedded.commentList[1].text", is(comment2.getText())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
   @Test
@@ -240,7 +255,14 @@ class CommentControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/comments")
         .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(2)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].commentList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.commentList[0].text", is(comment1.getText())))
+        .andExpect(jsonPath("$._embedded.commentList[1].text", is(comment2.getText())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 }

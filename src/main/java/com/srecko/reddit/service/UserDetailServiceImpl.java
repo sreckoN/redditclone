@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.assembler.PageRequestAssembler;
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
@@ -15,6 +16,11 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -65,9 +71,11 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
-  public List<User> getUsers() {
+  public Page<User> getUsers(Pageable pageable) {
     logger.info("Getting all users");
-    return userRepository.findAll();
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("username"),
+        Sort.by(Direction.ASC, "username"));
+    return userRepository.findAll(pageRequest);
   }
 
   @Override
