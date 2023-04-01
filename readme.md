@@ -19,8 +19,8 @@ Tests: ~160
 - Style checks CI/CD ✅
 - Refactor tests ✅
 - Logging ✅
+- Pagination ✅ 
 - Secure endpoints
-- SQL Pagination
 - Ability to add photos to Posts
 - User profile additional settings
 - API Docs
