@@ -8,12 +8,12 @@ import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.exception.authentication.AuthenticationRequestInvalidException;
 import com.srecko.reddit.exception.authentication.RegistrationRequestInvalidException;
 import com.srecko.reddit.exception.authentication.TokenRefreshRequestInvalidException;
-import com.srecko.reddit.jwt.JwtConfig;
 import com.srecko.reddit.service.AuthenticationService;
 import com.srecko.reddit.service.RefreshTokenService;
-import com.srecko.reddit.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -34,24 +34,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
   private final AuthenticationService authenticationService;
-  private final JwtConfig jwtConfig;
-  private final UserService userService;
   private final RefreshTokenService refreshTokenService;
+
+  private static final Logger logger = LogManager.getLogger(AuthenticationController.class);
 
   /**
    * Instantiates a new Authentication controller.
    *
    * @param authenticationService the authentication service
-   * @param jwtConfig             the jwt config
-   * @param userService           the user service
    * @param refreshTokenService   the refresh token service
    */
   @Autowired
-  public AuthenticationController(AuthenticationService authenticationService, JwtConfig jwtConfig,
-      UserService userService, RefreshTokenService refreshTokenService) {
+  public AuthenticationController(AuthenticationService authenticationService,
+      RefreshTokenService refreshTokenService) {
     this.authenticationService = authenticationService;
-    this.jwtConfig = jwtConfig;
-    this.userService = userService;
     this.refreshTokenService = refreshTokenService;
   }
 
@@ -73,6 +69,7 @@ public class AuthenticationController {
         request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
             + "/api/auth/registrationConfirm?token=";
     authenticationService.register(registrationRequest, confirmationUrl);
+    logger.info("User registered successfully: {}", registrationRequest.getEmail());
     return ResponseEntity.ok(
         "User has been registered successfully. Verify your email to enable the account.");
   }
@@ -87,6 +84,7 @@ public class AuthenticationController {
   public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
     EmailVerificationToken verificationToken = authenticationService.getVerificationToken(token);
     authenticationService.enableUserAccount(verificationToken.getUser());
+    logger.info("User's email successfully confirmed: {}", verificationToken.getUser().getEmail());
     return ResponseEntity.ok("Email confirmed! User account activated.");
   }
 
@@ -104,7 +102,10 @@ public class AuthenticationController {
     if (bindingResult.hasErrors()) {
       throw new AuthenticationRequestInvalidException(bindingResult.getAllErrors());
     }
-    return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
+    AuthenticationResponse authenticationResponse =
+        authenticationService.authenticate(authenticationRequest);
+    logger.info("User successfully authenticated: {}", authenticationResponse.getUsername());
+    return ResponseEntity.ok(authenticationResponse);
   }
 
   /**
@@ -122,6 +123,7 @@ public class AuthenticationController {
     }
     AuthenticationResponse newAccessToken = refreshTokenService.getNewAccessToken(
         tokenRefreshRequest);
+    logger.info("New access token successfully generated for: {}", newAccessToken.getUsername());
     return ResponseEntity.ok(newAccessToken);
   }
 }

@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.function.Function;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Component;
 public class JwtUtils {
 
   private final JwtConfig jwtConfig;
+
+  private static final Logger logger = LogManager.getLogger(JwtUtils.class);
 
   /**
    * Instantiates a new Jwt utils.
@@ -39,6 +43,7 @@ public class JwtUtils {
   public String getAccessToken(String username) {
     Integer accessTokenExpiration = jwtConfig.getAccessTokenExpiration();
     Instant expirationDate = Instant.now().plus(accessTokenExpiration, ChronoUnit.HOURS);
+    logger.info("Returning access token for: {}", username);
     return generateToken(username, expirationDate);
   }
 
@@ -51,10 +56,12 @@ public class JwtUtils {
   public String getRefreshToken(String username) {
     Integer refreshTokenExpiration = jwtConfig.getRefreshTokenExpiration();
     Instant expirationDate = Instant.now().plus(refreshTokenExpiration, ChronoUnit.DAYS);
+    logger.info("Returning refresh token for: {}", username);
     return generateToken(username, expirationDate);
   }
 
   private String generateToken(String username, Instant expirationDate) {
+    logger.info("Generating JWT token for: {}", username);
     return Jwts
         .builder()
         .setSubject(username)

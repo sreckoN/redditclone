@@ -6,6 +6,9 @@ import com.srecko.reddit.filters.AuthenticationFilter;
 import com.srecko.reddit.filters.JwtAuthenticationFilter;
 import com.srecko.reddit.jwt.JwtConfig;
 import com.srecko.reddit.service.RefreshTokenService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.slf4j.ILoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +37,8 @@ public class SecurityConfiguration {
   private final AppLogoutHandler logoutHandler;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final RefreshTokenService refreshTokenService;
+
+  private static final Logger logger = LogManager.getLogger(SecurityConfiguration.class);
 
   /**
    * Instantiates a new Security configuration.
@@ -65,6 +70,7 @@ public class SecurityConfiguration {
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    logger.debug("Creating filter chain");
     String[] staticResources = {
         "/css/**",
         "/images/**",
@@ -95,6 +101,7 @@ public class SecurityConfiguration {
             .addLogoutHandler(logoutHandler)
             .logoutUrl("/api/auth/logout")
             .logoutSuccessUrl("/login.html"));
+    logger.debug("Filter chain created");
     return http.build();
   }
 
@@ -105,6 +112,7 @@ public class SecurityConfiguration {
    */
   @Bean
   public PasswordEncoder passwordEncoder() {
+    logger.debug("Creating password encoder bean");
     return new BCryptPasswordEncoder();
   }
 
@@ -115,6 +123,7 @@ public class SecurityConfiguration {
    */
   @Bean
   public AuthenticationProvider daoAuthenticationProvider() {
+    logger.debug("Creating DAO authentication provider");
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
     authProvider.setPasswordEncoder(passwordEncoder());
     authProvider.setUserDetailsService(userDetailsService);

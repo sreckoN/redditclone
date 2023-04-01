@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,6 +33,8 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
   private final UserRepository userRepository;
   private final EmailVerificationRepository emailVerificationRepository;
+
+  private static final Logger logger = LogManager.getLogger(UserDetailServiceImpl.class);
 
   /**
    * Instantiates a new User detail service.
@@ -62,11 +66,13 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public List<User> getUsers() {
-    return (List<User>) userRepository.findAll();
+    logger.info("Getting all users");
+    return userRepository.findAll();
   }
 
   @Override
   public User getUserByUsername(String username) {
+    logger.info("Getting by username: {}", username);
     Optional<User> user = userRepository.findUserByUsername(username);
     if (user.isEmpty()) {
       throw new UserNotFoundException(username);
@@ -76,6 +82,7 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public User getUserByEmail(String email) {
+    logger.info("Getting by email: {}", email);
     Optional<User> userByEmail = userRepository.findUserByEmail(email);
     if (userByEmail.isEmpty()) {
       throw new UserNotFoundException(email);
@@ -85,6 +92,7 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public User deleteUser(String username) {
+    logger.info("Deleting user: {}", username);
     Optional<User> userOptional = userRepository.findUserByUsername(username);
     if (userOptional.isPresent()) {
       userRepository.delete(userOptional.get());
@@ -96,16 +104,19 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public boolean existsUserByEmail(String email) {
+    logger.info("Checking if exists user by email: {}", email);
     return userRepository.existsUserByEmail(email);
   }
 
   @Override
   public boolean existsUserByUsername(String username) {
+    logger.info("Checking if exists user by username: {}", username);
     return userRepository.existsUserByUsername(username);
   }
 
   @Override
   public User save(User user) {
+    logger.info("Saving user into database: {}", user.getUsername());
     return userRepository.save(user);
   }
 

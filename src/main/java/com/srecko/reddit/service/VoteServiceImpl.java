@@ -19,6 +19,8 @@ import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.UserRepository;
 import com.srecko.reddit.repository.VoteRepository;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,8 @@ public class VoteServiceImpl implements VoteService {
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
 
+  private static final Logger logger = LogManager.getLogger(VoteServiceImpl.class);
+
   /**
    * Instantiates a new Vote service.
    *
@@ -58,6 +62,7 @@ public class VoteServiceImpl implements VoteService {
 
   @Override
   public Vote savePostVote(VotePostDto voteDto) {
+    logger.info("Saving vote for post: {}", voteDto.getPostId());
     UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
     Optional<User> userOptional = userRepository.findUserByUsername(userMediator.getUsername());
@@ -79,6 +84,7 @@ public class VoteServiceImpl implements VoteService {
 
   @Override
   public Vote saveCommentVote(VoteCommentDto voteDto) {
+    logger.info("Saving vote for comment: {}", voteDto.getCommentId());
     UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
     Optional<User> userOptional = userRepository.findUserByUsername(userMediator.getUsername());
@@ -100,6 +106,7 @@ public class VoteServiceImpl implements VoteService {
 
   @Override
   public Vote deletePostVote(Long id) {
+    logger.info("Deleting vote for post: {}", id);
     Optional<Vote> voteOptional = voteRepository.findById(id);
     if (voteOptional.isPresent()) {
       VotePost vote = (VotePost) voteOptional.get();
@@ -120,6 +127,7 @@ public class VoteServiceImpl implements VoteService {
 
   @Override
   public Vote deleteCommentVote(Long id) {
+    logger.info("Deleting vote for comment: {}", id);
     Optional<Vote> voteOptional = voteRepository.findById(id);
     if (voteOptional.isPresent()) {
       VoteComment vote = (VoteComment) voteOptional.get();

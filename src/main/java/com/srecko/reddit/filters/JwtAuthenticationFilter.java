@@ -9,6 +9,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtUtils jwtUtils;
   private final UserService userService;
 
+  private static final Logger logger = LogManager.getLogger(JwtAuthenticationFilter.class);
+
   /**
    * Instantiates a new Jwt authentication filter.
    *
@@ -43,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     String servletPath = request.getServletPath();
+    logger.info("Filtering request with servlet path: {}", servletPath);
     if (servletPath.equals("/api/auth/register") || servletPath.equals(
         "/api/auth/registrationConfirm")
         || servletPath.equals("/api/auth/authenticate") || servletPath.contains(

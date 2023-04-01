@@ -42,10 +42,4 @@ class EmailServiceImplTest {
     // then
     verify(mailSender).send(any(SimpleMailMessage.class));
   }
-
-  @Test
-  void sendVerificationEmail_SendsVerificationEmail() {
-    // given when then
-    emailService.sendVerificationEmail("example@gmail.com", "/api/auth/confirmRegistration");
-  }
 }

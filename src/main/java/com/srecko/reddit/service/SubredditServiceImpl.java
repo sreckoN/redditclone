@@ -10,6 +10,8 @@ import com.srecko.reddit.repository.SubredditRepository;
 import com.srecko.reddit.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class SubredditServiceImpl implements SubredditService {
   private final SubredditRepository subredditRepository;
   private final UserRepository userRepository;
 
+  private static final Logger logger = LogManager.getLogger(SubredditServiceImpl.class);
+
   /**
    * Instantiates a new Subreddit service.
    *
@@ -42,11 +46,13 @@ public class SubredditServiceImpl implements SubredditService {
 
   @Override
   public List<Subreddit> getAll() {
-    return (List<Subreddit>) subredditRepository.findAll();
+    logger.info("Getting all subreddits");
+    return subredditRepository.findAll();
   }
 
   @Override
   public Subreddit getSubredditById(Long id) {
+    logger.info("Getting subreddit: {}", id);
     Optional<Subreddit> subredditOptional = subredditRepository.findById(id);
     if (subredditOptional.isPresent()) {
       return subredditOptional.get();
@@ -57,6 +63,7 @@ public class SubredditServiceImpl implements SubredditService {
 
   @Override
   public Subreddit save(SubredditDto subredditDto) {
+    logger.info("Saving subreddit into database");
     UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
     Optional<User> user = userRepository.findUserByUsername(userMediator.getUsername());
@@ -71,6 +78,7 @@ public class SubredditServiceImpl implements SubredditService {
 
   @Override
   public Subreddit delete(Long id) {
+    logger.info("Deleting subreddit: {}", id);
     Optional<Subreddit> subredditOptional = subredditRepository.findById(id);
     if (subredditOptional.isPresent()) {
       subredditRepository.delete(subredditOptional.get());
@@ -82,6 +90,7 @@ public class SubredditServiceImpl implements SubredditService {
 
   @Override
   public Subreddit update(SubredditDto subredditDto) {
+    logger.info("Updating subreddit: {}", subredditDto.getSubredditId());
     Optional<Subreddit> subredditOptional = subredditRepository.findById(
         subredditDto.getSubredditId());
     if (subredditOptional.isPresent()) {

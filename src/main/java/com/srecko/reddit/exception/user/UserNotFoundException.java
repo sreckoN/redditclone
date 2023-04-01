@@ -1,11 +1,16 @@
 package com.srecko.reddit.exception.user;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * The type User not found exception.
  *
  * @author Srecko Nikolic
  */
 public class UserNotFoundException extends RuntimeException {
+
+  private static final Logger logger = LogManager.getLogger(UserNotFoundException.class);
 
   /**
    * Instantiates a new User not found exception.
@@ -23,5 +28,6 @@ public class UserNotFoundException extends RuntimeException {
    */
   public UserNotFoundException(Long id) {
     super("User with id " + id + " is not found");
+    logger.error("User not found: {}", id);
   }
 }

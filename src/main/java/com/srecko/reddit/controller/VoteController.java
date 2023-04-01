@@ -7,6 +7,8 @@ import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.VoteService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -28,6 +30,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class VoteController {
 
   private final VoteService voteService;
+
+  private static final Logger logger = LogManager.getLogger(VoteController.class);
 
   /**
    * Instantiates a new Vote controller.
@@ -54,7 +58,9 @@ public class VoteController {
     }
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/votes").toUriString());
-    return ResponseEntity.created(uri).body(voteService.savePostVote(voteDto));
+    Vote savedVote = voteService.savePostVote(voteDto);
+    logger.info("Successfully saved vote ({}) for post {}", savedVote.getId(), voteDto.getPostId());
+    return ResponseEntity.created(uri).body(savedVote);
   }
 
   /**
@@ -65,7 +71,9 @@ public class VoteController {
    */
   @DeleteMapping("/post/{voteId}")
   public ResponseEntity<Vote> deletePostVote(@PathVariable("voteId") Long voteId) {
-    return ResponseEntity.ok(voteService.deletePostVote(voteId));
+    Vote deletedVote = voteService.deletePostVote(voteId);
+    logger.info("Deleted vote: {}", deletedVote.getId());
+    return ResponseEntity.ok(deletedVote);
   }
 
   /**
@@ -83,7 +91,10 @@ public class VoteController {
     }
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/votes").toUriString());
-    return ResponseEntity.created(uri).body(voteService.saveCommentVote(voteDto));
+    Vote savedVote = voteService.saveCommentVote(voteDto);
+    logger.info("Successfully saved vote ({}) for comment {}",
+        savedVote.getId(), voteDto.getCommentId());
+    return ResponseEntity.created(uri).body(savedVote);
   }
 
   /**
@@ -94,6 +105,8 @@ public class VoteController {
    */
   @DeleteMapping("/comment/{voteId}")
   public ResponseEntity<Vote> deleteCommentVote(@PathVariable("voteId") Long voteId) {
-    return ResponseEntity.ok(voteService.deleteCommentVote(voteId));
+    Vote deletedVote = voteService.deleteCommentVote(voteId);
+    logger.info("Deleted vote: {}", deletedVote.getId());
+    return ResponseEntity.ok(deletedVote);
   }
 }
