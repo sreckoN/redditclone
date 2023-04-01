@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.assembler.PageRequestAssembler;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
@@ -55,7 +56,7 @@ public class SearchServiceImpl implements SearchService {
   @Override
   public Page<User> searchUsers(String query, Pageable pageable) {
     logger.info("Searching for usernames that match query: {}", query);
-    PageRequest pageRequest = getPageRequest(pageable, List.of("username"),
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("username"),
         Sort.by(Direction.ASC, "username"));
     return userRepository.findByUsernameContainingIgnoreCase(query, pageRequest);
   }
@@ -63,7 +64,7 @@ public class SearchServiceImpl implements SearchService {
   @Override
   public Page<Subreddit> searchSubreddits(String query, Pageable pageable) {
     logger.info("Searching for subreddits that match query: {}", query);
-    PageRequest pageRequest = getPageRequest(pageable, List.of("name"),
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("name"),
         Sort.by(Direction.ASC, "name"));
     return subredditRepository.findByNameContainingIgnoreCase(query, pageRequest);
   }
@@ -71,7 +72,8 @@ public class SearchServiceImpl implements SearchService {
   @Override
   public Page<Post> searchPosts(String query, Pageable pageable) {
     logger.info("Searching for posts that match query: {}", query);
-    PageRequest pageRequest = getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
+    PageRequest pageRequest =
+        PageRequestAssembler.getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
         Sort.by(Direction.ASC, "dateOfCreation"));
     return postRepository.findByTitleContainingIgnoreCase(query, pageRequest);
   }
@@ -83,7 +85,8 @@ public class SearchServiceImpl implements SearchService {
     if (!subredditRepository.existsById(subredditId)) {
       throw new SubredditNotFoundException(subredditId);
     }
-    PageRequest pageRequest = getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
+    PageRequest pageRequest =
+        PageRequestAssembler.getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
         Sort.by(Direction.ASC, "dateOfCreation"));
     return postRepository
         .findBySubredditIdAndTitleContainingIgnoreCase(subredditId, query, pageRequest);
@@ -92,21 +95,9 @@ public class SearchServiceImpl implements SearchService {
   @Override
   public Page<Comment> searchComments(String query, Pageable pageable) {
     logger.info("Searching for comments that match query: {}", query);
-    PageRequest pageRequest = getPageRequest(pageable, List.of("text", "created"),
+    PageRequest pageRequest =
+        PageRequestAssembler.getPageRequest(pageable, List.of("text", "created"),
         Sort.by(Direction.ASC, "text"));
     return commentRepository.findByTextContainingIgnoreCase(query, pageRequest);
-  }
-
-  private PageRequest getPageRequest(Pageable pageable, List<String> sortings, Sort defaultSort) {
-    logger.info("Checking provided sorting");
-    PageRequest pageRequest;
-    String sort = pageable.getSort().toString();
-    if (sortings.stream().anyMatch(s -> s.equals(sort))) {
-      pageRequest = PageRequest
-          .of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-    } else {
-      pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
-    }
-    return pageRequest;
   }
 }

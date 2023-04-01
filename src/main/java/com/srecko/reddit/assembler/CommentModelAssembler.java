@@ -21,7 +21,6 @@ public class CommentModelAssembler implements
   @Override
   public EntityModel<Comment> toModel(Comment comment) {
     return EntityModel.of(comment,
-        linkTo(methodOn(CommentController.class).getComment(comment.getId())).withSelfRel(),
-        linkTo(methodOn(CommentController.class).getAllComments()).withRel("comments"));
+        linkTo(methodOn(CommentController.class).getComment(comment.getId())).withSelfRel());
   }
 }

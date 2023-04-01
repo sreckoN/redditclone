@@ -3,9 +3,9 @@ package com.srecko.reddit.repository;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -23,18 +23,21 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   /**
    * Find all by subreddit list.
    *
-   * @param subreddit the subreddit
+   * @param subreddit   the subreddit
+   * @param pageRequest the page request
    * @return the list
    */
-  List<Post> findAllBySubreddit(Subreddit subreddit);
+  Page<Post> findAllBySubreddit(Subreddit subreddit,
+      PageRequest pageRequest);
 
   /**
    * Find all by user list.
    *
-   * @param user the user
+   * @param user     the user
+   * @param pageable the pageable
    * @return the list
    */
-  List<Post> findAllByUser(User user);
+  Page<Post> findAllByUser(User user, Pageable pageable);
 
   void deleteById(Long id);
 

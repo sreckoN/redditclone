@@ -1,15 +1,22 @@
 package com.srecko.reddit.controller;
 
+import com.srecko.reddit.assembler.SubredditModelAssembler;
 import com.srecko.reddit.dto.SubredditDto;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.SubredditService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,29 +39,39 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class SubredditController {
 
   private final SubredditService subredditService;
+  private final SubredditModelAssembler subredditModelAssembler;
 
   private static final Logger logger = LogManager.getLogger(SubredditController.class);
 
   /**
    * Instantiates a new Subreddit controller.
    *
-   * @param subredditService the subreddit service
+   * @param subredditService        the subreddit service
+   * @param subredditModelAssembler the subreddit model assembler
    */
   @Autowired
-  public SubredditController(SubredditService subredditService) {
+  public SubredditController(SubredditService subredditService,
+      SubredditModelAssembler subredditModelAssembler) {
     this.subredditService = subredditService;
+    this.subredditModelAssembler = subredditModelAssembler;
   }
 
   /**
    * Gets all.
    *
+   * @param pageable  the pageable
+   * @param assembler the assembler
    * @return the all
    */
   @GetMapping
-  public ResponseEntity<List<Subreddit>> getAll() {
-    List<Subreddit> all = subredditService.getAll();
-    logger.info("Returning all subreddits");
-    return ResponseEntity.ok(all);
+  public ResponseEntity<PagedModel<EntityModel<Subreddit>>> getAll(
+      @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Subreddit> assembler) {
+    Page<Subreddit> page = subredditService.getAll(pageable);
+    PagedModel<EntityModel<Subreddit>> pagedModel = assembler.toModel(page,
+        subredditModelAssembler);
+    logger.info("Returning page of subreddits");
+    return ResponseEntity.ok(pagedModel);
   }
 
   /**

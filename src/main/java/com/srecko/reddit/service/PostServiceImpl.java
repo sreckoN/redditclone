@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.assembler.PageRequestAssembler;
 import com.srecko.reddit.dto.CreatePostDto;
 import com.srecko.reddit.dto.UpdatePostDto;
 import com.srecko.reddit.dto.UserMediator;
@@ -17,6 +18,11 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,9 +81,12 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<Post> getAllPosts() {
+  public Page<Post> getAllPosts(Pageable pageable) {
     logger.info("Getting all posts");
-    return postRepository.findAll();
+    PageRequest pageRequest =
+        PageRequestAssembler.getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
+        Sort.by(Direction.ASC, "dateOfCreation"));
+    return postRepository.findAll(pageRequest);
   }
 
   @Override
@@ -92,22 +101,28 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<Post> getAllPostsForSubreddit(Long subredditId) {
+  public Page<Post> getAllPostsForSubreddit(Long subredditId, Pageable pageable) {
     logger.info("Getting posts for subreddit: {}", subredditId);
     Optional<Subreddit> subredditOptional = subredditRepository.findById(subredditId);
     if (subredditOptional.isPresent()) {
-      return postRepository.findAllBySubreddit(subredditOptional.get());
+      PageRequest pageRequest =
+          PageRequestAssembler.getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
+          Sort.by(Direction.ASC, "dateOfCreation"));
+      return postRepository.findAllBySubreddit(subredditOptional.get(), pageRequest);
     } else {
       throw new SubredditNotFoundException(subredditId);
     }
   }
 
   @Override
-  public List<Post> getAllPostsForUser(String username) {
+  public Page<Post> getAllPostsForUser(String username, Pageable pageable) {
     logger.info("Getting posts for user: {}", username);
     Optional<User> userOptional = userRepository.findUserByUsername(username);
     if (userOptional.isPresent()) {
-      return postRepository.findAllByUser(userOptional.get());
+      PageRequest pageRequest =
+          PageRequestAssembler.getPageRequest(pageable, List.of("dateOfCreation", "title", "votes"),
+          Sort.by(Direction.ASC, "dateOfCreation"));
+      return postRepository.findAllByUser(userOptional.get(), pageRequest);
     } else {
       throw new UserNotFoundException(username);
     }

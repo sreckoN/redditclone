@@ -33,6 +33,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -124,9 +129,8 @@ class PostServiceImplTest {
         userMediator);
 
     // when
-    assertThrows(SubredditNotFoundException.class, () -> {
-      postService.save(new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText()));
-    });
+    assertThrows(SubredditNotFoundException.class, () ->
+        postService.save(new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText())));
   }
 
   @Test
@@ -141,21 +145,22 @@ class PostServiceImplTest {
         userMediator);
 
     // when
-    assertThrows(UserNotFoundException.class, () -> {
-      postService.save(new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText()));
-    });
+    assertThrows(UserNotFoundException.class, () ->
+        postService.save(new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText())));
   }
 
   @Test
   void getAllPosts_ReturnsAllPosts() {
     // given
-    given(postRepository.findAll()).willReturn(List.of(post));
+    given(postRepository.findAll(any(Pageable.class))).willReturn(new PageImpl<>(List.of(post)));
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
-    List<Post> allPosts = postService.getAllPosts();
+    Page<Post> result = postService.getAllPosts(pageRequest);
 
     // then
-    assertEquals(1, allPosts.size());
+    assertEquals(1, result.getTotalElements());
+    assertTrue(result.getContent().contains(post));
   }
 
   @Test
@@ -176,53 +181,58 @@ class PostServiceImplTest {
   @Test
   void getPost_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given when then
-    assertThrows(PostNotFoundException.class, () -> {
-      postService.getPost(post.getId());
-    });
+    assertThrows(PostNotFoundException.class, () -> postService.getPost(post.getId()));
   }
 
   @Test
   void getAllPostsForSubreddit_ReturnsPosts() {
     // given
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
-    given(postRepository.findAllBySubreddit(any())).willReturn(List.of(post));
+    given(postRepository.findAllBySubreddit(any(), any(PageRequest.class)))
+        .willReturn(new PageImpl<>(List.of(post)));
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
-    List<Post> allPostsForSubreddit = postService.getAllPostsForSubreddit(subreddit.getId());
+    Page<Post> page = postService.getAllPostsForSubreddit(subreddit.getId(), pageRequest);
 
     // then
-    assertEquals(1, allPostsForSubreddit.size());
-    assertTrue(allPostsForSubreddit.contains(post));
+    assertEquals(1, page.getTotalElements());
+    assertTrue(page.getContent().contains(post));
   }
 
   @Test
   void getAllPostsForSubreddit_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() {
-    // given when then
-    assertThrows(SubredditNotFoundException.class, () -> {
-      postService.getAllPostsForSubreddit(subreddit.getId());
-    });
+    // given
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
+
+    // when then
+    assertThrows(SubredditNotFoundException.class, () ->
+        postService.getAllPostsForSubreddit(subreddit.getId(), pageRequest));
   }
 
   @Test
   void getAllPostsForUser_ReturnsPosts() {
     // given
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
-    given(postRepository.findAllByUser(any())).willReturn(List.of(post));
+    given(postRepository.findAllByUser(any(), any())).willReturn(new PageImpl<>(List.of(post)));
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
-    List<Post> allPostsForUser = postService.getAllPostsForUser(user.getUsername());
+    Page<Post> page = postService.getAllPostsForUser(user.getUsername(), pageRequest);
 
     // then
-    assertEquals(1, allPostsForUser.size());
-    assertTrue(allPostsForUser.contains(post));
+    assertEquals(1, page.getTotalElements());
+    assertTrue(page.getContent().contains(post));
   }
 
   @Test
   void getAllPostsForUser_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
-    // given when then
-    assertThrows(UserNotFoundException.class, () -> {
-      postService.getAllPostsForUser(user.getUsername());
-    });
+    // given
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
+
+    // when then
+    assertThrows(UserNotFoundException.class, () ->
+        postService.getAllPostsForUser(user.getUsername(), pageRequest));
   }
 
   @Test
@@ -244,9 +254,7 @@ class PostServiceImplTest {
   @Test
   void delete_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given when then
-    assertThrows(PostNotFoundException.class, () -> {
-      postService.delete(post.getId());
-    });
+    assertThrows(PostNotFoundException.class, () -> postService.delete(post.getId()));
   }
 
   @Test
@@ -268,8 +276,7 @@ class PostServiceImplTest {
   @Test
   void update_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given when then
-    assertThrows(PostNotFoundException.class, () -> {
-      postService.update(new UpdatePostDto(post.getId(), post.getTitle(), post.getText()));
-    });
+    assertThrows(PostNotFoundException.class, () ->
+        postService.update(new UpdatePostDto(post.getId(), post.getTitle(), post.getText())));
   }
 }

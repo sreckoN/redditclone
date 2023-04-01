@@ -1,6 +1,5 @@
 package com.srecko.reddit.config;
 
-import com.srecko.reddit.controller.VoteController;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;

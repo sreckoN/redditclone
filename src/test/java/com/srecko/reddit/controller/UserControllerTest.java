@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.TestPropertySource;
@@ -61,8 +62,15 @@ class UserControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/users")
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(3)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].userList", hasSize(3)))
+        .andExpect(jsonPath("$._embedded.userList[0].username", is(user.getUsername())))
+        .andExpect(jsonPath("$._embedded.userList[1].username", is(user2.getUsername())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(3)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
   @Test

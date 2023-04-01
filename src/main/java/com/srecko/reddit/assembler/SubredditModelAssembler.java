@@ -21,7 +21,6 @@ public class SubredditModelAssembler implements
   @Override
   public EntityModel<Subreddit> toModel(Subreddit subreddit) {
     return EntityModel.of(subreddit,
-        linkTo(methodOn(SubredditController.class).getSubreddit(subreddit.getId())).withSelfRel(),
-        linkTo(methodOn(SubredditController.class).getAll()).withRel("subreddits"));
+        linkTo(methodOn(SubredditController.class).getSubreddit(subreddit.getId())).withSelfRel());
   }
 }

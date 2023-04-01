@@ -27,6 +27,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -73,9 +77,8 @@ class UserDetailServiceImplTest {
   @Test
   void loadUserByUsername_ThrowsUserNotFoundExceptionException_WhenUserDoesNotExist() {
     // given when then
-    assertThrows(UserNotFoundException.class, () -> {
-      userService.loadUserByUsername(user.getUsername());
-    });
+    assertThrows(UserNotFoundException.class, () ->
+        userService.loadUserByUsername(user.getUsername()));
   }
 
   @Test
@@ -85,23 +88,23 @@ class UserDetailServiceImplTest {
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
     // when then
-    assertThrows(AccountDisabledException.class, () -> {
-      userService.loadUserByUsername(user.getUsername());
-    });
+    assertThrows(AccountDisabledException.class, () ->
+        userService.loadUserByUsername(user.getUsername()));
   }
 
   @Test
   void getUsers_ReturnsListOfAllUsers() {
     // given
-    given(userRepository.findAll()).willReturn(List.of(user));
+    given(userRepository.findAll(any(PageRequest.class))).willReturn(new PageImpl<>(List.of(user)));
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "username"));
 
     // when
-    List<User> users = userService.getUsers();
+    Page<User> page = userService.getUsers(pageRequest);
 
     // then
-    assertNotNull(users);
-    assertEquals(1, users.size());
-    assertTrue(users.contains(user));
+    assertNotNull(page);
+    assertEquals(1, page.getTotalElements());
+    assertTrue(page.getContent().contains(user));
   }
 
   @Test
@@ -124,9 +127,7 @@ class UserDetailServiceImplTest {
   @Test
   void deleteUser_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
     // given when then
-    assertThrows(UserNotFoundException.class, () -> {
-      userService.deleteUser(user.getUsername());
-    });
+    assertThrows(UserNotFoundException.class, () -> userService.deleteUser(user.getUsername()));
   }
 
   @Test

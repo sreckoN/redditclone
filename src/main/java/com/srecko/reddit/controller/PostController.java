@@ -1,5 +1,6 @@
 package com.srecko.reddit.controller;
 
+import com.srecko.reddit.assembler.PostModelAssembler;
 import com.srecko.reddit.dto.CreatePostDto;
 import com.srecko.reddit.dto.UpdatePostDto;
 import com.srecko.reddit.entity.Post;
@@ -7,10 +8,17 @@ import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.PostService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,29 +41,38 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class PostController {
 
   private final PostService postService;
+  private final PostModelAssembler postModelAssembler;
 
   private static final Logger logger = LogManager.getLogger(PostController.class);
 
   /**
    * Instantiates a new Post controller.
    *
-   * @param postService the post service
+   * @param postService        the post service
+   * @param postModelAssembler the post model assembler
    */
   @Autowired
-  public PostController(PostService postService) {
+  public PostController(PostService postService,
+      PostModelAssembler postModelAssembler) {
     this.postService = postService;
+    this.postModelAssembler = postModelAssembler;
   }
 
   /**
    * Gets all posts.
    *
+   * @param pageable  the pageable
+   * @param assembler the assembler
    * @return the all posts
    */
   @GetMapping
-  public ResponseEntity<List<Post>> getAllPosts() {
-    List<Post> allPosts = postService.getAllPosts();
+  public ResponseEntity<PagedModel<EntityModel<Post>>> getAllPosts(
+      @PageableDefault(sort = "dateOfCreation", direction = Direction.ASC)Pageable pageable,
+      PagedResourcesAssembler<Post> assembler) {
+    Page<Post> page = postService.getAllPosts(pageable);
+    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning all posts");
-    return ResponseEntity.ok(allPosts);
+    return ResponseEntity.ok(pagedModel);
   }
 
   /**
@@ -75,27 +92,38 @@ public class PostController {
    * Gets all posts for subreddit.
    *
    * @param subredditId the subreddit id
+   * @param pageable    the pageable
+   * @param assembler   the assembler
    * @return the all posts for subreddit
    */
   @GetMapping("/subreddit/{subredditId}")
-  public ResponseEntity<List<Post>> getAllPostsForSubreddit(
-      @PathVariable("subredditId") Long subredditId) {
-    List<Post> allPostsForSubreddit = postService.getAllPostsForSubreddit(subredditId);
+  public ResponseEntity<PagedModel<EntityModel<Post>>> getAllPostsForSubreddit(
+      @PathVariable("subredditId") Long subredditId,
+      @PageableDefault(sort = "dateOfCreation", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Post> assembler) {
+    Page<Post> page = postService.getAllPostsForSubreddit(subredditId, pageable);
+    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning posts for subreddit: {}", subredditId);
-    return ResponseEntity.ok(allPostsForSubreddit);
+    return ResponseEntity.ok(pagedModel);
   }
 
   /**
    * Gets posts for user.
    *
-   * @param username the username
+   * @param username  the username
+   * @param pageable  the pageable
+   * @param assembler the assembler
    * @return the posts for user
    */
   @GetMapping("/user/{username}")
-  public ResponseEntity<List<Post>> getPostsForUser(@PathVariable("username") String username) {
-    List<Post> allPostsForUser = postService.getAllPostsForUser(username);
+  public ResponseEntity<PagedModel<EntityModel<Post>>> getPostsForUser(
+      @PathVariable("username") String username,
+      @PageableDefault(sort = "dateOfCreation", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Post> assembler) {
+    Page<Post> page = postService.getAllPostsForUser(username, pageable);
+    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning posts for user: {}", username);
-    return ResponseEntity.ok(allPostsForUser);
+    return ResponseEntity.ok(pagedModel);
   }
 
   /**

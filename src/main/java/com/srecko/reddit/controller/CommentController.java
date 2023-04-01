@@ -1,15 +1,22 @@
 package com.srecko.reddit.controller;
 
+import com.srecko.reddit.assembler.CommentModelAssembler;
 import com.srecko.reddit.dto.CommentDto;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.CommentService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,44 +38,59 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class CommentController {
 
   private final CommentService commentService;
+  private final CommentModelAssembler commentModelAssembler;
 
   private static final Logger logger = LogManager.getLogger(CommentController.class);
 
   /**
    * Instantiates a new Comment controller.
    *
-   * @param commentService the comment service
+   * @param commentService        the comment service
+   * @param commentModelAssembler the comment model assembler
    */
   @Autowired
-  public CommentController(CommentService commentService) {
+  public CommentController(CommentService commentService,
+      CommentModelAssembler commentModelAssembler) {
     this.commentService = commentService;
+    this.commentModelAssembler = commentModelAssembler;
   }
 
   /**
    * Gets comments for post.
    *
-   * @param postId the post id
+   * @param postId    the post id
+   * @param pageable  the pageable
+   * @param assembler the assembler
    * @return the comments for post
    */
   @GetMapping("/post/{postId}")
-  public ResponseEntity<List<Comment>> getCommentsForPost(@PathVariable("postId") Long postId) {
-    List<Comment> allCommentsForPost = commentService.getAllCommentsForPost(postId);
+  public ResponseEntity<PagedModel<EntityModel<Comment>>> getCommentsForPost(
+      @PathVariable("postId") Long postId,
+      @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Comment> assembler) {
+    Page<Comment> page = commentService.getAllCommentsForPost(postId, pageable);
+    PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
     logger.info("Returning all comments for post with id: {}", postId);
-    return ResponseEntity.ok(allCommentsForPost);
+    return ResponseEntity.ok(pagedModel);
   }
 
   /**
    * Gets comments for username.
    *
-   * @param username the username
+   * @param username  the username
+   * @param pageable  the pageable
+   * @param assembler the assembler
    * @return the comments for username
    */
   @GetMapping("/user/{username}")
-  public ResponseEntity<List<Comment>> getCommentsForUsername(
-      @PathVariable("username") String username) {
-    List<Comment> allCommentsForUsername = commentService.getAllCommentsForUsername(username);
+  public ResponseEntity<PagedModel<EntityModel<Comment>>> getCommentsForUsername(
+      @PathVariable("username") String username,
+      @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Comment> assembler) {
+    Page<Comment> page = commentService.getAllCommentsForUsername(username, pageable);
+    PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
     logger.info("Returning all comments for username: {}", username);
-    return ResponseEntity.ok(allCommentsForUsername);
+    return ResponseEntity.ok(pagedModel);
   }
 
   /**
@@ -87,13 +109,18 @@ public class CommentController {
   /**
    * Gets all comments.
    *
+   * @param pageable  the pageable
+   * @param assembler the assembler
    * @return the all comments
    */
   @GetMapping
-  public ResponseEntity<List<Comment>> getAllComments() {
-    List<Comment> allComments = commentService.getAllComments();
+  public ResponseEntity<PagedModel<EntityModel<Comment>>> getAllComments(
+      @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Comment> assembler) {
+    Page<Comment> page = commentService.getAllComments(pageable);
+    PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
     logger.info("Returning all comments");
-    return ResponseEntity.ok(allComments);
+    return ResponseEntity.ok(pagedModel);
   }
 
   /**

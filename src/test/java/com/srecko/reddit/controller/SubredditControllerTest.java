@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -75,8 +76,15 @@ class SubredditControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits")
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(2)));
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].subredditList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.subredditList[0].name", is(subreddit1.getName())))
+        .andExpect(jsonPath("$._embedded.subredditList[1].name", is(subreddit2.getName())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
   @Test
