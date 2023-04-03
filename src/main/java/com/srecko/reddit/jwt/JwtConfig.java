@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Srecko Nikolic
  */
-@Configuration
-@ConfigurationProperties(prefix = "application.jwt")
 public class JwtConfig {
 
   private final String secretKey;
