@@ -9,9 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.controller.utils.JwtTestUtils;
 import com.srecko.reddit.controller.utils.WithMockCustomUser;
-import com.srecko.reddit.dto.VoteCommentDto;
-import com.srecko.reddit.dto.VoteDto;
-import com.srecko.reddit.dto.VotePostDto;
+import com.srecko.reddit.dto.requests.VoteCommentRequest;
+import com.srecko.reddit.dto.requests.VotePostRequest;
+import com.srecko.reddit.dto.requests.VoteRequest;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
@@ -103,7 +103,7 @@ class VoteControllerTest {
   @WithMockCustomUser
   void savePostVote_ReturnsVote_WhenSuccessfullyCreated() throws Exception {
     VotePost vote = new VotePost(user, VoteType.UPVOTE, post);
-    VotePostDto voteDto = new VotePostDto(vote.getType(), post.getId());
+    VotePostRequest voteDto = new VotePostRequest(vote.getType(), post.getId());
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(voteDto);
     mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
@@ -120,9 +120,9 @@ class VoteControllerTest {
   @Test
   @WithMockCustomUser
   void savePostVote_ThrowsPostNotFoundException_WhenPostDoesNotExist() throws Exception {
-    VoteDto voteDto = new VotePostDto(VoteType.UPVOTE, 0L);
+    VoteRequest voteRequest = new VotePostRequest(VoteType.UPVOTE, 0L);
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(voteDto);
+    String valueAsString = objectMapper.writeValueAsString(voteRequest);
     mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
             .contentType(APPLICATION_JSON)
             .content(valueAsString)
@@ -134,9 +134,9 @@ class VoteControllerTest {
 
   @Test
   void savePostVote_ThrowsDtoValidationException_WhenInvalidDtoProvided() throws Exception {
-    VoteDto voteDto = new VotePostDto(VoteType.UPVOTE, null);
+    VoteRequest voteRequest = new VotePostRequest(VoteType.UPVOTE, null);
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(voteDto);
+    String valueAsString = objectMapper.writeValueAsString(voteRequest);
     mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/post")
             .contentType(APPLICATION_JSON)
             .content(valueAsString)
@@ -151,7 +151,7 @@ class VoteControllerTest {
   @WithMockCustomUser
   void saveCommentVote_ReturnsVote_WhenSuccessfullySaved() throws Exception {
     VoteComment vote = new VoteComment(user, VoteType.UPVOTE, comment);
-    VoteCommentDto voteDto = new VoteCommentDto(vote.getType(), comment.getId());
+    VoteCommentRequest voteDto = new VoteCommentRequest(vote.getType(), comment.getId());
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(voteDto);
     mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
@@ -168,9 +168,9 @@ class VoteControllerTest {
   @Test
   @WithMockCustomUser
   void saveCommentVote_ThrowsCommentNotFoundException_WhenCommentDoesNotExist() throws Exception {
-    VoteDto voteDto = new VoteCommentDto(VoteType.UPVOTE, 0L);
+    VoteRequest voteRequest = new VoteCommentRequest(VoteType.UPVOTE, 0L);
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(voteDto);
+    String valueAsString = objectMapper.writeValueAsString(voteRequest);
     mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
             .contentType(APPLICATION_JSON)
             .content(valueAsString)
@@ -182,9 +182,9 @@ class VoteControllerTest {
 
   @Test
   void saveCommentVote_ThrowsDtoValidationException_WhenInvalidDtoProvided() throws Exception {
-    VoteDto voteDto = new VoteCommentDto(VoteType.UPVOTE, null);
+    VoteRequest voteRequest = new VoteCommentRequest(VoteType.UPVOTE, null);
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(voteDto);
+    String valueAsString = objectMapper.writeValueAsString(voteRequest);
     mockMvc.perform(MockMvcRequestBuilders.post("/api/votes/comment")
             .contentType(APPLICATION_JSON)
             .content(valueAsString)

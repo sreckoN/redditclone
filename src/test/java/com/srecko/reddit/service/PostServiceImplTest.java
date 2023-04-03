@@ -8,9 +8,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
-import com.srecko.reddit.dto.CreatePostDto;
-import com.srecko.reddit.dto.UpdatePostDto;
+import com.srecko.reddit.dto.PostDto;
 import com.srecko.reddit.dto.UserMediator;
+import com.srecko.reddit.dto.requests.CreatePostRequest;
+import com.srecko.reddit.dto.requests.UpdatePostRequest;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -44,7 +46,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {PostServiceImpl.class})
+@ContextConfiguration(classes = {PostServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
 class PostServiceImplTest {
 
@@ -59,6 +61,8 @@ class PostServiceImplTest {
 
   @Autowired
   private PostService postService;
+
+  private final ModelMapper modelMapper = new ModelMapper();
 
   private User user;
   private Subreddit subreddit;
@@ -104,8 +108,8 @@ class PostServiceImplTest {
         userMediator);
 
     // when
-    Post saved = postService.save(
-        new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText()));
+    PostDto saved = postService.save(
+        new CreatePostRequest(subreddit.getId(), post.getTitle(), post.getText()));
 
     // then
     assertNotNull(saved);
@@ -130,7 +134,7 @@ class PostServiceImplTest {
 
     // when
     assertThrows(SubredditNotFoundException.class, () ->
-        postService.save(new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText())));
+        postService.save(new CreatePostRequest(subreddit.getId(), post.getTitle(), post.getText())));
   }
 
   @Test
@@ -146,7 +150,7 @@ class PostServiceImplTest {
 
     // when
     assertThrows(UserNotFoundException.class, () ->
-        postService.save(new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText())));
+        postService.save(new CreatePostRequest(subreddit.getId(), post.getTitle(), post.getText())));
   }
 
   @Test
@@ -156,11 +160,11 @@ class PostServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
-    Page<Post> result = postService.getAllPosts(pageRequest);
+    Page<PostDto> result = postService.getAllPosts(pageRequest);
 
     // then
     assertEquals(1, result.getTotalElements());
-    assertTrue(result.getContent().contains(post));
+    assertTrue(result.getContent().contains(modelMapper.map(post, PostDto.class)));
   }
 
   @Test
@@ -169,7 +173,7 @@ class PostServiceImplTest {
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
 
     // when
-    Post returned = postService.getPost(this.post.getId());
+    PostDto returned = postService.getPost(this.post.getId());
 
     // then
     assertEquals(post.getTitle(), returned.getTitle());
@@ -193,11 +197,11 @@ class PostServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
-    Page<Post> page = postService.getAllPostsForSubreddit(subreddit.getId(), pageRequest);
+    Page<PostDto> page = postService.getAllPostsForSubreddit(subreddit.getId(), pageRequest);
 
     // then
     assertEquals(1, page.getTotalElements());
-    assertTrue(page.getContent().contains(post));
+    assertTrue(page.getContent().contains(modelMapper.map(post, PostDto.class)));
   }
 
   @Test
@@ -218,11 +222,11 @@ class PostServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
-    Page<Post> page = postService.getAllPostsForUser(user.getUsername(), pageRequest);
+    Page<PostDto> page = postService.getAllPostsForUser(user.getUsername(), pageRequest);
 
     // then
     assertEquals(1, page.getTotalElements());
-    assertTrue(page.getContent().contains(post));
+    assertTrue(page.getContent().contains(modelMapper.map(post, PostDto.class)));
   }
 
   @Test
@@ -241,7 +245,7 @@ class PostServiceImplTest {
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
 
     // when
-    Post deleted = postService.delete(post.getId());
+    PostDto deleted = postService.delete(post.getId());
 
     // then
     assertNotNull(deleted);
@@ -261,22 +265,22 @@ class PostServiceImplTest {
   void update_ReturnsUpdatedPost_WhenSuccessfullyUpdated() {
     // given
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
-    given(postRepository.save(any())).willReturn(
-        new Post(user, "New title", "New text", subreddit));
+    Post post = new Post(user, "New title", "New text", subreddit);
+    given(postRepository.save(any())).willReturn(post);
 
     // when
-    Post updated = postService.update(new UpdatePostDto(post.getId(), "New title", "New text"));
+    PostDto updated = postService.update(new UpdatePostRequest(this.post.getId(), "New title", "New text"));
 
     // then
     assertNotNull(updated);
-    assertEquals("New title", updated.getTitle());
-    assertEquals("New text", updated.getText());
+    assertEquals(post.getTitle(), updated.getTitle());
+    assertEquals(post.getText(), updated.getText());
   }
 
   @Test
   void update_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
     // given when then
     assertThrows(PostNotFoundException.class, () ->
-        postService.update(new UpdatePostDto(post.getId(), post.getTitle(), post.getText())));
+        postService.update(new UpdatePostRequest(post.getId(), post.getTitle(), post.getText())));
   }
 }

@@ -6,11 +6,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.srecko.reddit.dto.AuthenticationRequest;
-import com.srecko.reddit.dto.AuthenticationResponse;
-import com.srecko.reddit.dto.RegistrationRequest;
+import com.srecko.reddit.dto.requests.AuthenticationRequest;
+import com.srecko.reddit.dto.requests.RegistrationRequest;
+import com.srecko.reddit.dto.responses.AuthenticationResponse;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.authentication.EmailAlreadyInUseException;
@@ -117,12 +116,7 @@ class AuthenticationServiceImplTest {
 
   @Test
   void register_ThrowsRegistrationRequestNullException_WhenGivenNullRegistrationRequest() {
-    // given
-    when(userService.existsUserByEmail(any())).thenReturn(true);
-    when(userService.existsUserByUsername(any())).thenReturn(true);
-    when(userService.save(any())).thenReturn(user);
-
-    // when then
+    // given when then
     assertThrows(RegistrationRequestNullException.class, () -> {
       authenticationServiceImpl.register(null, "");
     });
@@ -242,7 +236,7 @@ class AuthenticationServiceImplTest {
     AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
     given(authenticationManagerBuilder.getOrBuild()).willReturn(authenticationManager);
     given(authenticationManager.authenticate(token)).willReturn(null);
-    given(userService.getUserByUsername(user.getUsername())).willReturn(user);
+    given(userService.getUserByUsernameInternal(user.getUsername())).willReturn(user);
     given(jwtUtils.getAccessToken(any())).willReturn(accessToken);
     given(jwtUtils.getRefreshToken(any())).willReturn(refreshToken);
 

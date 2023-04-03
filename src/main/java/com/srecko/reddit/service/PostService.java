@@ -1,8 +1,8 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.dto.CreatePostDto;
-import com.srecko.reddit.dto.UpdatePostDto;
-import com.srecko.reddit.entity.Post;
+import com.srecko.reddit.dto.PostDto;
+import com.srecko.reddit.dto.requests.CreatePostRequest;
+import com.srecko.reddit.dto.requests.UpdatePostRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,7 +19,7 @@ public interface PostService {
    * @param postDto the post dto
    * @return the post
    */
-  Post save(CreatePostDto postDto);
+  PostDto save(CreatePostRequest postDto);
 
   /**
    * Gets all posts.
@@ -27,7 +27,7 @@ public interface PostService {
    * @param pageable the pageable
    * @return the all posts
    */
-  Page<Post> getAllPosts(Pageable pageable);
+  Page<PostDto> getAllPosts(Pageable pageable);
 
   /**
    * Gets post.
@@ -35,7 +35,7 @@ public interface PostService {
    * @param postId the post id
    * @return the post
    */
-  Post getPost(Long postId);
+  PostDto getPost(Long postId);
 
   /**
    * Gets all posts for subreddit.
@@ -44,7 +44,7 @@ public interface PostService {
    * @param pageable    the pageable
    * @return the all posts for subreddit
    */
-  Page<Post> getAllPostsForSubreddit(Long subredditId, Pageable pageable);
+  Page<PostDto> getAllPostsForSubreddit(Long subredditId, Pageable pageable);
 
   /**
    * Gets all posts for user.
@@ -53,7 +53,7 @@ public interface PostService {
    * @param pageable the pageable
    * @return the all posts for user
    */
-  Page<Post> getAllPostsForUser(String username, Pageable pageable);
+  Page<PostDto> getAllPostsForUser(String username, Pageable pageable);
 
   /**
    * Delete post.
@@ -61,7 +61,7 @@ public interface PostService {
    * @param postId the post id
    * @return the post
    */
-  Post delete(Long postId);
+  PostDto delete(Long postId);
 
   /**
    * Update post.
@@ -69,5 +69,5 @@ public interface PostService {
    * @param postDto the post dto
    * @return the post
    */
-  Post update(UpdatePostDto postDto);
+  PostDto update(UpdatePostRequest postDto);
 }

@@ -1,6 +1,6 @@
 package com.srecko.reddit.exception;
 
-import com.srecko.reddit.dto.ExceptionResponse;
+import com.srecko.reddit.dto.responses.ExceptionResponse;
 import com.srecko.reddit.exception.authentication.AuthenticationRequestInvalidException;
 import com.srecko.reddit.exception.authentication.AuthorizationHeaderMissingException;
 import com.srecko.reddit.exception.authentication.EmailAlreadyInUseException;

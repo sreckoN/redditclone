@@ -3,37 +3,41 @@ package com.srecko.reddit.dto;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.srecko.reddit.entity.Post;
+import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
 import java.util.Date;
 import java.util.Objects;
 
 /**
- * The type Comment dto.
+ * The type Post dto.
  *
  * @author Srecko Nikolic
  */
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class CommentDto {
+public class PostDto {
 
   private Long id;
+
+  private Date dateOfCreation;
+
+  private String title;
 
   private String text;
 
   private int votes;
 
-  private Date created;
+  private int commentsCounter;
 
   @JsonIdentityReference(alwaysAsId = true)
   private User user;
 
   @JsonIdentityReference(alwaysAsId = true)
-  private Post post;
+  private Subreddit subreddit;
 
   /**
-   * Instantiates a new Comment dto.
+   * Instantiates a new Post dto.
    */
-  public CommentDto() {
+  public PostDto() {
   }
 
   @Override
@@ -44,15 +48,15 @@ public class CommentDto {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CommentDto that = (CommentDto) o;
-    return id.equals(that.id) && text.equals(that.text) && Objects.equals(created, that.created)
-        && Objects.equals(user.getId(), that.user.getId()) && Objects.equals(post.getId(),
-        that.post.getId());
+    PostDto postDto = (PostDto) o;
+    return id.equals(postDto.id) && Objects.equals(dateOfCreation, postDto.dateOfCreation)
+        && title.equals(postDto.title) && text.equals(postDto.text) && user.equals(postDto.user)
+        && subreddit.equals(postDto.subreddit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, text, votes, created, user, post);
+    return Objects.hash(id, dateOfCreation, title, text, user, subreddit);
   }
 
   /**
@@ -71,6 +75,42 @@ public class CommentDto {
    */
   public void setId(Long id) {
     this.id = id;
+  }
+
+  /**
+   * Gets date of creation.
+   *
+   * @return the date of creation
+   */
+  public Date getDateOfCreation() {
+    return dateOfCreation;
+  }
+
+  /**
+   * Sets date of creation.
+   *
+   * @param dateOfCreation the date of creation
+   */
+  public void setDateOfCreation(Date dateOfCreation) {
+    this.dateOfCreation = dateOfCreation;
+  }
+
+  /**
+   * Gets title.
+   *
+   * @return the title
+   */
+  public String getTitle() {
+    return title;
+  }
+
+  /**
+   * Sets title.
+   *
+   * @param title the title
+   */
+  public void setTitle(String title) {
+    this.title = title;
   }
 
   /**
@@ -110,21 +150,21 @@ public class CommentDto {
   }
 
   /**
-   * Gets created.
+   * Gets comments counter.
    *
-   * @return the created
+   * @return the comments counter
    */
-  public Date getCreated() {
-    return created;
+  public int getCommentsCounter() {
+    return commentsCounter;
   }
 
   /**
-   * Sets created.
+   * Sets comments counter.
    *
-   * @param created the created
+   * @param commentsCounter the comments counter
    */
-  public void setCreated(Date created) {
-    this.created = created;
+  public void setCommentsCounter(int commentsCounter) {
+    this.commentsCounter = commentsCounter;
   }
 
   /**
@@ -146,20 +186,20 @@ public class CommentDto {
   }
 
   /**
-   * Gets post.
+   * Gets subreddit.
    *
-   * @return the post
+   * @return the subreddit
    */
-  public Post getPost() {
-    return post;
+  public Subreddit getSubreddit() {
+    return subreddit;
   }
 
   /**
-   * Sets post.
+   * Sets subreddit.
    *
-   * @param post the post
+   * @param subreddit the subreddit
    */
-  public void setPost(Post post) {
-    this.post = post;
+  public void setSubreddit(Subreddit subreddit) {
+    this.subreddit = subreddit;
   }
 }

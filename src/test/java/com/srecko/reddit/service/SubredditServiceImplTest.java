@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.srecko.reddit.dto.SubredditDto;
 import com.srecko.reddit.dto.UserMediator;
+import com.srecko.reddit.dto.requests.SubredditRequest;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -40,7 +42,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {SubredditServiceImpl.class})
+@ContextConfiguration(classes = {SubredditServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
 class SubredditServiceImplTest {
 
@@ -54,8 +56,12 @@ class SubredditServiceImplTest {
   private SubredditService subredditService;
 
   private User user;
+
   private Subreddit subreddit;
+
   private Post post;
+
+  private final ModelMapper modelMapper = new ModelMapper();
 
   @BeforeEach
   void setUp() {
@@ -90,11 +96,11 @@ class SubredditServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
 
     // when
-    Page<Subreddit> page = subredditService.getAll(pageRequest);
+    Page<SubredditDto> page = subredditService.getAll(pageRequest);
 
     // then
     assertEquals(1, page.getTotalElements());
-    assertTrue(page.getContent().contains(subreddit));
+    assertTrue(page.getContent().contains(modelMapper.map(subreddit, SubredditDto.class)));
   }
 
   @Test
@@ -103,7 +109,7 @@ class SubredditServiceImplTest {
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
 
     // when
-    Subreddit subredditById = subredditService.getSubredditById(subreddit.getId());
+    SubredditDto subredditById = subredditService.getSubredditById(subreddit.getId());
 
     // then
     assertNotNull(subredditById);
@@ -135,8 +141,8 @@ class SubredditServiceImplTest {
         userMediator);
 
     // when
-    Subreddit saved = subredditService.save(
-        new SubredditDto(subreddit.getId(), subreddit.getName(), subreddit.getDescription()));
+    SubredditDto saved = subredditService.save(
+        new SubredditRequest(subreddit.getId(), subreddit.getName(), subreddit.getDescription()));
 
     // then
     assertNotNull(saved);
@@ -159,7 +165,7 @@ class SubredditServiceImplTest {
     // when then
     assertThrows(UserNotFoundException.class, () -> {
       subredditService.save(
-          new SubredditDto(subreddit.getId(), subreddit.getName(), subreddit.getDescription()));
+          new SubredditRequest(subreddit.getId(), subreddit.getName(), subreddit.getDescription()));
     });
   }
 
@@ -169,7 +175,7 @@ class SubredditServiceImplTest {
     given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
 
     // when
-    Subreddit deleted = subredditService.delete(subreddit.getId());
+    SubredditDto deleted = subredditService.delete(subreddit.getId());
 
     // then
     assertEquals(subreddit.getName(), deleted.getName());
@@ -193,8 +199,8 @@ class SubredditServiceImplTest {
         new Subreddit("New name", "New description", user));
 
     // when
-    Subreddit updated = subredditService.update(
-        new SubredditDto(subreddit.getId(), "New name", "New description"));
+    SubredditDto updated = subredditService.update(
+        new SubredditRequest(subreddit.getId(), "New name", "New description"));
 
     // then
     assertEquals(subreddit.getName(), updated.getName());
@@ -206,7 +212,7 @@ class SubredditServiceImplTest {
   void update_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() {
     // given when then
     assertThrows(SubredditNotFoundException.class, () -> {
-      subredditService.update(new SubredditDto(subreddit.getId(), "New name", "New description"));
+      subredditService.update(new SubredditRequest(subreddit.getId(), "New name", "New description"));
     });
   }
 }

@@ -1,5 +1,6 @@
 package com.srecko.reddit.service;
 
+import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ public interface UserService {
    * @param pageable the pageable
    * @return the users
    */
-  Page<User> getUsers(Pageable pageable);
+  Page<UserDto> getUsers(Pageable pageable);
 
   /**
    * Gets user by username.
@@ -25,13 +26,21 @@ public interface UserService {
    * @param username the username
    * @return the user by username
    */
-  User getUserByUsername(String username);
+  UserDto getUserByUsername(String username);
 
   /**
-   * Gets user by email.
+   * Gets user by username.
+   *
+   * @param username the username
+   * @return the user by username
+   */
+  User getUserByUsernameInternal(String username);
+
+  /**
+   * Gets user by email internal.
    *
    * @param email the email
-   * @return the user by email
+   * @return the user by email internal
    */
   User getUserByEmail(String email);
 
@@ -41,7 +50,7 @@ public interface UserService {
    * @param username the username
    * @return the user
    */
-  User deleteUser(String username);
+  UserDto deleteUser(String username);
 
   /**
    * Exists user by email boolean.
@@ -65,7 +74,7 @@ public interface UserService {
    * @param user the user
    * @return the user
    */
-  User save(User user);
+  UserDto save(User user);
 
   /**
    * Delete unverified users.

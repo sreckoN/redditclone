@@ -1,14 +1,14 @@
-package com.srecko.reddit.dto;
+package com.srecko.reddit.dto.requests;
 
 import com.srecko.reddit.entity.VoteType;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * The abstract type Vote dto.
+ * The abstract type Vote request.
  *
  * @author Srecko Nikolic
  */
-public abstract class VoteDto {
+public abstract class VoteRequest {
 
   @NotNull
   private VoteType type;
@@ -18,14 +18,14 @@ public abstract class VoteDto {
    *
    * @param type the type
    */
-  public VoteDto(VoteType type) {
+  public VoteRequest(VoteType type) {
     this.type = type;
   }
 
   /**
    * Instantiates a new Vote dto.
    */
-  public VoteDto() {
+  public VoteRequest() {
   }
 
   /**

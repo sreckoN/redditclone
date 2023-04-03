@@ -1,28 +1,29 @@
 package com.srecko.reddit.dto;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.srecko.reddit.entity.Post;
+import com.srecko.reddit.entity.User;
 import com.srecko.reddit.entity.VoteType;
-import jakarta.validation.constraints.NotNull;
 
 /**
  * The type Vote post dto.
  *
  * @author Srecko Nikolic
  */
-public class VotePostDto extends VoteDto {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class VotePostDto {
 
-  @NotNull
-  private Long postId;
+  private Long id;
 
-  /**
-   * Instantiates a new Vote post dto.
-   *
-   * @param type   the type
-   * @param postId the post id
-   */
-  public VotePostDto(VoteType type, Long postId) {
-    super(type);
-    this.postId = postId;
-  }
+  @JsonIdentityReference(alwaysAsId = true)
+  private User user;
+
+  @JsonIdentityReference(alwaysAsId = true)
+  private Post post;
+
+  private VoteType type;
 
   /**
    * Instantiates a new Vote post dto.
@@ -31,20 +32,74 @@ public class VotePostDto extends VoteDto {
   }
 
   /**
-   * Gets post id.
+   * Gets id.
    *
-   * @return the post id
+   * @return the id
    */
-  public Long getPostId() {
-    return postId;
+  public Long getId() {
+    return id;
   }
 
   /**
-   * Sets post id.
+   * Sets id.
    *
-   * @param postId the post id
+   * @param id the id
    */
-  public void setPostId(Long postId) {
-    this.postId = postId;
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  /**
+   * Gets user.
+   *
+   * @return the user
+   */
+  public User getUser() {
+    return user;
+  }
+
+  /**
+   * Sets user.
+   *
+   * @param user the user
+   */
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  /**
+   * Gets post.
+   *
+   * @return the post
+   */
+  public Post getPost() {
+    return post;
+  }
+
+  /**
+   * Sets post.
+   *
+   * @param post the post
+   */
+  public void setPost(Post post) {
+    this.post = post;
+  }
+
+  /**
+   * Gets type.
+   *
+   * @return the type
+   */
+  public VoteType getType() {
+    return type;
+  }
+
+  /**
+   * Sets type.
+   *
+   * @param type the type
+   */
+  public void setType(VoteType type) {
+    this.type = type;
   }
 }

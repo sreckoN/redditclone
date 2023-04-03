@@ -1,7 +1,7 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.dto.AuthenticationResponse;
-import com.srecko.reddit.dto.TokenRefreshRequest;
+import com.srecko.reddit.dto.requests.TokenRefreshRequest;
+import com.srecko.reddit.dto.responses.AuthenticationResponse;
 import com.srecko.reddit.entity.RefreshToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.authentication.RefreshTokenInvalidException;
@@ -75,7 +75,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   @Override
   public void saveRefreshToken(String token, String username) {
     logger.info("Saving refresh token to the database for user: {}", username);
-    User user = userService.getUserByUsername(username);
+    User user = userService.getUserByUsernameInternal(username);
     saveRefreshToken(token, user);
   }
 

@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.controller.utils.JwtTestUtils;
 import com.srecko.reddit.controller.utils.WithMockCustomUser;
-import com.srecko.reddit.dto.CommentDto;
+import com.srecko.reddit.dto.requests.CommentRequest;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
@@ -98,9 +98,9 @@ class CommentControllerTest {
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].commentList", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.commentList[0].text", is(comment1.getText())))
-        .andExpect(jsonPath("$._embedded.commentList[1].text", is(comment2.getText())))
+        .andExpect(jsonPath("$.['_embedded'].commentDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.commentDtoList[0].text", is(comment1.getText())))
+        .andExpect(jsonPath("$._embedded.commentDtoList[1].text", is(comment2.getText())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))
@@ -126,9 +126,9 @@ class CommentControllerTest {
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].commentList", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.commentList[0].text", is(comment1.getText())))
-        .andExpect(jsonPath("$._embedded.commentList[1].text", is(comment2.getText())))
+        .andExpect(jsonPath("$.['_embedded'].commentDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.commentDtoList[0].text", is(comment1.getText())))
+        .andExpect(jsonPath("$._embedded.commentDtoList[1].text", is(comment2.getText())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))
@@ -150,9 +150,9 @@ class CommentControllerTest {
     Comment comment = new Comment(user, "Good", post);
     commentRepository.save(comment);
 
-    CommentDto commentDto = new CommentDto(comment.getText(), post.getId());
+    CommentRequest commentRequest = new CommentRequest(comment.getText(), post.getId());
     ObjectMapper objectMapper = new ObjectMapper();
-    String json = objectMapper.writeValueAsString(commentDto);
+    String json = objectMapper.writeValueAsString(commentRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -169,9 +169,9 @@ class CommentControllerTest {
   @Test
   @WithMockCustomUser
   void createComment_ThrowsPostNotFoundException_WhenPostDoesNotExist() throws Exception {
-    CommentDto commentDto = new CommentDto("New comment", 0L);
+    CommentRequest commentRequest = new CommentRequest("New comment", 0L);
     ObjectMapper objectMapper = new ObjectMapper();
-    String json = objectMapper.writeValueAsString(commentDto);
+    String json = objectMapper.writeValueAsString(commentRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -185,9 +185,9 @@ class CommentControllerTest {
   @Test
   @WithMockCustomUser
   void createComment_ThrowsDtoValidationException_WhenInvalidDto() throws Exception {
-    CommentDto commentDto = new CommentDto();
+    CommentRequest commentRequest = new CommentRequest();
     ObjectMapper objectMapper = new ObjectMapper();
-    String json = objectMapper.writeValueAsString(commentDto);
+    String json = objectMapper.writeValueAsString(commentRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -256,9 +256,9 @@ class CommentControllerTest {
         .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].commentList", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.commentList[0].text", is(comment1.getText())))
-        .andExpect(jsonPath("$._embedded.commentList[1].text", is(comment2.getText())))
+        .andExpect(jsonPath("$.['_embedded'].commentDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.commentDtoList[0].text", is(comment1.getText())))
+        .andExpect(jsonPath("$._embedded.commentDtoList[1].text", is(comment2.getText())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))

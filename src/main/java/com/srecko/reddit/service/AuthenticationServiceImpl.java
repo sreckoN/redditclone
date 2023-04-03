@@ -1,8 +1,8 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.dto.AuthenticationRequest;
-import com.srecko.reddit.dto.AuthenticationResponse;
-import com.srecko.reddit.dto.RegistrationRequest;
+import com.srecko.reddit.dto.requests.AuthenticationRequest;
+import com.srecko.reddit.dto.requests.RegistrationRequest;
+import com.srecko.reddit.dto.responses.AuthenticationResponse;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.authentication.EmailAlreadyInUseException;
@@ -123,7 +123,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
         request.getUsername(), request.getPassword());
     authenticationManagerBuilder.getOrBuild().authenticate(token);
-    User user = userService.getUserByUsername(request.getUsername());
+    User user = userService.getUserByUsernameInternal(request.getUsername());
     String accessToken = jwtUtils.getAccessToken(user.getEmail());
     String refreshToken = jwtUtils.getRefreshToken(user.getEmail());
     refreshTokenService.saveRefreshToken(refreshToken, user);

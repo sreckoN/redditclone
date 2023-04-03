@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.authentication.AccountDisabledException;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -35,7 +37,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {UserDetailServiceImpl.class})
+@ContextConfiguration(classes = {UserDetailServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
 class UserDetailServiceImplTest {
 
@@ -49,6 +51,8 @@ class UserDetailServiceImplTest {
   private UserDetailServiceImpl userService;
 
   private User user;
+
+  private final ModelMapper modelMapper = new ModelMapper();
 
   @BeforeEach
   void setUp() {
@@ -99,12 +103,12 @@ class UserDetailServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "username"));
 
     // when
-    Page<User> page = userService.getUsers(pageRequest);
+    Page<UserDto> page = userService.getUsers(pageRequest);
 
     // then
     assertNotNull(page);
     assertEquals(1, page.getTotalElements());
-    assertTrue(page.getContent().contains(user));
+    assertTrue(page.getContent().contains(modelMapper.map(user, UserDto.class)));
   }
 
   @Test
@@ -113,15 +117,14 @@ class UserDetailServiceImplTest {
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
 
     // when
-    User deleted = userService.deleteUser(user.getUsername());
+    UserDto deleted = userService.deleteUser(user.getUsername());
 
     // then
     assertNotNull(deleted);
+    assertEquals(user.getId(), deleted.getId());
     assertEquals(user.getUsername(), deleted.getUsername());
-    assertEquals(user.getFirstName(), deleted.getFirstName());
-    assertEquals(user.getLastName(), deleted.getLastName());
-    assertEquals(user.getEmail(), deleted.getEmail());
-    assertEquals(user.isEnabled(), deleted.isEnabled());
+    assertEquals(user.getCountry(), deleted.getCountry());
+    assertEquals(user.getRegistrationDate(), deleted.getRegistrationDate());
   }
 
   @Test
@@ -184,9 +187,10 @@ class UserDetailServiceImplTest {
     given(userRepository.save(user)).willReturn(user);
 
     // when
-    User savedUser = userService.save(user);
+    UserDto savedUser = userService.save(user);
 
     // then
+    assertNotNull(savedUser);
     assertEquals(user.getUsername(), savedUser.getUsername());
   }
 

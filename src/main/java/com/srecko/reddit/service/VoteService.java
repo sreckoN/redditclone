@@ -2,7 +2,8 @@ package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VotePostDto;
-import com.srecko.reddit.entity.Vote;
+import com.srecko.reddit.dto.requests.VoteCommentRequest;
+import com.srecko.reddit.dto.requests.VotePostRequest;
 
 /**
  * The interface Vote service.
@@ -12,34 +13,34 @@ import com.srecko.reddit.entity.Vote;
 public interface VoteService {
 
   /**
-   * Save comment vote vote.
+   * Save post vote.
    *
    * @param voteDto the vote dto
    * @return the vote
    */
-  Vote saveCommentVote(VoteCommentDto voteDto);
+  VotePostDto savePostVote(VotePostRequest voteDto);
 
   /**
-   * Save post vote vote.
+   * Delete post vote.
+   *
+   * @param id the id
+   * @return the vote
+   */
+  VotePostDto deletePostVote(Long id);
+
+  /**
+   * Save comment vote.
    *
    * @param voteDto the vote dto
    * @return the vote
    */
-  Vote savePostVote(VotePostDto voteDto);
+  VoteCommentDto saveCommentVote(VoteCommentRequest voteDto);
 
   /**
-   * Delete post vote vote.
+   * Delete comment vote.
    *
    * @param id the id
    * @return the vote
    */
-  Vote deletePostVote(Long id);
-
-  /**
-   * Delete comment vote vote.
-   *
-   * @param id the id
-   * @return the vote
-   */
-  Vote deleteCommentVote(Long id);
+  VoteCommentDto deleteCommentVote(Long id);
 }

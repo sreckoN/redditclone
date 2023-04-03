@@ -1,6 +1,7 @@
 package com.srecko.reddit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.srecko.reddit.dto.CommentDto;
 import com.srecko.reddit.dto.UserMediator;
+import com.srecko.reddit.dto.requests.CommentRequest;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -42,7 +45,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {CommentServiceImpl.class})
+@ContextConfiguration(classes = {CommentServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
 class CommentServiceImplTest {
 
@@ -57,6 +60,9 @@ class CommentServiceImplTest {
 
   @MockBean
   private UserRepository userRepository;
+
+  @Autowired
+  private final ModelMapper modelMapper = new ModelMapper();
 
   private User user;
   private Post post;
@@ -100,18 +106,19 @@ class CommentServiceImplTest {
   void testGetAllCommentsForPost_ReturnsComments() {
     // given
     Comment comment2 = new Comment(user, "Yeah, me neither", post);
+    comment2.setId(222L);
     post.getComments().add(comment2);
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
     given(commentRepository.findAllByPost(any(), any())).willReturn(new PageImpl<>(List.of(comment, comment2)));
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
 
     // when
-    Page<Comment> page = commentServiceImpl.getAllCommentsForPost(post.getId(), pageRequest);
+    Page<CommentDto> page = commentServiceImpl.getAllCommentsForPost(post.getId(), pageRequest);
 
     // then
     assertEquals(2, page.getTotalElements());
-    assertTrue(page.getContent().contains(comment));
-    assertTrue(page.getContent().contains(comment2));
+    assertTrue(page.getContent().contains(modelMapper.map(comment, CommentDto.class)));
+    assertTrue(page.getContent().contains(modelMapper.map(comment2, CommentDto.class)));
   }
 
   @Test
@@ -128,6 +135,7 @@ class CommentServiceImplTest {
   void getAllCommentsForUsername_ReturnsComments() {
     // given
     Comment comment2 = new Comment(user, "Yeah, me neither", post);
+    comment2.setId(222L);
     user.getComments().add(comment2);
     given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
     given(commentRepository.findAllByUser(any(), any()))
@@ -135,13 +143,16 @@ class CommentServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
 
     // when
-    Page<Comment> page = commentServiceImpl.getAllCommentsForUsername(
+    Page<CommentDto> page = commentServiceImpl.getAllCommentsForUsername(
         user.getUsername(), pageRequest);
 
     // then
     assertEquals(2, page.getTotalElements());
-    assertTrue(page.getContent().contains(comment));
-    assertTrue(page.getContent().contains(comment2));
+    List<CommentDto> content = page.getContent();
+    CommentDto map1 = modelMapper.map(comment, CommentDto.class);
+    assertTrue(content.contains(map1));
+    CommentDto map2 = modelMapper.map(comment2, CommentDto.class);
+    assertTrue(content.contains(map2));
   }
 
   @Test
@@ -169,8 +180,8 @@ class CommentServiceImplTest {
         userMediator);
 
     // when
-    Comment savedComment = commentServiceImpl.save(
-        new CommentDto(comment.getText(), comment.getPost().getId()));
+    CommentDto savedComment = commentServiceImpl.save(
+        new CommentRequest(comment.getText(), comment.getPost().getId()));
 
     // then
     assertEquals(comment.getText(), savedComment.getText());
@@ -191,7 +202,7 @@ class CommentServiceImplTest {
 
     // when then
     assertThrows(UserNotFoundException.class, () ->
-        commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId())));
+        commentServiceImpl.save(new CommentRequest(comment.getText(), comment.getPost().getId())));
   }
 
   @Test
@@ -209,7 +220,7 @@ class CommentServiceImplTest {
 
     // when then
     assertThrows(PostNotFoundException.class, () ->
-        commentServiceImpl.save(new CommentDto(comment.getText(), comment.getPost().getId())));
+        commentServiceImpl.save(new CommentRequest(comment.getText(), comment.getPost().getId())));
   }
 
   @Test
@@ -218,10 +229,14 @@ class CommentServiceImplTest {
     given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
 
     // when
-    Comment deleted = commentServiceImpl.delete(comment.getId());
+    CommentDto deleted = commentServiceImpl.delete(comment.getId());
 
     // then
-    assertEquals(comment, deleted);
+    assertNotNull(deleted);
+    assertEquals(comment.getId(), deleted.getId());
+    assertEquals(comment.getText(), deleted.getText());
+    assertEquals(comment.getUser(), deleted.getUser());
+    assertEquals(comment.getPost(), deleted.getPost());
   }
 
   @Test

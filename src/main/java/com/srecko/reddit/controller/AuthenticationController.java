@@ -1,9 +1,9 @@
 package com.srecko.reddit.controller;
 
-import com.srecko.reddit.dto.AuthenticationRequest;
-import com.srecko.reddit.dto.AuthenticationResponse;
-import com.srecko.reddit.dto.RegistrationRequest;
-import com.srecko.reddit.dto.TokenRefreshRequest;
+import com.srecko.reddit.dto.requests.AuthenticationRequest;
+import com.srecko.reddit.dto.requests.RegistrationRequest;
+import com.srecko.reddit.dto.requests.TokenRefreshRequest;
+import com.srecko.reddit.dto.responses.AuthenticationResponse;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.exception.authentication.AuthenticationRequestInvalidException;
 import com.srecko.reddit.exception.authentication.RegistrationRequestInvalidException;

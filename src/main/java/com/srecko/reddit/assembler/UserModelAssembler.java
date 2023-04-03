@@ -4,7 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.srecko.reddit.controller.UserController;
-import com.srecko.reddit.entity.User;
+import com.srecko.reddit.dto.UserDto;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -15,10 +15,11 @@ import org.springframework.stereotype.Component;
  * @author Srecko Nikolic
  */
 @Component
-public class UserModelAssembler implements RepresentationModelAssembler<User, EntityModel<User>> {
+public class UserModelAssembler implements
+    RepresentationModelAssembler<UserDto, EntityModel<UserDto>> {
 
   @Override
-  public EntityModel<User> toModel(User user) {
+  public EntityModel<UserDto> toModel(UserDto user) {
     return EntityModel.of(user,
         linkTo(methodOn(UserController.class).getUser(user.getUsername())).withSelfRel());
   }

@@ -1,9 +1,9 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.entity.Comment;
-import com.srecko.reddit.entity.Post;
-import com.srecko.reddit.entity.Subreddit;
-import com.srecko.reddit.entity.User;
+import com.srecko.reddit.dto.CommentDto;
+import com.srecko.reddit.dto.PostDto;
+import com.srecko.reddit.dto.SubredditDto;
+import com.srecko.reddit.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,7 +21,7 @@ public interface SearchService {
    * @param pageable the pageable
    * @return the page
    */
-  Page<User> searchUsers(String query, Pageable pageable);
+  Page<UserDto> searchUsers(String query, Pageable pageable);
 
   /**
    * Search subreddits page.
@@ -30,7 +30,7 @@ public interface SearchService {
    * @param pageable the pageable
    * @return the page
    */
-  Page<Subreddit> searchSubreddits(String query, Pageable pageable);
+  Page<SubredditDto> searchSubreddits(String query, Pageable pageable);
 
   /**
    * Search posts page.
@@ -39,16 +39,8 @@ public interface SearchService {
    * @param pageable the pageable
    * @return the page
    */
-  Page<Post> searchPosts(String query, Pageable pageable);
+  Page<PostDto> searchPosts(String query, Pageable pageable);
 
-  /**
-   * Search comments page.
-   *
-   * @param query    the query
-   * @param pageable the pageable
-   * @return the page
-   */
-  Page<Comment> searchComments(String query, Pageable pageable);
 
   /**
    * Search posts in subreddit page.
@@ -58,5 +50,14 @@ public interface SearchService {
    * @param pageable    the pageable
    * @return the page
    */
-  Page<Post> searchPostsInSubreddit(Long subredditId, String query, Pageable pageable);
+  Page<PostDto> searchPostsInSubreddit(Long subredditId, String query, Pageable pageable);
+
+  /**
+   * Search comments page.
+   *
+   * @param query    the query
+   * @param pageable the pageable
+   * @return the page
+   */
+  Page<CommentDto> searchComments(String query, Pageable pageable);
 }
