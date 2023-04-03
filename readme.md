@@ -20,7 +20,7 @@ Tests: ~160
 - Refactor tests ✅
 - Logging ✅
 - Pagination ✅ 
-- Secure endpoints
+- Secure endpoints ✅
 - Ability to add photos to Posts
 - User profile additional settings
 - API Docs
