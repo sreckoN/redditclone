@@ -1,7 +1,7 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.CommentDto;
-import com.srecko.reddit.entity.Comment;
+import com.srecko.reddit.dto.requests.CommentRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,7 +19,7 @@ public interface CommentService {
    * @param pageable the pageable
    * @return the all comments for post
    */
-  Page<Comment> getAllCommentsForPost(Long postId, Pageable pageable);
+  Page<CommentDto> getAllCommentsForPost(Long postId, Pageable pageable);
 
   /**
    * Gets all comments for username.
@@ -28,15 +28,15 @@ public interface CommentService {
    * @param pageable the pageable
    * @return the all comments for username
    */
-  Page<Comment> getAllCommentsForUsername(String username, Pageable pageable);
+  Page<CommentDto> getAllCommentsForUsername(String username, Pageable pageable);
 
   /**
    * Save comment.
    *
-   * @param commentDto the comment dto
+   * @param commentRequest the comment dto
    * @return the comment
    */
-  Comment save(CommentDto commentDto);
+  CommentDto save(CommentRequest commentRequest);
 
   /**
    * Delete comment.
@@ -44,7 +44,7 @@ public interface CommentService {
    * @param commentId the comment id
    * @return the comment
    */
-  Comment delete(Long commentId);
+  CommentDto delete(Long commentId);
 
   /**
    * Gets comment.
@@ -52,7 +52,7 @@ public interface CommentService {
    * @param commentId the comment id
    * @return the comment
    */
-  Comment getComment(Long commentId);
+  CommentDto getComment(Long commentId);
 
   /**
    * Gets all comments.
@@ -60,5 +60,5 @@ public interface CommentService {
    * @param pageable the pageable
    * @return the all comments
    */
-  Page<Comment> getAllComments(Pageable pageable);
+  Page<CommentDto> getAllComments(Pageable pageable);
 }

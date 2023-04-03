@@ -10,8 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.controller.utils.JwtTestUtils;
 import com.srecko.reddit.controller.utils.WithMockCustomUser;
-import com.srecko.reddit.dto.CreatePostDto;
-import com.srecko.reddit.dto.UpdatePostDto;
+import com.srecko.reddit.dto.requests.CreatePostRequest;
+import com.srecko.reddit.dto.requests.UpdatePostRequest;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
@@ -86,9 +86,9 @@ class PostControllerTest {
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
-        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$.['_embedded'].postDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postDtoList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postDtoList[1].title", is(post2.getTitle())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))
@@ -135,9 +135,9 @@ class PostControllerTest {
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
-        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$.['_embedded'].postDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postDtoList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postDtoList[1].title", is(post2.getTitle())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))
@@ -164,9 +164,9 @@ class PostControllerTest {
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].postList", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.postList[0].title", is(post1.getTitle())))
-        .andExpect(jsonPath("$._embedded.postList[1].title", is(post2.getTitle())))
+        .andExpect(jsonPath("$.['_embedded'].postDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.postDtoList[0].title", is(post1.getTitle())))
+        .andExpect(jsonPath("$._embedded.postDtoList[1].title", is(post2.getTitle())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))
@@ -187,7 +187,7 @@ class PostControllerTest {
   @WithMockCustomUser
   void create_ReturnsNewPost() throws Exception {
     Post post = new Post(user, "I love you.", "I do.", subreddit);
-    CreatePostDto postDto = new CreatePostDto(subreddit.getId(), post.getTitle(), post.getText());
+    CreatePostRequest postDto = new CreatePostRequest(subreddit.getId(), post.getTitle(), post.getText());
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(postDto);
 
@@ -207,7 +207,7 @@ class PostControllerTest {
   @WithMockCustomUser
   void create_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() throws Exception {
     Post post = new Post(user, "I love you.", "I do.", subreddit);
-    CreatePostDto postDto = new CreatePostDto(0L, post.getTitle(), post.getText());
+    CreatePostRequest postDto = new CreatePostRequest(0L, post.getTitle(), post.getText());
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(postDto);
 
@@ -223,7 +223,7 @@ class PostControllerTest {
   @Test
   @WithMockCustomUser
   void create_ThrowsDtoValidationException_WhenInvalidDto() throws Exception {
-    CreatePostDto postDto = new CreatePostDto();
+    CreatePostRequest postDto = new CreatePostRequest();
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(postDto);
 
@@ -271,7 +271,7 @@ class PostControllerTest {
   void update_ReturnsUpdatedPost() throws Exception {
     Post post = new Post(user, "I love you.", "I do.", subreddit);
     postRepository.save(post);
-    UpdatePostDto postDto = new UpdatePostDto(post.getId(), post.getTitle(), post.getText());
+    UpdatePostRequest postDto = new UpdatePostRequest(post.getId(), post.getTitle(), post.getText());
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(postDto);
 
@@ -301,7 +301,7 @@ class PostControllerTest {
 
   @Test
   void update_ThrowsDtoValidationException_WhenUpdatePostDtoIsInvalid() throws Exception {
-    UpdatePostDto postDto = new UpdatePostDto(null, "Todays News", "Something new");
+    UpdatePostRequest postDto = new UpdatePostRequest(null, "Todays News", "Something new");
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(postDto);
 

@@ -1,9 +1,9 @@
 package com.srecko.reddit.controller;
 
 import com.srecko.reddit.assembler.PostModelAssembler;
-import com.srecko.reddit.dto.CreatePostDto;
-import com.srecko.reddit.dto.UpdatePostDto;
-import com.srecko.reddit.entity.Post;
+import com.srecko.reddit.dto.PostDto;
+import com.srecko.reddit.dto.requests.CreatePostRequest;
+import com.srecko.reddit.dto.requests.UpdatePostRequest;
 import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.PostService;
 import jakarta.validation.Valid;
@@ -66,11 +66,11 @@ public class PostController {
    * @return the all posts
    */
   @GetMapping
-  public ResponseEntity<PagedModel<EntityModel<Post>>> getAllPosts(
+  public ResponseEntity<PagedModel<EntityModel<PostDto>>> getAllPosts(
       @PageableDefault(sort = "dateOfCreation", direction = Direction.ASC)Pageable pageable,
-      PagedResourcesAssembler<Post> assembler) {
-    Page<Post> page = postService.getAllPosts(pageable);
-    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+      PagedResourcesAssembler<PostDto> assembler) {
+    Page<PostDto> page = postService.getAllPosts(pageable);
+    PagedModel<EntityModel<PostDto>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning all posts");
     return ResponseEntity.ok(pagedModel);
   }
@@ -82,8 +82,8 @@ public class PostController {
    * @return the post
    */
   @GetMapping("/{postId}")
-  public ResponseEntity<Post> getPost(@PathVariable("postId") Long postId) {
-    Post post = postService.getPost(postId);
+  public ResponseEntity<PostDto> getPost(@PathVariable("postId") Long postId) {
+    PostDto post = postService.getPost(postId);
     logger.info("Returning a post with id: {}", post.getId());
     return ResponseEntity.ok(post);
   }
@@ -97,12 +97,12 @@ public class PostController {
    * @return the all posts for subreddit
    */
   @GetMapping("/subreddit/{subredditId}")
-  public ResponseEntity<PagedModel<EntityModel<Post>>> getAllPostsForSubreddit(
+  public ResponseEntity<PagedModel<EntityModel<PostDto>>> getAllPostsForSubreddit(
       @PathVariable("subredditId") Long subredditId,
       @PageableDefault(sort = "dateOfCreation", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Post> assembler) {
-    Page<Post> page = postService.getAllPostsForSubreddit(subredditId, pageable);
-    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+      PagedResourcesAssembler<PostDto> assembler) {
+    Page<PostDto> page = postService.getAllPostsForSubreddit(subredditId, pageable);
+    PagedModel<EntityModel<PostDto>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning posts for subreddit: {}", subredditId);
     return ResponseEntity.ok(pagedModel);
   }
@@ -116,12 +116,12 @@ public class PostController {
    * @return the posts for user
    */
   @GetMapping("/user/{username}")
-  public ResponseEntity<PagedModel<EntityModel<Post>>> getPostsForUser(
+  public ResponseEntity<PagedModel<EntityModel<PostDto>>> getPostsForUser(
       @PathVariable("username") String username,
       @PageableDefault(sort = "dateOfCreation", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Post> assembler) {
-    Page<Post> page = postService.getAllPostsForUser(username, pageable);
-    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+      PagedResourcesAssembler<PostDto> assembler) {
+    Page<PostDto> page = postService.getAllPostsForUser(username, pageable);
+    PagedModel<EntityModel<PostDto>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning posts for user: {}", username);
     return ResponseEntity.ok(pagedModel);
   }
@@ -134,14 +134,14 @@ public class PostController {
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<Post> create(@Valid @RequestBody CreatePostDto postRequest,
+  public ResponseEntity<PostDto> create(@Valid @RequestBody CreatePostRequest postRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/posts").toUriString());
-    Post savedPost = postService.save(postRequest);
+    PostDto savedPost = postService.save(postRequest);
     logger.info("Successfully created a new post: {}", savedPost.getId());
     return ResponseEntity.created(uri).body(savedPost);
   }
@@ -153,8 +153,8 @@ public class PostController {
    * @return the response entity
    */
   @DeleteMapping("/{postId}")
-  public ResponseEntity<Post> delete(@PathVariable("postId") Long postId) {
-    Post deletedPost = postService.delete(postId);
+  public ResponseEntity<PostDto> delete(@PathVariable("postId") Long postId) {
+    PostDto deletedPost = postService.delete(postId);
     logger.info("Deleted a post with id: {}", postId);
     return ResponseEntity.ok(deletedPost);
   }
@@ -162,17 +162,17 @@ public class PostController {
   /**
    * Update post.
    *
-   * @param postDto       the post dto
-   * @param bindingResult the binding result
+   * @param updatePostRequest the post dto
+   * @param bindingResult     the binding result
    * @return the response entity
    */
   @PutMapping
-  public ResponseEntity<Post> update(@Valid @RequestBody UpdatePostDto postDto,
+  public ResponseEntity<PostDto> update(@Valid @RequestBody UpdatePostRequest updatePostRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
-    Post updatedPost = postService.update(postDto);
+    PostDto updatedPost = postService.update(updatePostRequest);
     logger.info("Updated post: {}", updatedPost.getId());
     return ResponseEntity.ok(updatedPost);
   }

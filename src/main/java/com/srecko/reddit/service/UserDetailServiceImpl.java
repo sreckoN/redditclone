@@ -1,7 +1,9 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.assembler.PageRequestAssembler;
+import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.dto.UserMediator;
+import com.srecko.reddit.dto.util.ModelPageToDtoPageConverter;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.exception.authentication.AccountDisabledException;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +42,7 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
 
   private final UserRepository userRepository;
   private final EmailVerificationRepository emailVerificationRepository;
+  private final ModelMapper modelMapper;
 
   private static final Logger logger = LogManager.getLogger(UserDetailServiceImpl.class);
 
@@ -47,12 +51,15 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
    *
    * @param userRepository              the user repository
    * @param emailVerificationRepository the email verification repository
+   * @param modelMapper                 the model mapper
    */
   @Autowired
   public UserDetailServiceImpl(UserRepository userRepository,
-      EmailVerificationRepository emailVerificationRepository) {
+      EmailVerificationRepository emailVerificationRepository,
+      ModelMapper modelMapper) {
     this.userRepository = userRepository;
     this.emailVerificationRepository = emailVerificationRepository;
+    this.modelMapper = modelMapper;
   }
 
   @Override
@@ -71,15 +78,21 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
-  public Page<User> getUsers(Pageable pageable) {
+  public Page<UserDto> getUsers(Pageable pageable) {
     logger.info("Getting all users");
     PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("username"),
         Sort.by(Direction.ASC, "username"));
-    return userRepository.findAll(pageRequest);
+    Page<User> users = userRepository.findAll(pageRequest);
+    return ModelPageToDtoPageConverter.convertUsers(pageable, users, modelMapper);
   }
 
   @Override
-  public User getUserByUsername(String username) {
+  public UserDto getUserByUsername(String username) {
+    return modelMapper.map(getUserByUsernameInternal(username), UserDto.class);
+  }
+
+  @Override
+  public User getUserByUsernameInternal(String username) {
     logger.info("Getting by username: {}", username);
     Optional<User> user = userRepository.findUserByUsername(username);
     if (user.isEmpty()) {
@@ -99,12 +112,12 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
-  public User deleteUser(String username) {
+  public UserDto deleteUser(String username) {
     logger.info("Deleting user: {}", username);
     Optional<User> userOptional = userRepository.findUserByUsername(username);
     if (userOptional.isPresent()) {
       userRepository.delete(userOptional.get());
-      return userOptional.get();
+      return modelMapper.map(userOptional.get(), UserDto.class);
     } else {
       throw new UserNotFoundException(username);
     }
@@ -123,9 +136,10 @@ public class UserDetailServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
-  public User save(User user) {
+  public UserDto save(User user) {
     logger.info("Saving user into database: {}", user.getUsername());
-    return userRepository.save(user);
+    User savedUser = userRepository.save(user);
+    return modelMapper.map(savedUser, UserDto.class);
   }
 
   @Override

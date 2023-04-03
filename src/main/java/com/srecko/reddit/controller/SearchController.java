@@ -4,10 +4,10 @@ import com.srecko.reddit.assembler.CommentModelAssembler;
 import com.srecko.reddit.assembler.PostModelAssembler;
 import com.srecko.reddit.assembler.SubredditModelAssembler;
 import com.srecko.reddit.assembler.UserModelAssembler;
-import com.srecko.reddit.entity.Comment;
-import com.srecko.reddit.entity.Post;
-import com.srecko.reddit.entity.Subreddit;
-import com.srecko.reddit.entity.User;
+import com.srecko.reddit.dto.CommentDto;
+import com.srecko.reddit.dto.PostDto;
+import com.srecko.reddit.dto.SubredditDto;
+import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,6 +64,25 @@ public class SearchController {
   }
 
   /**
+   * Search users.
+   *
+   * @param query     the query
+   * @param pageable  the pageable
+   * @param assembler the assembler
+   * @return the response entity
+   */
+  @GetMapping("/users")
+  public ResponseEntity<PagedModel<EntityModel<UserDto>>> searchUsers(
+      @RequestParam(name = "q") String query,
+      @PageableDefault(sort = "username", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<UserDto> assembler) {
+    Page<UserDto> page = searchService.searchUsers(query, pageable);
+    PagedModel<EntityModel<UserDto>> pagedModel = assembler.toModel(page, userModelAssembler);
+    logger.info("Returning a page {} of users", page.getNumber());
+    return ResponseEntity.ok(pagedModel);
+  }
+
+  /**
    * Search subreddits.
    *
    * @param query     the query
@@ -72,12 +91,12 @@ public class SearchController {
    * @return the response entity
    */
   @GetMapping("/subreddits")
-  public ResponseEntity<PagedModel<EntityModel<Subreddit>>> searchSubreddits(
+  public ResponseEntity<PagedModel<EntityModel<SubredditDto>>> searchSubreddits(
       @RequestParam(name = "q") String query,
       @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Subreddit> assembler) {
-    Page<Subreddit> page = searchService.searchSubreddits(query, pageable);
-    PagedModel<EntityModel<Subreddit>> pagedModel = assembler.toModel(page,
+      PagedResourcesAssembler<SubredditDto> assembler) {
+    Page<SubredditDto> page = searchService.searchSubreddits(query, pageable);
+    PagedModel<EntityModel<SubredditDto>> pagedModel = assembler.toModel(page,
         subredditModelAssembler);
     logger.info("Returning a page {} of subreddits", page.getNumber());
     return ResponseEntity.ok(pagedModel);
@@ -92,12 +111,12 @@ public class SearchController {
    * @return the response entity
    */
   @GetMapping("/posts")
-  public ResponseEntity<PagedModel<EntityModel<Post>>> searchPosts(
+  public ResponseEntity<PagedModel<EntityModel<PostDto>>> searchPosts(
       @RequestParam(name = "q") String query,
       @PageableDefault(sort = "dateOfCreation", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Post> assembler) {
-    Page<Post> page = searchService.searchPosts(query, pageable);
-    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+      PagedResourcesAssembler<PostDto> assembler) {
+    Page<PostDto> page = searchService.searchPosts(query, pageable);
+    PagedModel<EntityModel<PostDto>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning a page {} of posts", page.getNumber());
     return ResponseEntity.ok(pagedModel);
   }
@@ -112,13 +131,13 @@ public class SearchController {
    * @return the response entity
    */
   @GetMapping("/posts/{subredditId}")
-  public ResponseEntity<PagedModel<EntityModel<Post>>> searchPostsInSubreddit(
+  public ResponseEntity<PagedModel<EntityModel<PostDto>>> searchPostsInSubreddit(
       @PathVariable("subredditId") Long subredditId,
       @RequestParam(name = "q") String query,
       @PageableDefault(sort = "dateOfCreation", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Post> assembler) {
-    Page<Post> page = searchService.searchPostsInSubreddit(subredditId, query, pageable);
-    PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(page, postModelAssembler);
+      PagedResourcesAssembler<PostDto> assembler) {
+    Page<PostDto> page = searchService.searchPostsInSubreddit(subredditId, query, pageable);
+    PagedModel<EntityModel<PostDto>> pagedModel = assembler.toModel(page, postModelAssembler);
     logger.info("Returning a page {} of posts for subreddit: {}", page.getNumber(), subredditId);
     return ResponseEntity.ok(pagedModel);
   }
@@ -132,32 +151,13 @@ public class SearchController {
    * @return the response entity
    */
   @GetMapping("/comments")
-  public ResponseEntity<PagedModel<EntityModel<Comment>>> searchComment(
+  public ResponseEntity<PagedModel<EntityModel<CommentDto>>> searchComment(
       @RequestParam(name = "q") String query,
       @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Comment> assembler) {
-    Page<Comment> page = searchService.searchComments(query, pageable);
-    PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
+      PagedResourcesAssembler<CommentDto> assembler) {
+    Page<CommentDto> page = searchService.searchComments(query, pageable);
+    PagedModel<EntityModel<CommentDto>> pagedModel = assembler.toModel(page, commentModelAssembler);
     logger.info("Returning a page {} of comments", page.getNumber());
-    return ResponseEntity.ok(pagedModel);
-  }
-
-  /**
-   * Search users.
-   *
-   * @param query     the query
-   * @param pageable  the pageable
-   * @param assembler the assembler
-   * @return the response entity
-   */
-  @GetMapping("/users")
-  public ResponseEntity<PagedModel<EntityModel<User>>> searchUsers(
-      @RequestParam(name = "q") String query,
-      @PageableDefault(sort = "username", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<User> assembler) {
-    Page<User> page = searchService.searchUsers(query, pageable);
-    PagedModel<EntityModel<User>> pagedModel = assembler.toModel(page, userModelAssembler);
-    logger.info("Returning a page {} of users", page.getNumber());
     return ResponseEntity.ok(pagedModel);
   }
 }

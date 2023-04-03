@@ -48,6 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
     String servletPath = request.getServletPath();
     logger.info("Filtering request with servlet path: {}", servletPath);
+
     if (servletPath.equals("/api/auth/register") || servletPath.equals(
         "/api/auth/registrationConfirm")
         || servletPath.equals("/api/auth/authenticate") || servletPath.contains(
@@ -62,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String jwtToken = authHeader.substring(7);
       String username = jwtUtils.extractSubject(jwtToken);
       if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-        User userInstance = userService.getUserByUsername(username);
+        User userInstance = userService.getUserByUsernameInternal(username);
         UserMediator user = new UserMediator(userInstance);
         if (jwtUtils.isTokenValid(jwtToken, user.getUsername())) {
           UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

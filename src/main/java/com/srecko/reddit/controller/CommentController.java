@@ -2,7 +2,7 @@ package com.srecko.reddit.controller;
 
 import com.srecko.reddit.assembler.CommentModelAssembler;
 import com.srecko.reddit.dto.CommentDto;
-import com.srecko.reddit.entity.Comment;
+import com.srecko.reddit.dto.requests.CommentRequest;
 import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.CommentService;
 import jakarta.validation.Valid;
@@ -64,12 +64,12 @@ public class CommentController {
    * @return the comments for post
    */
   @GetMapping("/post/{postId}")
-  public ResponseEntity<PagedModel<EntityModel<Comment>>> getCommentsForPost(
+  public ResponseEntity<PagedModel<EntityModel<CommentDto>>> getCommentsForPost(
       @PathVariable("postId") Long postId,
       @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Comment> assembler) {
-    Page<Comment> page = commentService.getAllCommentsForPost(postId, pageable);
-    PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
+      PagedResourcesAssembler<CommentDto> assembler) {
+    Page<CommentDto> page = commentService.getAllCommentsForPost(postId, pageable);
+    PagedModel<EntityModel<CommentDto>> pagedModel = assembler.toModel(page, commentModelAssembler);
     logger.info("Returning all comments for post with id: {}", postId);
     return ResponseEntity.ok(pagedModel);
   }
@@ -83,12 +83,12 @@ public class CommentController {
    * @return the comments for username
    */
   @GetMapping("/user/{username}")
-  public ResponseEntity<PagedModel<EntityModel<Comment>>> getCommentsForUsername(
+  public ResponseEntity<PagedModel<EntityModel<CommentDto>>> getCommentsForUsername(
       @PathVariable("username") String username,
       @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Comment> assembler) {
-    Page<Comment> page = commentService.getAllCommentsForUsername(username, pageable);
-    PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
+      PagedResourcesAssembler<CommentDto> assembler) {
+    Page<CommentDto> page = commentService.getAllCommentsForUsername(username, pageable);
+    PagedModel<EntityModel<CommentDto>> pagedModel = assembler.toModel(page, commentModelAssembler);
     logger.info("Returning all comments for username: {}", username);
     return ResponseEntity.ok(pagedModel);
   }
@@ -100,8 +100,8 @@ public class CommentController {
    * @return the comment
    */
   @GetMapping("/{commentId}")
-  public ResponseEntity<Comment> getComment(@PathVariable("commentId") Long commentId) {
-    Comment comment = commentService.getComment(commentId);
+  public ResponseEntity<CommentDto> getComment(@PathVariable("commentId") Long commentId) {
+    CommentDto comment = commentService.getComment(commentId);
     logger.info("Returning comment by id: {}", commentId);
     return ResponseEntity.ok(comment);
   }
@@ -114,11 +114,11 @@ public class CommentController {
    * @return the all comments
    */
   @GetMapping
-  public ResponseEntity<PagedModel<EntityModel<Comment>>> getAllComments(
+  public ResponseEntity<PagedModel<EntityModel<CommentDto>>> getAllComments(
       @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Comment> assembler) {
-    Page<Comment> page = commentService.getAllComments(pageable);
-    PagedModel<EntityModel<Comment>> pagedModel = assembler.toModel(page, commentModelAssembler);
+      PagedResourcesAssembler<CommentDto> assembler) {
+    Page<CommentDto> page = commentService.getAllComments(pageable);
+    PagedModel<EntityModel<CommentDto>> pagedModel = assembler.toModel(page, commentModelAssembler);
     logger.info("Returning all comments");
     return ResponseEntity.ok(pagedModel);
   }
@@ -126,19 +126,19 @@ public class CommentController {
   /**
    * Create comment.
    *
-   * @param commentDto    the comment dto
-   * @param bindingResult the binding result
+   * @param commentRequest the comment dto
+   * @param bindingResult  the binding result
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<Comment> createComment(@Valid @RequestBody CommentDto commentDto,
+  public ResponseEntity<CommentDto> createComment(@Valid @RequestBody CommentRequest commentRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/comments/").toUriString());
-    Comment comment = commentService.save(commentDto);
+    CommentDto comment = commentService.save(commentRequest);
     logger.info("Successfully created a new comment: {}", comment.getId());
     return ResponseEntity.created(uri).body(comment);
   }
@@ -150,8 +150,8 @@ public class CommentController {
    * @return the response entity
    */
   @DeleteMapping("{commentId}")
-  public ResponseEntity<Comment> deleteComment(@PathVariable("commentId") Long commentId) {
-    Comment deletedComment = commentService.delete(commentId);
+  public ResponseEntity<CommentDto> deleteComment(@PathVariable("commentId") Long commentId) {
+    CommentDto deletedComment = commentService.delete(commentId);
     logger.info("Deleted the comment with id: {}", commentId);
     return ResponseEntity.ok(deletedComment);
   }

@@ -1,7 +1,7 @@
 package com.srecko.reddit.service;
 
 import com.srecko.reddit.dto.SubredditDto;
-import com.srecko.reddit.entity.Subreddit;
+import com.srecko.reddit.dto.requests.SubredditRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +18,7 @@ public interface SubredditService {
    * @param pageable the pageable
    * @return the all
    */
-  Page<Subreddit> getAll(Pageable pageable);
+  Page<SubredditDto> getAll(Pageable pageable);
 
   /**
    * Gets subreddit by id.
@@ -26,15 +26,15 @@ public interface SubredditService {
    * @param id the id
    * @return the subreddit by id
    */
-  Subreddit getSubredditById(Long id);
+  SubredditDto getSubredditById(Long id);
 
   /**
    * Save subreddit.
    *
-   * @param subredditDto the subreddit dto
+   * @param subredditRequest the subreddit dto
    * @return the subreddit
    */
-  Subreddit save(SubredditDto subredditDto);
+  SubredditDto save(SubredditRequest subredditRequest);
 
   /**
    * Delete subreddit.
@@ -42,13 +42,13 @@ public interface SubredditService {
    * @param id the id
    * @return the subreddit
    */
-  Subreddit delete(Long id);
+  SubredditDto delete(Long id);
 
   /**
    * Update subreddit.
    *
-   * @param subredditDto the subreddit dto
+   * @param subredditRequest the subreddit dto
    * @return the subreddit
    */
-  Subreddit update(SubredditDto subredditDto);
+  SubredditDto update(SubredditRequest subredditRequest);
 }

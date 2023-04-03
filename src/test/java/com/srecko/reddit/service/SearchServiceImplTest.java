@@ -3,9 +3,14 @@ package com.srecko.reddit.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import com.srecko.reddit.dto.CommentDto;
+import com.srecko.reddit.dto.PostDto;
+import com.srecko.reddit.dto.SubredditDto;
+import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
@@ -26,6 +31,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -35,7 +41,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {SearchServiceImpl.class})
+@ContextConfiguration(classes = {SearchServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
 class SearchServiceImplTest {
 
@@ -57,6 +63,8 @@ class SearchServiceImplTest {
   private User user;
 
   private Subreddit subreddit;
+
+  private final ModelMapper modelMapper = new ModelMapper();
 
   @BeforeEach
   void setUp() {
@@ -82,24 +90,28 @@ class SearchServiceImplTest {
   void searchPosts_ReturnsPageOfPosts() {
     // given
     Post post = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
+    post.setId(111L);
     given(postRepository.findByTitleContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(post)));
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
-    Page<Post> result = searchService.searchPosts("Serbia", pageRequest);
+    Page<PostDto> result = searchService.searchPosts("Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(1, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
+    assertTrue(result.getContent().contains(modelMapper.map(post, PostDto.class)));
   }
 
   @Test
   void searchPosts_ReturnsPageOfPosts_WithDefaultSortWhenWrongSortGiven() {
     // given
     Post post1 = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
+    post1.setId(111L);
     Post post2 = new Post(user, "What's good in Serbia", "Everything is good in Serbia", subreddit);
+    post2.setId(222L);
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
     calendar.add(Calendar.DATE, -7);
@@ -109,16 +121,16 @@ class SearchServiceImplTest {
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-    Page<Post> result = searchService.searchPosts("Serbia", pageRequest);
+    Page<PostDto> result = searchService.searchPosts("Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(2, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
 
-    List<Post> content = result.getContent();
-    assertEquals(post1, content.get(0));
-    assertEquals(post2, content.get(1));
+    List<PostDto> content = result.getContent();
+    assertEquals(modelMapper.map(post1, PostDto.class), content.get(0));
+    assertEquals(modelMapper.map(post2, PostDto.class), content.get(1));
   }
 
   @Test
@@ -126,17 +138,19 @@ class SearchServiceImplTest {
     // given
     Post post = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
     Comment comment = new Comment(user, "What's the best place in Serbia?", post);
+    comment.setId(111L);
     given(commentRepository.findByTextContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(comment)));
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
-    Page<Comment> result = searchService.searchComments("Serbia", pageRequest);
+    Page<CommentDto> result = searchService.searchComments("Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(1, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
+    assertTrue(result.getContent().contains(modelMapper.map(comment, CommentDto.class)));
   }
 
   @Test
@@ -144,22 +158,24 @@ class SearchServiceImplTest {
     // given
     Post post = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
     Comment comment1 = new Comment(user, "What's the best place in Serbia?", post);
+    comment1.setId(111L);
     Comment comment2 = new Comment(user, "I love Serbia", post);
+    comment2.setId(222L);
     given(commentRepository.findByTextContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(comment1, comment2)));
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-    Page<Comment> result = searchService.searchComments("Serbia", pageRequest);
+    Page<CommentDto> result = searchService.searchComments("Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(2, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
 
-    List<Comment> content = result.getContent();
-    assertEquals(comment1, content.get(0));
-    assertEquals(comment2, content.get(1));
+    List<CommentDto> content = result.getContent();
+    assertEquals(modelMapper.map(comment1, CommentDto.class), content.get(0));
+    assertEquals(modelMapper.map(comment2, CommentDto.class), content.get(1));
   }
 
   @Test
@@ -170,33 +186,38 @@ class SearchServiceImplTest {
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "username"));
-    Page<User> result = searchService.searchUsers("jane", pageRequest);
+    Page<UserDto> result = searchService.searchUsers("jane", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(1, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
+    assertTrue(result.getContent().contains(modelMapper.map(user, UserDto.class)));
   }
 
   @Test
   void searchUsers_ReturnsPageOfUsers_WithDefaultSortWhenWrongSortGiven() {
     // given
+    user.setId(111L);
     User user2 = new User("Jane", "Smith", "jane.smith@example.org", "jane.smith", "iloveyou", "GB",
         true);
+    user2.setId(222L);
     given(userRepository.findByUsernameContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(user, user2)));
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-    Page<User> result = searchService.searchUsers("jane", pageRequest);
+    Page<UserDto> result = searchService.searchUsers("jane", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(2, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
 
-    List<User> content = result.getContent();
+    List<UserDto> content = result.getContent();
     assertEquals(content.size(), 2);
+    assertTrue(content.contains(modelMapper.map(user, UserDto.class)));
+    assertTrue(content.contains(modelMapper.map(user2, UserDto.class)));
   }
 
   @Test
@@ -207,62 +228,69 @@ class SearchServiceImplTest {
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "name"));
-    Page<Subreddit> result = searchService.searchSubreddits("Serbia", pageRequest);
+    Page<SubredditDto> result = searchService.searchSubreddits("Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(1, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
+    assertTrue(result.getContent().contains(modelMapper.map(subreddit, SubredditDto.class)));
   }
 
   @Test
   void searchSubreddits_ReturnsPageOfSubreddits_WithDefaultSortWhenWrongSortGiven() {
     // given
+    subreddit.setId(111L);
     Subreddit subreddit2 = new Subreddit("Programming Serbia", "Serbian programmers unite!", user);
+    subreddit2.setId(222L);
     given(subredditRepository.findByNameContainingIgnoreCase(any(), any())).willReturn(
         new PageImpl<>(List.of(subreddit, subreddit2)));
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-    Page<Subreddit> result = searchService.searchSubreddits("Serbia", pageRequest);
+    Page<SubredditDto> result = searchService.searchSubreddits("Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(2, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
 
-    List<Subreddit> content = result.getContent();
-    assertEquals(subreddit, content.get(0));
-    assertEquals(subreddit2, content.get(1));
+    List<SubredditDto> content = result.getContent();
+    assertEquals(modelMapper.map(subreddit, SubredditDto.class), content.get(0));
+    assertEquals(modelMapper.map(subreddit2, SubredditDto.class), content.get(1));
   }
-
-  // ##########################################
 
   @Test
   void searchPostsInSubreddit_ReturnsPageOfPostsFromSubreddit() {
     // given
     Post post1 = new Post(user, "How is the weather in Serbia?", "Is it warm?", subreddit);
+    post1.setId(111L);
     post1.setDateOfCreation(new Date(System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000));
     Post post2 = new Post(user, "Serbia's player just won", "Congrats", subreddit);
+    post2.setId(222L);
     given(subredditRepository.existsById(any())).willReturn(true);
     given(postRepository.findBySubredditIdAndTitleContainingIgnoreCase(any(), any(), any())).willReturn(
         new PageImpl<>(List.of(post1, post2)));
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
-    Page<Post> result = searchService.searchPostsInSubreddit(subreddit.getId(), "Serbia", pageRequest);
+    Page<PostDto> result = searchService.searchPostsInSubreddit(subreddit.getId(), "Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(2, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
+    assertTrue(result.getContent().contains(modelMapper.map(post1, PostDto.class)));
+    assertTrue(result.getContent().contains(modelMapper.map(post2, PostDto.class)));
   }
 
   @Test
   void searchPostsInSubreddit_ReturnsPageOfPosts_WithDefaultSortWhenWrongSortGiven() {
     // given
     Post post1 = new Post(user, "Serbia's best!", "Check out the best in Serbia", subreddit);
+    post1.setId(111L);
     Post post2 = new Post(user, "What's good in Serbia", "Everything is good in Serbia", subreddit);
+    post2.setId(222L);
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
     calendar.add(Calendar.DATE, -7);
@@ -273,16 +301,16 @@ class SearchServiceImplTest {
 
     // when
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-    Page<Post> result = searchService.searchPostsInSubreddit(subreddit.getId(), "Serbia", pageRequest);
+    Page<PostDto> result = searchService.searchPostsInSubreddit(subreddit.getId(), "Serbia", pageRequest);
 
     // then
     assertNotNull(result);
     assertEquals(2, result.getTotalElements());
     assertEquals(1, result.getTotalPages());
 
-    List<Post> content = result.getContent();
-    assertEquals(post1, content.get(0));
-    assertEquals(post2, content.get(1));
+    List<PostDto> content = result.getContent();
+    assertEquals(modelMapper.map(post1, PostDto.class), content.get(0));
+    assertEquals(modelMapper.map(post2, PostDto.class), content.get(1));
   }
 
   @Test

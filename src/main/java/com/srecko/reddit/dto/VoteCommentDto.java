@@ -1,28 +1,29 @@
 package com.srecko.reddit.dto;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.srecko.reddit.entity.Comment;
+import com.srecko.reddit.entity.User;
 import com.srecko.reddit.entity.VoteType;
-import jakarta.validation.constraints.NotNull;
 
 /**
  * The type Vote comment dto.
  *
  * @author Srecko Nikolic
  */
-public class VoteCommentDto extends VoteDto {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class VoteCommentDto {
 
-  @NotNull
-  private Long commentId;
+  private Long id;
 
-  /**
-   * Instantiates a new Vote comment dto.
-   *
-   * @param type      the type
-   * @param commentId the comment id
-   */
-  public VoteCommentDto(VoteType type, Long commentId) {
-    super(type);
-    this.commentId = commentId;
-  }
+  @JsonIdentityReference(alwaysAsId = true)
+  private User user;
+
+  @JsonIdentityReference(alwaysAsId = true)
+  private Comment comment;
+
+  private VoteType type;
 
   /**
    * Instantiates a new Vote comment dto.
@@ -31,20 +32,74 @@ public class VoteCommentDto extends VoteDto {
   }
 
   /**
-   * Gets comment id.
+   * Gets id.
    *
-   * @return the comment id
+   * @return the id
    */
-  public Long getCommentId() {
-    return commentId;
+  public Long getId() {
+    return id;
   }
 
   /**
-   * Sets comment id.
+   * Sets id.
    *
-   * @param commentId the comment id
+   * @param id the id
    */
-  public void setCommentId(Long commentId) {
-    this.commentId = commentId;
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  /**
+   * Gets user.
+   *
+   * @return the user
+   */
+  public User getUser() {
+    return user;
+  }
+
+  /**
+   * Sets user.
+   *
+   * @param user the user
+   */
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  /**
+   * Gets comment.
+   *
+   * @return the comment
+   */
+  public Comment getComment() {
+    return comment;
+  }
+
+  /**
+   * Sets comment.
+   *
+   * @param comment the comment
+   */
+  public void setComment(Comment comment) {
+    this.comment = comment;
+  }
+
+  /**
+   * Gets type.
+   *
+   * @return the type
+   */
+  public VoteType getType() {
+    return type;
+  }
+
+  /**
+   * Sets type.
+   *
+   * @param type the type
+   */
+  public void setType(VoteType type) {
+    this.type = type;
   }
 }

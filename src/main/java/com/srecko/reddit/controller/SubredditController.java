@@ -2,7 +2,7 @@ package com.srecko.reddit.controller;
 
 import com.srecko.reddit.assembler.SubredditModelAssembler;
 import com.srecko.reddit.dto.SubredditDto;
-import com.srecko.reddit.entity.Subreddit;
+import com.srecko.reddit.dto.requests.SubredditRequest;
 import com.srecko.reddit.exception.DtoValidationException;
 import com.srecko.reddit.service.SubredditService;
 import jakarta.validation.Valid;
@@ -64,11 +64,11 @@ public class SubredditController {
    * @return the all
    */
   @GetMapping
-  public ResponseEntity<PagedModel<EntityModel<Subreddit>>> getAll(
+  public ResponseEntity<PagedModel<EntityModel<SubredditDto>>> getAll(
       @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Subreddit> assembler) {
-    Page<Subreddit> page = subredditService.getAll(pageable);
-    PagedModel<EntityModel<Subreddit>> pagedModel = assembler.toModel(page,
+      PagedResourcesAssembler<SubredditDto> assembler) {
+    Page<SubredditDto> page = subredditService.getAll(pageable);
+    PagedModel<EntityModel<SubredditDto>> pagedModel = assembler.toModel(page,
         subredditModelAssembler);
     logger.info("Returning page of subreddits");
     return ResponseEntity.ok(pagedModel);
@@ -81,8 +81,8 @@ public class SubredditController {
    * @return the subreddit
    */
   @GetMapping("/{subredditId}")
-  public ResponseEntity<Subreddit> getSubreddit(@PathVariable("subredditId") Long id) {
-    Subreddit subreddit = subredditService.getSubredditById(id);
+  public ResponseEntity<SubredditDto> getSubreddit(@PathVariable("subredditId") Long id) {
+    SubredditDto subreddit = subredditService.getSubredditById(id);
     logger.info("Returning a subreddit with id: {}", id);
     return ResponseEntity.ok(subreddit);
   }
@@ -90,12 +90,12 @@ public class SubredditController {
   /**
    * Save subreddit.
    *
-   * @param subredditDto  the subreddit dto
-   * @param bindingResult the binding result
+   * @param subredditRequest the subreddit dto
+   * @param bindingResult    the binding result
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<Subreddit> save(@Valid @RequestBody SubredditDto subredditDto,
+  public ResponseEntity<SubredditDto> save(@Valid @RequestBody SubredditRequest subredditRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -103,7 +103,7 @@ public class SubredditController {
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/subreddits/")
             .toUriString());
-    Subreddit saved = subredditService.save(subredditDto);
+    SubredditDto saved = subredditService.save(subredditRequest);
     logger.info("Successfully created a subreddit: {}", saved.getId());
     return ResponseEntity.created(uri).body(saved);
   }
@@ -115,8 +115,8 @@ public class SubredditController {
    * @return the response entity
    */
   @DeleteMapping("/{subredditId}")
-  public ResponseEntity<Subreddit> delete(@PathVariable("subredditId") Long id) {
-    Subreddit deleted = subredditService.delete(id);
+  public ResponseEntity<SubredditDto> delete(@PathVariable("subredditId") Long id) {
+    SubredditDto deleted = subredditService.delete(id);
     logger.info("Deleted subreddit with id: {}", deleted.getId());
     return ResponseEntity.ok(deleted);
   }
@@ -124,17 +124,17 @@ public class SubredditController {
   /**
    * Update subreddit.
    *
-   * @param subredditDto  the subreddit dto
-   * @param bindingResult the binding result
+   * @param subredditRequest the subreddit dto
+   * @param bindingResult    the binding result
    * @return the response entity
    */
   @PutMapping
-  public ResponseEntity<Subreddit> update(@Valid @RequestBody SubredditDto subredditDto,
+  public ResponseEntity<SubredditDto> update(@Valid @RequestBody SubredditRequest subredditRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
-    Subreddit updated = subredditService.update(subredditDto);
+    SubredditDto updated = subredditService.update(subredditRequest);
     logger.info("Updated subreddit with id: {}", updated.getId());
     return ResponseEntity.ok(updated);
   }

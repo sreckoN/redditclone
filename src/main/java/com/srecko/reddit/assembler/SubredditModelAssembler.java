@@ -4,7 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.srecko.reddit.controller.SubredditController;
-import com.srecko.reddit.entity.Subreddit;
+import com.srecko.reddit.dto.SubredditDto;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SubredditModelAssembler implements
-    RepresentationModelAssembler<Subreddit, EntityModel<Subreddit>> {
+    RepresentationModelAssembler<SubredditDto, EntityModel<SubredditDto>> {
 
   @Override
-  public EntityModel<Subreddit> toModel(Subreddit subreddit) {
+  public EntityModel<SubredditDto> toModel(SubredditDto subreddit) {
     return EntityModel.of(subreddit,
         linkTo(methodOn(SubredditController.class).getSubreddit(subreddit.getId())).withSelfRel());
   }

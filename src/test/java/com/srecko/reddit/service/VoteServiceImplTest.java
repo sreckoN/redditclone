@@ -10,11 +10,12 @@ import static org.mockito.Mockito.when;
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VotePostDto;
+import com.srecko.reddit.dto.requests.VoteCommentRequest;
+import com.srecko.reddit.dto.requests.VotePostRequest;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
-import com.srecko.reddit.entity.Vote;
 import com.srecko.reddit.entity.VoteComment;
 import com.srecko.reddit.entity.VotePost;
 import com.srecko.reddit.entity.VoteType;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
@@ -44,7 +46,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {VoteServiceImpl.class})
+@ContextConfiguration(classes = {VoteServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
 class VoteServiceImplTest {
 
@@ -64,9 +66,14 @@ class VoteServiceImplTest {
   private VoteService voteService;
 
   private User user;
+
   private Subreddit subreddit;
+
   private Post post;
+
   private Comment comment;
+
+  private final ModelMapper modelMapper = new ModelMapper();
 
   @BeforeEach
   void setUp() {
@@ -116,7 +123,7 @@ class VoteServiceImplTest {
         userMediator);
 
     // when
-    Vote saved = voteService.savePostVote(new VotePostDto(VoteType.UPVOTE, post.getId()));
+    VotePostDto saved = voteService.savePostVote(new VotePostRequest(VoteType.UPVOTE, post.getId()));
 
     // then
     assertNotNull(saved);
@@ -138,7 +145,7 @@ class VoteServiceImplTest {
 
     // when then
     assertThrows(PostNotFoundException.class, () -> {
-      voteService.savePostVote(new VotePostDto(VoteType.UPVOTE, post.getId()));
+      voteService.savePostVote(new VotePostRequest(VoteType.UPVOTE, post.getId()));
     });
   }
 
@@ -155,7 +162,7 @@ class VoteServiceImplTest {
 
     // when then
     assertThrows(UserNotFoundException.class, () -> {
-      voteService.savePostVote(new VotePostDto(VoteType.UPVOTE, post.getId()));
+      voteService.savePostVote(new VotePostRequest(VoteType.UPVOTE, post.getId()));
     });
   }
 
@@ -174,7 +181,7 @@ class VoteServiceImplTest {
         userMediator);
 
     // when
-    Vote saved = voteService.saveCommentVote(new VoteCommentDto(VoteType.UPVOTE, comment.getId()));
+    VoteCommentDto saved = voteService.saveCommentVote(new VoteCommentRequest(VoteType.UPVOTE, comment.getId()));
 
     // then
     assertNotNull(saved);
@@ -196,7 +203,7 @@ class VoteServiceImplTest {
 
     // when then
     assertThrows(CommentNotFoundException.class, () -> {
-      voteService.saveCommentVote(new VoteCommentDto(VoteType.UPVOTE, post.getId()));
+      voteService.saveCommentVote(new VoteCommentRequest(VoteType.UPVOTE, post.getId()));
     });
   }
 
@@ -213,7 +220,7 @@ class VoteServiceImplTest {
 
     // when then
     assertThrows(UserNotFoundException.class, () -> {
-      voteService.saveCommentVote(new VoteCommentDto(VoteType.UPVOTE, post.getId()));
+      voteService.saveCommentVote(new VoteCommentRequest(VoteType.UPVOTE, post.getId()));
     });
   }
 
@@ -225,7 +232,7 @@ class VoteServiceImplTest {
     given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
 
     // when
-    VotePost deleted = (VotePost) voteService.deletePostVote(vote.getId());
+    VotePostDto deleted = voteService.deletePostVote(vote.getId());
 
     // then
     assertNotNull(deleted);
@@ -263,7 +270,7 @@ class VoteServiceImplTest {
     given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
 
     // when
-    VoteComment deleted = (VoteComment) voteService.deleteCommentVote(vote.getId());
+    VoteCommentDto deleted = voteService.deleteCommentVote(vote.getId());
 
     // then
     assertNotNull(deleted);

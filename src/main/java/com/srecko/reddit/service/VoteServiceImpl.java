@@ -3,6 +3,8 @@ package com.srecko.reddit.service;
 import com.srecko.reddit.dto.UserMediator;
 import com.srecko.reddit.dto.VoteCommentDto;
 import com.srecko.reddit.dto.VotePostDto;
+import com.srecko.reddit.dto.requests.VoteCommentRequest;
+import com.srecko.reddit.dto.requests.VotePostRequest;
 import com.srecko.reddit.entity.Comment;
 import com.srecko.reddit.entity.Post;
 import com.srecko.reddit.entity.User;
@@ -21,6 +23,7 @@ import com.srecko.reddit.repository.VoteRepository;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,7 @@ public class VoteServiceImpl implements VoteService {
   private final UserRepository userRepository;
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
+  private final ModelMapper modelMapper;
 
   private static final Logger logger = LogManager.getLogger(VoteServiceImpl.class);
 
@@ -50,18 +54,21 @@ public class VoteServiceImpl implements VoteService {
    * @param userRepository    the user repository
    * @param postRepository    the post repository
    * @param commentRepository the comment repository
+   * @param modelMapper       the model mapper
    */
   @Autowired
   public VoteServiceImpl(VoteRepository voteRepository, UserRepository userRepository,
-      PostRepository postRepository, CommentRepository commentRepository) {
+      PostRepository postRepository, CommentRepository commentRepository,
+      ModelMapper modelMapper) {
     this.voteRepository = voteRepository;
     this.userRepository = userRepository;
     this.postRepository = postRepository;
     this.commentRepository = commentRepository;
+    this.modelMapper = modelMapper;
   }
 
   @Override
-  public Vote savePostVote(VotePostDto voteDto) {
+  public VotePostDto savePostVote(VotePostRequest voteDto) {
     logger.info("Saving vote for post: {}", voteDto.getPostId());
     UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
@@ -73,7 +80,7 @@ public class VoteServiceImpl implements VoteService {
         post.setVotes(post.getVotes() + voteDto.getType().getVal());
         Vote vote = new VotePost(userOptional.get(), voteDto.getType(), postOptional.get());
         voteRepository.save(vote);
-        return vote;
+        return modelMapper.map(vote, VotePostDto.class);
       } else {
         throw new PostNotFoundException(voteDto.getPostId());
       }
@@ -83,7 +90,7 @@ public class VoteServiceImpl implements VoteService {
   }
 
   @Override
-  public Vote saveCommentVote(VoteCommentDto voteDto) {
+  public VoteCommentDto saveCommentVote(VoteCommentRequest voteDto) {
     logger.info("Saving vote for comment: {}", voteDto.getCommentId());
     UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
@@ -95,7 +102,7 @@ public class VoteServiceImpl implements VoteService {
         comment.setVotes(comment.getVotes() + voteDto.getType().getVal());
         Vote vote = new VoteComment(userOptional.get(), voteDto.getType(), commentOptional.get());
         voteRepository.save(vote);
-        return vote;
+        return modelMapper.map(vote, VoteCommentDto.class);
       } else {
         throw new CommentNotFoundException(voteDto.getCommentId());
       }
@@ -105,7 +112,7 @@ public class VoteServiceImpl implements VoteService {
   }
 
   @Override
-  public Vote deletePostVote(Long id) {
+  public VotePostDto deletePostVote(Long id) {
     logger.info("Deleting vote for post: {}", id);
     Optional<Vote> voteOptional = voteRepository.findById(id);
     if (voteOptional.isPresent()) {
@@ -116,7 +123,7 @@ public class VoteServiceImpl implements VoteService {
         int change = (vote.getType().equals(VoteType.UPVOTE)) ? -1 : 1;
         post.setVotes(post.getVotes() + change);
         voteRepository.delete(vote);
-        return vote;
+        return modelMapper.map(vote, VotePostDto.class);
       } else {
         throw new PostNotFoundException(vote.getPost().getId());
       }
@@ -126,7 +133,7 @@ public class VoteServiceImpl implements VoteService {
   }
 
   @Override
-  public Vote deleteCommentVote(Long id) {
+  public VoteCommentDto deleteCommentVote(Long id) {
     logger.info("Deleting vote for comment: {}", id);
     Optional<Vote> voteOptional = voteRepository.findById(id);
     if (voteOptional.isPresent()) {
@@ -137,7 +144,7 @@ public class VoteServiceImpl implements VoteService {
         int change = (vote.getType().equals(VoteType.UPVOTE)) ? -1 : 1;
         comment.setVotes(comment.getVotes() + change);
         voteRepository.delete(vote);
-        return vote;
+        return modelMapper.map(vote, VoteCommentDto.class);
       } else {
         throw new PostNotFoundException(vote.getComment().getId());
       }

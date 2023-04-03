@@ -1,7 +1,7 @@
 package com.srecko.reddit.controller;
 
 import com.srecko.reddit.assembler.UserModelAssembler;
-import com.srecko.reddit.entity.User;
+import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,11 +55,11 @@ public class UserController {
    * @return the users
    */
   @GetMapping
-  public ResponseEntity<PagedModel<EntityModel<User>>> getUsers(
+  public ResponseEntity<PagedModel<EntityModel<UserDto>>> getUsers(
       @PageableDefault(sort = "username", direction = Sort.Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<User> assembler) {
-    Page<User> page = userService.getUsers(pageable);
-    PagedModel<EntityModel<User>> pagedModel = assembler.toModel(page, userModelAssembler);
+      PagedResourcesAssembler<UserDto> assembler) {
+    Page<UserDto> page = userService.getUsers(pageable);
+    PagedModel<EntityModel<UserDto>> pagedModel = assembler.toModel(page, userModelAssembler);
     logger.info("Returning all users");
     return ResponseEntity.ok().body(pagedModel);
   }
@@ -71,8 +71,8 @@ public class UserController {
    * @return the user
    */
   @GetMapping("/{username}")
-  public ResponseEntity<User> getUser(@PathVariable("username") String username) {
-    User user = userService.getUserByUsername(username);
+  public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) {
+    UserDto user = userService.getUserByUsername(username);
     logger.info("Returning user with id: {}", user.getId());
     return ResponseEntity.ok().body(user);
   }
@@ -84,8 +84,8 @@ public class UserController {
    * @return the response entity
    */
   @DeleteMapping("/{username}")
-  public ResponseEntity<User> delete(@PathVariable("username") String username) {
-    User deleted = userService.deleteUser(username);
+  public ResponseEntity<UserDto> delete(@PathVariable("username") String username) {
+    UserDto deleted = userService.deleteUser(username);
     logger.info("Deleted user with id: {}", deleted.getId());
     return ResponseEntity.ok().body(deleted);
   }

@@ -1,4 +1,4 @@
-package com.srecko.reddit.dto;
+package com.srecko.reddit.dto.responses;
 
 /**
  * The type Authentication response.

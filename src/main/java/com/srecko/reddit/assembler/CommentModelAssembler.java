@@ -4,7 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.srecko.reddit.controller.CommentController;
-import com.srecko.reddit.entity.Comment;
+import com.srecko.reddit.dto.CommentDto;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CommentModelAssembler implements
-    RepresentationModelAssembler<Comment, EntityModel<Comment>> {
+    RepresentationModelAssembler<CommentDto, EntityModel<CommentDto>> {
 
   @Override
-  public EntityModel<Comment> toModel(Comment comment) {
+  public EntityModel<CommentDto> toModel(CommentDto comment) {
     return EntityModel.of(comment,
         linkTo(methodOn(CommentController.class).getComment(comment.getId())).withSelfRel());
   }

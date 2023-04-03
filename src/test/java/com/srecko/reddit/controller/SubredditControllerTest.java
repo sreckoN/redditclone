@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.controller.utils.JwtTestUtils;
 import com.srecko.reddit.controller.utils.WithMockCustomUser;
-import com.srecko.reddit.dto.SubredditDto;
+import com.srecko.reddit.dto.requests.SubredditRequest;
 import com.srecko.reddit.entity.Subreddit;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.repository.SubredditRepository;
@@ -77,9 +77,9 @@ class SubredditControllerTest {
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].subredditList", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.subredditList[0].name", is(subreddit1.getName())))
-        .andExpect(jsonPath("$._embedded.subredditList[1].name", is(subreddit2.getName())))
+        .andExpect(jsonPath("$.['_embedded'].subredditDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.subredditDtoList[0].name", is(subreddit1.getName())))
+        .andExpect(jsonPath("$._embedded.subredditDtoList[1].name", is(subreddit2.getName())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))
@@ -115,9 +115,9 @@ class SubredditControllerTest {
   @WithMockCustomUser
   void save_ReturnsSubreddit_WhenSuccessfullySaved() throws Exception {
     Subreddit subreddit = new Subreddit("Serbia", "Serbia's official subreddit", user);
-    SubredditDto subredditDto = new SubredditDto(0L, subreddit.getName(), subreddit.getDescription());
+    SubredditRequest subredditRequest = new SubredditRequest(0L, subreddit.getName(), subreddit.getDescription());
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    String valueAsString = objectMapper.writeValueAsString(subredditRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/subreddits")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -132,9 +132,9 @@ class SubredditControllerTest {
   @Test
   @WithMockCustomUser
   void save_ThrowsDtoValidationException_WhenInvalidDto() throws Exception {
-    SubredditDto subredditDto = new SubredditDto();
+    SubredditRequest subredditRequest = new SubredditRequest();
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    String valueAsString = objectMapper.writeValueAsString(subredditRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/subreddits")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -175,9 +175,9 @@ class SubredditControllerTest {
   void update_ReturnsUpdatedSubreddit_WhenSuccessfullyUpdated() throws Exception {
     Subreddit subreddit = new Subreddit("Serbia", "Serbia's official subreddit", user);
     subredditRepository.save(subreddit);
-    SubredditDto subredditDto = new SubredditDto(subreddit.getId(), subreddit.getName(), "Official subreddit");
+    SubredditRequest subredditRequest = new SubredditRequest(subreddit.getId(), subreddit.getName(), "Official subreddit");
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    String valueAsString = objectMapper.writeValueAsString(subredditRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -192,9 +192,9 @@ class SubredditControllerTest {
 
   @Test
   void update_ThrowsSubredditNotFoundException_WhenSubredditNotFound() throws Exception {
-    SubredditDto subredditDto = new SubredditDto(0L, "Serbias subreddit", "Welcome to Yugoslavia");
+    SubredditRequest subredditRequest = new SubredditRequest(0L, "Serbias subreddit", "Welcome to Yugoslavia");
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    String valueAsString = objectMapper.writeValueAsString(subredditRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -207,10 +207,10 @@ class SubredditControllerTest {
 
   @Test
   void update_ThrowsDtoValidationException_WhenProvidedInvalidDto() throws Exception {
-    SubredditDto subredditDto = new SubredditDto(null, "Serbias subreddit",
+    SubredditRequest subredditRequest = new SubredditRequest(null, "Serbias subreddit",
         "Welcome to Yugoslavia");
     ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(subredditDto);
+    String valueAsString = objectMapper.writeValueAsString(subredditRequest);
 
     mockMvc.perform(MockMvcRequestBuilders.put("/api/subreddits")
             .header("AUTHORIZATION", "Bearer " + jwt)

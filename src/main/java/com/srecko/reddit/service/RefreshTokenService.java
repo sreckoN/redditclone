@@ -1,7 +1,7 @@
 package com.srecko.reddit.service;
 
-import com.srecko.reddit.dto.AuthenticationResponse;
-import com.srecko.reddit.dto.TokenRefreshRequest;
+import com.srecko.reddit.dto.requests.TokenRefreshRequest;
+import com.srecko.reddit.dto.responses.AuthenticationResponse;
 import com.srecko.reddit.entity.User;
 
 /**

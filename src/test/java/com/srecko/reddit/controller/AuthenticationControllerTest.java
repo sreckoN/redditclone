@@ -8,10 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.controller.utils.JwtTestUtils;
-import com.srecko.reddit.dto.AuthenticationRequest;
-import com.srecko.reddit.dto.AuthenticationResponse;
-import com.srecko.reddit.dto.RegistrationRequest;
-import com.srecko.reddit.dto.TokenRefreshRequest;
+import com.srecko.reddit.dto.requests.AuthenticationRequest;
+import com.srecko.reddit.dto.requests.RegistrationRequest;
+import com.srecko.reddit.dto.requests.TokenRefreshRequest;
+import com.srecko.reddit.dto.responses.AuthenticationResponse;
 import com.srecko.reddit.entity.EmailVerificationToken;
 import com.srecko.reddit.entity.User;
 import com.srecko.reddit.repository.EmailVerificationRepository;

@@ -1,17 +1,17 @@
-package com.srecko.reddit.dto;
+package com.srecko.reddit.dto.requests;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * The type Update post dto.
+ * The type Create post dto.
  *
  * @author Srecko Nikolic
  */
-public class UpdatePostDto {
+public class CreatePostRequest {
 
   @NotNull
-  private Long postId;
+  private Long subredditId;
 
   @NotEmpty
   private String title;
@@ -20,40 +20,40 @@ public class UpdatePostDto {
   private String text;
 
   /**
-   * Instantiates a new Update post dto.
+   * Instantiates a new Create post dto.
    *
-   * @param id    the id
-   * @param title the title
-   * @param text  the text
+   * @param subredditId the subreddit id
+   * @param title       the title
+   * @param text        the text
    */
-  public UpdatePostDto(Long id, String title, String text) {
-    this.postId = id;
+  public CreatePostRequest(Long subredditId, String title, String text) {
+    this.subredditId = subredditId;
     this.title = title;
     this.text = text;
   }
 
   /**
-   * Instantiates a new Update post dto.
+   * Instantiates a new Create post dto.
    */
-  public UpdatePostDto() {
+  public CreatePostRequest() {
   }
 
   /**
-   * Gets post id.
+   * Gets subreddit id.
    *
-   * @return the post id
+   * @return the subreddit id
    */
-  public Long getPostId() {
-    return postId;
+  public Long getSubredditId() {
+    return subredditId;
   }
 
   /**
-   * Sets post id.
+   * Sets subreddit id.
    *
-   * @param postId the post id
+   * @param subredditId the subreddit id
    */
-  public void setPostId(Long postId) {
-    this.postId = postId;
+  public void setSubredditId(Long subredditId) {
+    this.subredditId = subredditId;
   }
 
   /**

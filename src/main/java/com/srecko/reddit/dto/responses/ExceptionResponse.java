@@ -1,4 +1,4 @@
-package com.srecko.reddit.dto;
+package com.srecko.reddit.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
