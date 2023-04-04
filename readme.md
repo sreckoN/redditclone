@@ -21,6 +21,7 @@ Tests: ~160
 - Logging ✅
 - Pagination ✅ 
 - Secure endpoints ✅
+- HATEOAS ✅
 - Ability to add photos to Posts
 - User profile additional settings
 - API Docs
