@@ -100,7 +100,8 @@ public class CommentController {
    * @return the comment
    */
   @GetMapping("/{commentId}")
-  public ResponseEntity<EntityModel<CommentDto>> getComment(@PathVariable("commentId") Long commentId) {
+  public ResponseEntity<EntityModel<CommentDto>> getComment(
+      @PathVariable("commentId") Long commentId) {
     CommentDto comment = commentService.getComment(commentId);
     EntityModel<CommentDto> commentDtoEntityModel = commentModelAssembler.toModel(comment);
     logger.info("Returning comment by id: {}", commentId);
@@ -132,7 +133,8 @@ public class CommentController {
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<EntityModel<CommentDto>> createComment(@Valid @RequestBody CommentRequest commentRequest,
+  public ResponseEntity<EntityModel<CommentDto>> createComment(
+      @Valid @RequestBody CommentRequest commentRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -152,7 +154,8 @@ public class CommentController {
    * @return the response entity
    */
   @DeleteMapping("{commentId}")
-  public ResponseEntity<EntityModel<CommentDto>> deleteComment(@PathVariable("commentId") Long commentId) {
+  public ResponseEntity<EntityModel<CommentDto>> deleteComment(
+      @PathVariable("commentId") Long commentId) {
     CommentDto deletedComment = commentService.delete(commentId);
     EntityModel<CommentDto> commentDtoEntityModel = commentModelAssembler.toModel(deletedComment);
     logger.info("Deleted the comment with id: {}", commentId);

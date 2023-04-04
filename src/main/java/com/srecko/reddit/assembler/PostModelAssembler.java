@@ -24,7 +24,9 @@ public class PostModelAssembler implements
   public EntityModel<PostDto> toModel(PostDto post) {
     return EntityModel.of(post,
         linkTo(methodOn(PostController.class).getPost(post.getId())).withSelfRel(),
-        linkTo(methodOn(UserController.class).getUser(post.getUser().getUsername())).withRel("user"),
-        linkTo(methodOn(CommentController.class).getCommentsForPost(post.getId(), null, null)).withRel("comments"));
+        linkTo(methodOn(UserController.class)
+            .getUser(post.getUser().getUsername())).withRel("user"),
+        linkTo(methodOn(CommentController.class)
+            .getCommentsForPost(post.getId(), null, null)).withRel("comments"));
   }
 }

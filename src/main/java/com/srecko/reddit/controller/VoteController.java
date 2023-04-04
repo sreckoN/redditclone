@@ -63,7 +63,8 @@ public class VoteController {
    * @return the response entity
    */
   @PostMapping("/post")
-  public ResponseEntity<EntityModel<VotePostDto>> savePostVote(@Valid @RequestBody VotePostRequest voteDto,
+  public ResponseEntity<EntityModel<VotePostDto>> savePostVote(
+      @Valid @RequestBody VotePostRequest voteDto,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -83,7 +84,8 @@ public class VoteController {
    * @return the response entity
    */
   @DeleteMapping("/post/{voteId}")
-  public ResponseEntity<EntityModel<VotePostDto>> deletePostVote(@PathVariable("voteId") Long voteId) {
+  public ResponseEntity<EntityModel<VotePostDto>> deletePostVote(
+      @PathVariable("voteId") Long voteId) {
     VotePostDto deletedVote = voteService.deletePostVote(voteId);
     EntityModel<VotePostDto> votePostDtoEntityModel = postModelAssembler.toModel(deletedVote);
     logger.info("Deleted vote: {}", deletedVote.getId());
@@ -120,7 +122,8 @@ public class VoteController {
    * @return the response entity
    */
   @DeleteMapping("/comment/{voteId}")
-  public ResponseEntity<EntityModel<VoteCommentDto>> deleteCommentVote(@PathVariable("voteId") Long voteId) {
+  public ResponseEntity<EntityModel<VoteCommentDto>> deleteCommentVote(
+      @PathVariable("voteId") Long voteId) {
     VoteCommentDto deletedVote = voteService.deleteCommentVote(voteId);
     EntityModel<VoteCommentDto> voteCommentDtoEntityModel = commentModelAssembler.toModel(
         deletedVote);

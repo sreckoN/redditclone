@@ -84,7 +84,8 @@ public class SubredditController {
    * @return the subreddit
    */
   @GetMapping("/{subredditId}")
-  public ResponseEntity<EntityModel<SubredditDto>> getSubreddit(@PathVariable("subredditId") Long id) {
+  public ResponseEntity<EntityModel<SubredditDto>> getSubreddit(
+      @PathVariable("subredditId") Long id) {
     SubredditDto subreddit = subredditService.getSubredditById(id);
     EntityModel<SubredditDto> subredditDtoEntityModel = subredditModelAssembler.toModel(subreddit);
     logger.info("Returning a subreddit with id: {}", id);
@@ -99,7 +100,8 @@ public class SubredditController {
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<EntityModel<SubredditDto>> save(@Valid @RequestBody SubredditRequest subredditRequest,
+  public ResponseEntity<EntityModel<SubredditDto>> save(
+      @Valid @RequestBody SubredditRequest subredditRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -137,7 +139,8 @@ public class SubredditController {
    * @return the response entity
    */
   @PutMapping
-  public ResponseEntity<EntityModel<SubredditDto>> update(@Valid @RequestBody SubredditRequest subredditRequest,
+  public ResponseEntity<EntityModel<SubredditDto>> update(
+      @Valid @RequestBody SubredditRequest subredditRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());

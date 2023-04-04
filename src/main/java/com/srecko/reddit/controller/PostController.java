@@ -138,7 +138,8 @@ public class PostController {
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<EntityModel<PostDto>> create(@Valid @RequestBody CreatePostRequest postRequest,
+  public ResponseEntity<EntityModel<PostDto>> create(
+      @Valid @RequestBody CreatePostRequest postRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -175,7 +176,8 @@ public class PostController {
    * @return the response entity
    */
   @PutMapping
-  public ResponseEntity<EntityModel<PostDto>> update(@Valid @RequestBody UpdatePostRequest updatePostRequest,
+  public ResponseEntity<EntityModel<PostDto>> update(
+      @Valid @RequestBody UpdatePostRequest updatePostRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());

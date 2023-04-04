@@ -22,6 +22,8 @@ public class CommentModelAssembler implements
   public EntityModel<CommentDto> toModel(CommentDto comment) {
     return EntityModel.of(comment,
         linkTo(methodOn(CommentController.class).getComment(comment.getId())).withSelfRel(),
-        linkTo(methodOn(CommentController.class).getCommentsForPost(comment.getPost().getId(), null, null)).withRel("all_comments_for_post"));
+        linkTo(methodOn(CommentController.class)
+            .getCommentsForPost(comment.getPost().getId(), null, null))
+            .withRel("all_comments_for_post"));
   }
 }

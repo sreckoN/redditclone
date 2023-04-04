@@ -24,7 +24,9 @@ public class UserModelAssembler implements
   public EntityModel<UserDto> toModel(UserDto user) {
     return EntityModel.of(user,
         linkTo(methodOn(UserController.class).getUser(user.getUsername())).withSelfRel(),
-        linkTo(methodOn(PostController.class).getPostsForUser(user.getUsername(), null, null)).withRel("posts"),
-        linkTo(methodOn(CommentController.class).getCommentsForUsername(user.getUsername(), null, null)).withRel("comments"));
+        linkTo(methodOn(PostController.class)
+            .getPostsForUser(user.getUsername(), null, null)).withRel("posts"),
+        linkTo(methodOn(CommentController.class)
+            .getCommentsForUsername(user.getUsername(), null, null)).withRel("comments"));
   }
 }
