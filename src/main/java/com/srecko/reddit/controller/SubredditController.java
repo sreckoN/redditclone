@@ -1,5 +1,8 @@
 package com.srecko.reddit.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.srecko.reddit.assembler.SubredditModelAssembler;
 import com.srecko.reddit.dto.SubredditDto;
 import com.srecko.reddit.dto.requests.SubredditRequest;
@@ -81,10 +84,11 @@ public class SubredditController {
    * @return the subreddit
    */
   @GetMapping("/{subredditId}")
-  public ResponseEntity<SubredditDto> getSubreddit(@PathVariable("subredditId") Long id) {
+  public ResponseEntity<EntityModel<SubredditDto>> getSubreddit(@PathVariable("subredditId") Long id) {
     SubredditDto subreddit = subredditService.getSubredditById(id);
+    EntityModel<SubredditDto> subredditDtoEntityModel = subredditModelAssembler.toModel(subreddit);
     logger.info("Returning a subreddit with id: {}", id);
-    return ResponseEntity.ok(subreddit);
+    return ResponseEntity.ok(subredditDtoEntityModel);
   }
 
   /**
@@ -95,7 +99,7 @@ public class SubredditController {
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<SubredditDto> save(@Valid @RequestBody SubredditRequest subredditRequest,
+  public ResponseEntity<EntityModel<SubredditDto>> save(@Valid @RequestBody SubredditRequest subredditRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -104,8 +108,9 @@ public class SubredditController {
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/subreddits/")
             .toUriString());
     SubredditDto saved = subredditService.save(subredditRequest);
+    EntityModel<SubredditDto> subredditDtoEntityModel = subredditModelAssembler.toModel(saved);
     logger.info("Successfully created a subreddit: {}", saved.getId());
-    return ResponseEntity.created(uri).body(saved);
+    return ResponseEntity.created(uri).body(subredditDtoEntityModel);
   }
 
   /**
@@ -117,6 +122,9 @@ public class SubredditController {
   @DeleteMapping("/{subredditId}")
   public ResponseEntity<SubredditDto> delete(@PathVariable("subredditId") Long id) {
     SubredditDto deleted = subredditService.delete(id);
+    EntityModel.of(deleted,
+        linkTo(methodOn(SubredditController.class).getSubreddit(deleted.getId())).withSelfRel(),
+        linkTo(methodOn(SubredditController.class).getAll(null, null)).withRel("subreddits"));
     logger.info("Deleted subreddit with id: {}", deleted.getId());
     return ResponseEntity.ok(deleted);
   }
@@ -129,13 +137,14 @@ public class SubredditController {
    * @return the response entity
    */
   @PutMapping
-  public ResponseEntity<SubredditDto> update(@Valid @RequestBody SubredditRequest subredditRequest,
+  public ResponseEntity<EntityModel<SubredditDto>> update(@Valid @RequestBody SubredditRequest subredditRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
     SubredditDto updated = subredditService.update(subredditRequest);
+    EntityModel<SubredditDto> subredditDtoEntityModel = subredditModelAssembler.toModel(updated);
     logger.info("Updated subreddit with id: {}", updated.getId());
-    return ResponseEntity.ok(updated);
+    return ResponseEntity.ok(subredditDtoEntityModel);
   }
 }

@@ -95,7 +95,7 @@ class SubredditControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/subreddits/{subredditId}", subreddit.getId())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.id", is(subreddit.getId().intValue())))
         .andExpect(jsonPath("$.name", is(subreddit.getName())))
         .andExpect(jsonPath("$.description", is(subreddit.getDescription())))
@@ -124,7 +124,7 @@ class SubredditControllerTest {
             .contentType(APPLICATION_JSON)
             .content(valueAsString))
         .andExpect(status().is2xxSuccessful())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.name", is(subreddit.getName())))
         .andExpect(jsonPath("$.description", is(subreddit.getDescription())));
   }
@@ -184,7 +184,7 @@ class SubredditControllerTest {
             .contentType(APPLICATION_JSON)
             .content(valueAsString))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.id", is(subreddit.getId().intValue())))
         .andExpect(jsonPath("$.name", is(subreddit.getName())))
         .andExpect(jsonPath("$.description", is("Official subreddit")));

@@ -80,7 +80,7 @@ class UserControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", user.getUsername())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.username", is(user.getUsername())));
   }
 
@@ -100,7 +100,7 @@ class UserControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{username}", user.getUsername())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.username", is("janedoe")));
   }
 

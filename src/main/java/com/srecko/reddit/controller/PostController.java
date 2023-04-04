@@ -1,5 +1,8 @@
 package com.srecko.reddit.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.srecko.reddit.assembler.PostModelAssembler;
 import com.srecko.reddit.dto.PostDto;
 import com.srecko.reddit.dto.requests.CreatePostRequest;
@@ -82,10 +85,11 @@ public class PostController {
    * @return the post
    */
   @GetMapping("/{postId}")
-  public ResponseEntity<PostDto> getPost(@PathVariable("postId") Long postId) {
+  public ResponseEntity<EntityModel<PostDto>> getPost(@PathVariable("postId") Long postId) {
     PostDto post = postService.getPost(postId);
+    EntityModel<PostDto> postDtoEntityModel = postModelAssembler.toModel(post);
     logger.info("Returning a post with id: {}", post.getId());
-    return ResponseEntity.ok(post);
+    return ResponseEntity.ok(postDtoEntityModel);
   }
 
   /**
@@ -134,7 +138,7 @@ public class PostController {
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<PostDto> create(@Valid @RequestBody CreatePostRequest postRequest,
+  public ResponseEntity<EntityModel<PostDto>> create(@Valid @RequestBody CreatePostRequest postRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -142,8 +146,9 @@ public class PostController {
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/posts").toUriString());
     PostDto savedPost = postService.save(postRequest);
+    EntityModel<PostDto> postDtoEntityModel = postModelAssembler.toModel(savedPost);
     logger.info("Successfully created a new post: {}", savedPost.getId());
-    return ResponseEntity.created(uri).body(savedPost);
+    return ResponseEntity.created(uri).body(postDtoEntityModel);
   }
 
   /**
@@ -153,10 +158,13 @@ public class PostController {
    * @return the response entity
    */
   @DeleteMapping("/{postId}")
-  public ResponseEntity<PostDto> delete(@PathVariable("postId") Long postId) {
+  public ResponseEntity<EntityModel<PostDto>> delete(@PathVariable("postId") Long postId) {
     PostDto deletedPost = postService.delete(postId);
+    EntityModel<PostDto> postDtoEntityModel = EntityModel.of(deletedPost,
+        linkTo(methodOn(UserController.class).getUser(deletedPost.getUser().getUsername())).withRel(
+            "user"));
     logger.info("Deleted a post with id: {}", postId);
-    return ResponseEntity.ok(deletedPost);
+    return ResponseEntity.ok(postDtoEntityModel);
   }
 
   /**
@@ -167,13 +175,14 @@ public class PostController {
    * @return the response entity
    */
   @PutMapping
-  public ResponseEntity<PostDto> update(@Valid @RequestBody UpdatePostRequest updatePostRequest,
+  public ResponseEntity<EntityModel<PostDto>> update(@Valid @RequestBody UpdatePostRequest updatePostRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
     }
     PostDto updatedPost = postService.update(updatePostRequest);
+    EntityModel<PostDto> postDtoEntityModel = postModelAssembler.toModel(updatedPost);
     logger.info("Updated post: {}", updatedPost.getId());
-    return ResponseEntity.ok(updatedPost);
+    return ResponseEntity.ok(postDtoEntityModel);
   }
 }

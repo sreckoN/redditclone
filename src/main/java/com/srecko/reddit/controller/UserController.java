@@ -1,5 +1,8 @@
 package com.srecko.reddit.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.srecko.reddit.assembler.UserModelAssembler;
 import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.service.UserService;
@@ -71,10 +74,11 @@ public class UserController {
    * @return the user
    */
   @GetMapping("/{username}")
-  public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) {
+  public ResponseEntity<EntityModel<UserDto>> getUser(@PathVariable("username") String username) {
     UserDto user = userService.getUserByUsername(username);
+    EntityModel<UserDto> userDtoEntityModel = userModelAssembler.toModel(user);
     logger.info("Returning user with id: {}", user.getId());
-    return ResponseEntity.ok().body(user);
+    return ResponseEntity.ok().body(userDtoEntityModel);
   }
 
   /**
@@ -84,9 +88,12 @@ public class UserController {
    * @return the response entity
    */
   @DeleteMapping("/{username}")
-  public ResponseEntity<UserDto> delete(@PathVariable("username") String username) {
+  public ResponseEntity<EntityModel<UserDto>> delete(@PathVariable("username") String username) {
     UserDto deleted = userService.deleteUser(username);
+    EntityModel<UserDto> userDtoEntityModel = EntityModel.of(deleted,
+        linkTo(methodOn(UserController.class).getUser(deleted.getUsername())).withSelfRel(),
+        linkTo(methodOn(UserController.class).getUsers(null, null)).withRel("users"));
     logger.info("Deleted user with id: {}", deleted.getId());
-    return ResponseEntity.ok().body(deleted);
+    return ResponseEntity.ok().body(userDtoEntityModel);
   }
 }
