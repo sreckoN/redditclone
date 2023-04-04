@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.TestPropertySource;
@@ -111,7 +112,7 @@ class VoteControllerTest {
             .content(valueAsString)
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().is2xxSuccessful())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.post", is(vote.getPost().getId().intValue())))
         .andExpect(jsonPath("$.user", is(vote.getUser().getId().intValue())))
         .andExpect(jsonPath("$.type", is(VoteType.UPVOTE.toString())));
@@ -159,7 +160,7 @@ class VoteControllerTest {
             .content(valueAsString)
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().is2xxSuccessful())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.comment", is(vote.getComment().getId().intValue())))
         .andExpect(jsonPath("$.user", is(vote.getUser().getId().intValue())))
         .andExpect(jsonPath("$.type", is(VoteType.UPVOTE.toString())));
@@ -203,7 +204,7 @@ class VoteControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/post/{voteId}", vote.getId())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.id", is(vote.getId().intValue())));
   }
 
@@ -225,7 +226,7 @@ class VoteControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.delete("/api/votes/comment/{voteId}", vote.getId())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.id", is(vote.getId().intValue())));
   }
 

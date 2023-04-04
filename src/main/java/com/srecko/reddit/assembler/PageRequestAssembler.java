@@ -26,8 +26,8 @@ public class PageRequestAssembler {
       Pageable pageable, List<String> availableSorts, Sort defaultSort) {
     logger.info("Checking provided sorting");
     PageRequest pageRequest;
-    String sort = pageable.getSort().toString();
-    if (availableSorts.stream().anyMatch(s -> s.equals(sort))) {
+    String providedSort = pageable.getSort().toString().split(":")[0];
+    if (availableSorts.stream().anyMatch(s -> s.equals(providedSort))) {
       pageRequest = PageRequest
           .of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
     } else {

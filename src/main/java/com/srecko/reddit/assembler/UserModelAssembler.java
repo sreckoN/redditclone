@@ -3,6 +3,8 @@ package com.srecko.reddit.assembler;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import com.srecko.reddit.controller.CommentController;
+import com.srecko.reddit.controller.PostController;
 import com.srecko.reddit.controller.UserController;
 import com.srecko.reddit.dto.UserDto;
 import org.springframework.hateoas.EntityModel;
@@ -21,6 +23,10 @@ public class UserModelAssembler implements
   @Override
   public EntityModel<UserDto> toModel(UserDto user) {
     return EntityModel.of(user,
-        linkTo(methodOn(UserController.class).getUser(user.getUsername())).withSelfRel());
+        linkTo(methodOn(UserController.class).getUser(user.getUsername())).withSelfRel(),
+        linkTo(methodOn(PostController.class)
+            .getPostsForUser(user.getUsername(), null, null)).withRel("posts"),
+        linkTo(methodOn(CommentController.class)
+            .getCommentsForUsername(user.getUsername(), null, null)).withRel("comments"));
   }
 }

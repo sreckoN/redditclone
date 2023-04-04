@@ -100,10 +100,12 @@ public class CommentController {
    * @return the comment
    */
   @GetMapping("/{commentId}")
-  public ResponseEntity<CommentDto> getComment(@PathVariable("commentId") Long commentId) {
+  public ResponseEntity<EntityModel<CommentDto>> getComment(
+      @PathVariable("commentId") Long commentId) {
     CommentDto comment = commentService.getComment(commentId);
+    EntityModel<CommentDto> commentDtoEntityModel = commentModelAssembler.toModel(comment);
     logger.info("Returning comment by id: {}", commentId);
-    return ResponseEntity.ok(comment);
+    return ResponseEntity.ok(commentDtoEntityModel);
   }
 
   /**
@@ -131,7 +133,8 @@ public class CommentController {
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<CommentDto> createComment(@Valid @RequestBody CommentRequest commentRequest,
+  public ResponseEntity<EntityModel<CommentDto>> createComment(
+      @Valid @RequestBody CommentRequest commentRequest,
       BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new DtoValidationException(bindingResult.getAllErrors());
@@ -139,8 +142,9 @@ public class CommentController {
     URI uri = URI.create(
         ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/comments/").toUriString());
     CommentDto comment = commentService.save(commentRequest);
+    EntityModel<CommentDto> commentDtoEntityModel = commentModelAssembler.toModel(comment);
     logger.info("Successfully created a new comment: {}", comment.getId());
-    return ResponseEntity.created(uri).body(comment);
+    return ResponseEntity.created(uri).body(commentDtoEntityModel);
   }
 
   /**
@@ -150,9 +154,11 @@ public class CommentController {
    * @return the response entity
    */
   @DeleteMapping("{commentId}")
-  public ResponseEntity<CommentDto> deleteComment(@PathVariable("commentId") Long commentId) {
+  public ResponseEntity<EntityModel<CommentDto>> deleteComment(
+      @PathVariable("commentId") Long commentId) {
     CommentDto deletedComment = commentService.delete(commentId);
+    EntityModel<CommentDto> commentDtoEntityModel = commentModelAssembler.toModel(deletedComment);
     logger.info("Deleted the comment with id: {}", commentId);
-    return ResponseEntity.ok(deletedComment);
+    return ResponseEntity.ok(commentDtoEntityModel);
   }
 }
