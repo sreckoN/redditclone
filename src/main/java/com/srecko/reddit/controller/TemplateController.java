@@ -3,6 +3,8 @@ package com.srecko.reddit.controller;
 import com.srecko.reddit.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Srecko Nikolic
  */
 @Controller
-@RequestMapping("/api")
+@RequestMapping("/")
 public class TemplateController {
 
   private final UserService userService;
@@ -39,6 +41,8 @@ public class TemplateController {
   @GetMapping
   public String index(Model model) {
     logger.info("Returning index.html");
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    model.addAttribute("loggedIn", authentication.isAuthenticated());
     return "index";
   }
 

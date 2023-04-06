@@ -19,7 +19,7 @@
     <div class="row">
       <div class="col-1">
         <a>
-          <img src="/images/Reddit-Logo.png" alt="logo"/>
+          <img src="../static/images/RedditLogo.png" th:src="@{/images/RedditLogo.png}" alt="logo"/>
         </a>
       </div>
       <form class="col col-lg-auto mb-2 mb-lg-0 me-lg-auto">
@@ -28,9 +28,11 @@
           <path
               d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
         </svg>
-        <input class="form-control" type="search" placeholder="Search Reddit">
+        <label>
+          <input class="form-control" type="search" placeholder="Search Reddit">
+        </label>
       </form>
-      <!--<div th:unless="${loggedIn}" class="col-1">
+      <div th:unless="${loggedIn}" class="col-1">
         <a href="/login" class="btn btn-light text-dark me-2">Log In</a>
         <a th:href="@{/signup}" class="btn btn-primary">Sign Up</a>
       </div>
@@ -38,9 +40,17 @@
         <form th:action="@{/logout}" method="post">
           <input type="submit" value="Logout"/>
         </form>
-      </div>-->
+      </div>
     </div>
   </div>
 </header>
+
+<main>
+
+</main>
+
+<footer>
+
+</footer>
 </body>
 </html>
