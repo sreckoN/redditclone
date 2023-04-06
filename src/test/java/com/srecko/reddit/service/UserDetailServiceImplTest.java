@@ -35,11 +35,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ContextConfiguration(classes = {UserDetailServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
 class UserDetailServiceImplTest {
 
   @MockBean

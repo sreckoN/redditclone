@@ -44,11 +44,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ContextConfiguration(classes = {VoteServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
 class VoteServiceImplTest {
 
   @MockBean

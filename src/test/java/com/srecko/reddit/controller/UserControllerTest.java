@@ -63,13 +63,13 @@ class UserControllerTest {
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
-        .andExpect(jsonPath("$.['_embedded'].userDtoList", hasSize(3)))
+        .andExpect(jsonPath("$.['_embedded'].userDtoList", hasSize(2)))
         .andExpect(jsonPath("$._embedded.userDtoList[0].username", is(user.getUsername())))
         .andExpect(jsonPath("$._embedded.userDtoList[1].username", is(user2.getUsername())))
         .andExpect(jsonPath("$._links.self").exists())
         .andExpect(jsonPath("$.page").exists())
         .andExpect(jsonPath("$.page.size", is(10)))
-        .andExpect(jsonPath("$.page.totalElements", is(3)))
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
         .andExpect(jsonPath("$.page.totalPages", is(1)));
   }
 
