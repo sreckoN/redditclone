@@ -70,12 +70,6 @@ public class SecurityConfiguration {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     logger.debug("Creating filter chain");
-    String[] staticResources = {
-        "/css/**",
-        "/images/**",
-        "/fonts/**",
-        "/scripts/**",
-    };
     AuthenticationFilter authenticationFilter = new AuthenticationFilter(new JwtConfig(),
         authenticationManagerBuilder.getOrBuild(), refreshTokenService);
     authenticationFilter.setFilterProcessesUrl("/api/auth/authenticate");
@@ -84,10 +78,11 @@ public class SecurityConfiguration {
         .sessionManagement().sessionCreationPolicy(STATELESS)
         .and()
         .authorizeHttpRequests()
-        .requestMatchers(staticResources).permitAll()
+        .requestMatchers("/images/**").permitAll()
+        .requestMatchers("/css/**").permitAll()
         .requestMatchers("/api/auth/**").permitAll()
         .requestMatchers("/api/search/**").permitAll()
-        .requestMatchers("/api").permitAll()
+        .requestMatchers("/").permitAll()
         .anyRequest().authenticated()
         .and()
         .formLogin()

@@ -39,7 +39,7 @@ public class ThymeleafConfiguration {
   public SpringResourceTemplateResolver templateResolver() {
     SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
     templateResolver.setApplicationContext(context);
-    templateResolver.setPrefix("resources/templates/");
+    templateResolver.setPrefix("classpath:/templates/");
     templateResolver.setSuffix(".html");
     logger.debug("Created a bean of {}", SpringResourceTemplateResolver.class);
     return templateResolver;

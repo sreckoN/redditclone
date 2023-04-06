@@ -49,13 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String servletPath = request.getServletPath();
     logger.info("Filtering request with servlet path: {}", servletPath);
 
-    if (servletPath.equals("/api/auth/register") || servletPath.equals(
-        "/api/auth/registrationConfirm")
-        || servletPath.equals("/api/auth/authenticate") || servletPath.contains(
-        "/api/auth/token/refresh")
-        || servletPath.contains("/api/search") || servletPath.endsWith("/api")) {
+    if (!servletPath.contains("/api") || servletPath.contains("/api/auth/")
+        || servletPath.contains("/api/search")) {
       filterChain.doFilter(request, response);
     } else {
+      logger.info("Extracting AUTHORIZATION header");
       String authHeader = request.getHeader("AUTHORIZATION");
       if (authHeader == null || !authHeader.startsWith("Bearer")) {
         filterChain.doFilter(request, response);
