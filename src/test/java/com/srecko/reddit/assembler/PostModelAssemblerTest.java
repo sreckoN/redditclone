@@ -6,10 +6,7 @@ import com.srecko.reddit.controller.CommentController;
 import com.srecko.reddit.controller.PostController;
 import com.srecko.reddit.controller.UserController;
 import com.srecko.reddit.dto.PostDto;
-import com.srecko.reddit.dto.UserDto;
 import com.srecko.reddit.entity.User;
-import com.srecko.reddit.service.PostServiceImpl;
-import com.srecko.reddit.service.TestConfig;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Links;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)

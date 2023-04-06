@@ -20,6 +20,7 @@ import com.srecko.reddit.repository.CommentRepository;
 import com.srecko.reddit.repository.PostRepository;
 import com.srecko.reddit.repository.SubredditRepository;
 import com.srecko.reddit.repository.UserRepository;
+import com.srecko.reddit.service.utils.TestConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

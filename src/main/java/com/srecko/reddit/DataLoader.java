@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Srecko Nikolic
  */
 @Configuration
+@Profile("dev")
 public class DataLoader implements CommandLineRunner {
 
   private final PasswordEncoder passwordEncoder;

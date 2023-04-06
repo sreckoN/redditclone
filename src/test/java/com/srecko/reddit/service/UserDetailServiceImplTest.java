@@ -16,6 +16,7 @@ import com.srecko.reddit.exception.authentication.AccountDisabledException;
 import com.srecko.reddit.exception.user.UserNotFoundException;
 import com.srecko.reddit.repository.EmailVerificationRepository;
 import com.srecko.reddit.repository.UserRepository;
+import com.srecko.reddit.service.utils.TestConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
