@@ -22,8 +22,8 @@ Tests: ~160
 - Pagination ✅ 
 - Secure endpoints ✅
 - HATEOAS ✅
+- Switch to Microservices architecture ⏳
 - Ability to add photos to Posts
 - User profile additional settings
 - API Docs
-- Switch to Microservices architecture
 - Front-end
