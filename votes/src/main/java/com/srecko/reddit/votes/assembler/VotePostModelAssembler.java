@@ -17,8 +17,8 @@ public class VotePostModelAssembler implements
   @Override
   public EntityModel<VotePostDto> toModel(VotePostDto vote) {
     return EntityModel.of(vote);
-        /*linkTo(methodOn(PostController.class).getPost(vote.getPost().getId())).withRel("post"),
-        linkTo(methodOn(UserController.class).getUser(vote.getUser().getUsername()))
-            .withRel("user"));*/
+    /*linkTo(methodOn(PostController.class).getPost(vote.getPost().getId())).withRel("post"),
+    linkTo(methodOn(UserController.class).getUser(vote.getUser().getUsername()))
+        .withRel("user"));*/
   }
 }
