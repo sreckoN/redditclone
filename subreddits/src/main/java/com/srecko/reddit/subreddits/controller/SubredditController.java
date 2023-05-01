@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -152,8 +153,32 @@ public class SubredditController {
     return ResponseEntity.ok(subredditDtoEntityModel);
   }
 
+  /**
+   * Check if subreddit exists.
+   *
+   * @param subredditId the subreddit id
+   */
   @RequestMapping(method = RequestMethod.HEAD, value = "/checkIfSubredditExists")
   public void checkIfSubredditExists(@RequestBody Long subredditId) {
     subredditService.checkIfExists(subredditId);
+  }
+
+  /**
+   * Search subreddits paged model.
+   *
+   * @param query     the query
+   * @param pageable  the pageable
+   * @param assembler the assembler
+   * @return the paged model
+   */
+  @PostMapping("/search")
+  public PagedModel<EntityModel<SubredditDto>> searchSubreddits(@RequestBody String query,
+      @PageableDefault(sort = "name", direction = Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<SubredditDto> assembler) {
+    Page<SubredditDto> page = subredditService.search(query, pageable);
+    PagedModel<EntityModel<SubredditDto>> pagedModel =
+        assembler.toModel(page, subredditModelAssembler);
+    logger.info("Returning a page {}/{} of users", page.getNumber(), page.getTotalPages());
+    return pagedModel;
   }
 }

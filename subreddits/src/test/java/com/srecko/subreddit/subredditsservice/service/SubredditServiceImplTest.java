@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-import com.srecko.reddit.service.utils.TestConfig;
 import com.srecko.reddit.subreddits.dto.SubredditDto;
 import com.srecko.reddit.subreddits.dto.SubredditRequest;
 import com.srecko.reddit.subreddits.entity.Subreddit;
@@ -15,6 +14,7 @@ import com.srecko.reddit.subreddits.exception.SubredditNotFoundException;
 import com.srecko.reddit.subreddits.repository.SubredditRepository;
 import com.srecko.reddit.subreddits.service.SubredditService;
 import com.srecko.reddit.subreddits.service.SubredditServiceImpl;
+import com.srecko.subreddit.subredditsservice.service.utils.TestConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

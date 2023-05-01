@@ -1,4 +1,4 @@
-package com.srecko.reddit.posts.assembler;
+package com.srecko.reddit.users.assembler;
 
 import java.util.List;
 import org.apache.logging.log4j.LogManager;

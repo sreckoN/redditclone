@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.srecko.reddit.users.controller.utils.JwtTestUtils;
 import com.srecko.reddit.users.entity.User;
 import com.srecko.reddit.users.repository.UserRepository;
 import java.util.List;
@@ -37,7 +36,8 @@ class UserControllerTest {
   @Autowired
   private UserRepository userRepository;
 
-  private final String jwt = JwtTestUtils.getJwt();
+//  private final String jwt = JwtTestUtils.getJwt();
+  private final String jwt = "2342okn1o24n.124oini4o1.1jk12n4k1nj4k12";
 
   private User user;
 

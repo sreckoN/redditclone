@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -107,5 +109,23 @@ public class UserController {
   @GetMapping("/getUserIdByUsername")
   public Long getUserIdByUsername(@RequestBody String username) {
     return userService.getUserIdByUsername(username);
+  }
+
+  /**
+   * Search users paged model.
+   *
+   * @param query     the query
+   * @param pageable  the pageable
+   * @param assembler the assembler
+   * @return the paged model
+   */
+  @PostMapping("/search")
+  public PagedModel<EntityModel<UserDto>> searchUsers(@RequestBody String query,
+      @PageableDefault(sort = "username", direction = Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<UserDto> assembler) {
+    Page<UserDto> page = userService.search(query, pageable);
+    PagedModel<EntityModel<UserDto>> pagedModel = assembler.toModel(page, userModelAssembler);
+    logger.info("Returning a page {}/{} of users", page.getNumber(), page.getTotalPages());
+    return pagedModel;
   }
 }

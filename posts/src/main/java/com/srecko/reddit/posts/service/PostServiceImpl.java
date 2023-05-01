@@ -153,4 +153,27 @@ public class PostServiceImpl implements PostService {
       throw new PostNotFoundException(postId);
     }
   }
+
+  @Override
+  public Page<PostDto> searchPosts(String query, Pageable pageable) {
+    logger.info("Searching for posts that match query: {}", query);
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable,
+        List.of("dateOfCreation", "title", "votes"),
+        Sort.by(Direction.ASC, "dateOfCreation"));
+    Page<Post> users = postRepository.findByTitleContainingIgnoreCase(query,
+        pageRequest);
+    return ModelPageToDtoPageConverter.convertPosts(pageable, users, modelMapper);
+  }
+
+  @Override
+  public Page<PostDto> searchPostsInSubreddit(Long subredditId, String query, Pageable pageable) {
+    logger.info("Searching for posts in subreddit {} that match query: {}", subredditId, query);
+    subredditsFeignClient.checkIfSubredditExists(subredditId);
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable,
+        List.of("dateOfCreation", "title", "votes"),
+        Sort.by(Direction.ASC, "dateOfCreation"));
+    Page<Post> users = postRepository.findBySubredditIdAndTitleContainingIgnoreCase(subredditId,
+        query, pageRequest);
+    return ModelPageToDtoPageConverter.convertPosts(pageable, users, modelMapper);
+  }
 }

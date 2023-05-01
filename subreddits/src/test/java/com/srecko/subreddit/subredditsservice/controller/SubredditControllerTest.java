@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.srecko.reddit.controller.utils.JwtTestUtils;
 import com.srecko.reddit.subreddits.dto.SubredditRequest;
 import com.srecko.reddit.subreddits.entity.Subreddit;
 import com.srecko.reddit.subreddits.repository.SubredditRepository;
@@ -41,7 +40,8 @@ class SubredditControllerTest {
   @Autowired
   private SubredditRepository subredditRepository;
 
-  private final String jwt = JwtTestUtils.getJwt();
+  // private final String jwt = JwtTestUtils.getJwt();
+  private final String jwt = "ff42lk12mk1.lfkfm12o3limf2po3.1lkfm3olk1mf3";
 
   private Long userId;
 

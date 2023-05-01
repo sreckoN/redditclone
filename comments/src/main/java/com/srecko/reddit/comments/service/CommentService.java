@@ -68,4 +68,13 @@ public interface CommentService {
    * @param commentId the comment id
    */
   void checkIfExists(Long commentId);
+
+  /**
+   * Search page.
+   *
+   * @param query    the query
+   * @param pageable the pageable
+   * @return the page
+   */
+  Page<CommentDto> search(String query, Pageable pageable);
 }

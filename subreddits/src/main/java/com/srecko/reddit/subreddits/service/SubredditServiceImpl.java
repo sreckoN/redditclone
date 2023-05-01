@@ -77,9 +77,9 @@ public class SubredditServiceImpl implements SubredditService {
   public SubredditDto save(SubredditRequest subredditRequest) {
     logger.info("Saving subreddit into database");
     /*UserMediator userMediator = (UserMediator) SecurityContextHolder.getContext()
-        .getAuthentication().getPrincipal();
-   Long userId = usersFeignClient.getUserId(userMediator.getUsername());*/
-   Long userId = usersFeignClient.getUserId("username");
+    .getAuthentication().getPrincipal();
+    Long userId = usersFeignClient.getUserId(userMediator.getUsername());*/
+    Long userId = usersFeignClient.getUserId("username");
     Subreddit subreddit =
         new Subreddit(subredditRequest.getName(), subredditRequest.getDescription(), userId);
     subreddit = subredditRepository.save(subreddit);
@@ -120,5 +120,15 @@ public class SubredditServiceImpl implements SubredditService {
     if (subredditOptional.isEmpty()) {
       throw new SubredditNotFoundException(subredditId);
     }
+  }
+
+  @Override
+  public Page<SubredditDto> search(String query, Pageable pageable) {
+    logger.info("Searching for subreddits that match query: {}", query);
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("name"),
+        Sort.by(Direction.ASC, "name"));
+    Page<Subreddit> users = subredditRepository.findByNameContainingIgnoreCase(query,
+        pageRequest);
+    return ModelPageToDtoPageConverter.convertSubreddits(pageable, users, modelMapper);
   }
 }

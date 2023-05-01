@@ -77,4 +77,23 @@ public interface PostService {
    * @param postId the post id
    */
   void checkIfExists(Long postId);
+
+  /**
+   * Search page.
+   *
+   * @param query    the query
+   * @param pageable the pageable
+   * @return the page
+   */
+  Page<PostDto> searchPosts(String query, Pageable pageable);
+
+  /**
+   * Search posts in subreddit page.
+   *
+   * @param subredditId the subreddit id
+   * @param query       the query
+   * @param pageable    the pageable
+   * @return the page
+   */
+  Page<PostDto> searchPostsInSubreddit(Long subredditId, String query, Pageable pageable);
 }

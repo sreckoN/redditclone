@@ -1,11 +1,11 @@
-package com.srecko.reddit.assembler;
+package com.srecko.reddit.users.assembler;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.srecko.reddit.controller.CommentController;
-import com.srecko.reddit.controller.PostController;
-import com.srecko.reddit.controller.UserController;
-import com.srecko.reddit.dto.UserDto;
+import com.srecko.reddit.users.controller.UserController;
+import com.srecko.reddit.users.dto.UserDto;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -22,13 +21,7 @@ class UserModelAssemblerTest {
   private UserModelAssembler userModelAssembler;
 
   @Mock
-  private PostController postController;
-
-  @Mock
   private UserController userController;
-
-  @Mock
-  private CommentController commentController;
 
   @BeforeEach
   void setUp() {

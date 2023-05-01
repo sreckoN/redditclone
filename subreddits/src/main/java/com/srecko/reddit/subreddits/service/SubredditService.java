@@ -58,4 +58,13 @@ public interface SubredditService {
    * @param subredditId the subreddit id
    */
   void checkIfExists(Long subredditId);
+
+  /**
+   * Search page.
+   *
+   * @param query    the query
+   * @param pageable the pageable
+   * @return the page
+   */
+  Page<SubredditDto> search(String query, Pageable pageable);
 }

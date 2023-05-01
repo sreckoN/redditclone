@@ -1,5 +1,6 @@
 package com.srecko.reddit.users.controller.utils;
 
+/*
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import org.springframework.security.test.context.support.WithSecurityContext;
@@ -11,4 +12,4 @@ public @interface WithMockCustomUser {
   String username() default "janedoe";
 
   String[] authorities() default {};
-}
+}*/

@@ -186,8 +186,52 @@ public class PostController {
     return ResponseEntity.ok(postDtoEntityModel);
   }
 
+  /**
+   * Check if post exists.
+   *
+   * @param postId the post id
+   */
   @RequestMapping(method = RequestMethod.HEAD, value = "/checkIfExists")
   public void checkIfPostExists(@RequestBody Long postId) {
     postService.checkIfExists(postId);
+  }
+
+  /**
+   * Search subreddits paged model.
+   *
+   * @param query     the query
+   * @param pageable  the pageable
+   * @param assembler the assembler
+   * @return the paged model
+   */
+  @PostMapping("/search")
+  public PagedModel<EntityModel<PostDto>> searchPosts(@RequestBody String query,
+      @PageableDefault(sort = "name", direction = Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<PostDto> assembler) {
+    Page<PostDto> page = postService.searchPosts(query, pageable);
+    PagedModel<EntityModel<PostDto>> pagedModel = assembler.toModel(page, postModelAssembler);
+    logger.info("Returning a page {}/{} of users", page.getNumber(), page.getTotalPages());
+    return pagedModel;
+  }
+
+  /**
+   * Search posts in subreddit paged model.
+   *
+   * @param subredditId the subreddit id
+   * @param query       the query
+   * @param pageable    the pageable
+   * @param assembler   the assembler
+   * @return the paged model
+   */
+  @PostMapping("/search/subreddit/{subredditId}")
+  public PagedModel<EntityModel<PostDto>> searchPostsInSubreddit(
+      @PathVariable("subredditId") Long subredditId,
+      @RequestBody String query,
+      @PageableDefault(sort = "name", direction = Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<PostDto> assembler) {
+    Page<PostDto> page = postService.searchPostsInSubreddit(subredditId, query, pageable);
+    PagedModel<EntityModel<PostDto>> pagedModel = assembler.toModel(page, postModelAssembler);
+    logger.info("Returning a page {}/{} of users", page.getNumber(), page.getTotalPages());
+    return pagedModel;
   }
 }

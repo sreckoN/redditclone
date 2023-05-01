@@ -1,5 +1,6 @@
-package com.srecko.reddit.controller.utils;
+package com.srecko.subreddit.subredditsservice.controller.utils;
 
+/*
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -29,4 +30,4 @@ public class JwtTestUtils {
             SignatureAlgorithm.HS256)
         .compact();
   }
-}
+}*/

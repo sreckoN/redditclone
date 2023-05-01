@@ -1,6 +1,6 @@
 package com.srecko.reddit.users.service;
 
-import com.srecko.reddit.posts.assembler.PageRequestAssembler;
+import com.srecko.reddit.users.assembler.PageRequestAssembler;
 import com.srecko.reddit.users.dto.ModelPageToDtoPageConverter;
 import com.srecko.reddit.users.dto.UserDto;
 import com.srecko.reddit.users.entity.User;
@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -143,5 +144,15 @@ public class UserServiceImpl implements UserService {
       throw new UserNotFoundException(username);
     }
     return userOptional.get().getId();
+  }
+
+  @Override
+  public PageImpl<UserDto> search(String q, Pageable pageable) {
+    logger.info("Searching for usernames that match query: {}", q);
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("username"),
+        Sort.by(Direction.ASC, "username"));
+    Page<User> users = userRepository.findByUsernameContainingIgnoreCase(q,
+        pageRequest);
+    return ModelPageToDtoPageConverter.convertUsers(pageable, users, modelMapper);
   }
 }

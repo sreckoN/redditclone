@@ -11,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.comments.dto.CommentRequest;
 import com.srecko.reddit.comments.entity.Comment;
 import com.srecko.reddit.comments.repository.CommentRepository;
-import com.srecko.reddit.controller.utils.JwtTestUtils;
-import com.srecko.reddit.controller.utils.WithMockCustomUser;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +37,8 @@ class CommentControllerTest {
   @Autowired
   private CommentRepository commentRepository;
 
-  private final String jwt = JwtTestUtils.getJwt();
+  // private final String jwt = JwtTestUtils.getJwt();
+  private final String jwt = "dfgegoidsaid.sdvnsdOVNISD.Djvndovisdn";
 
   private Long userId;
 
@@ -114,7 +113,7 @@ class CommentControllerTest {
   }
 
   @Test
-  @WithMockCustomUser
+  // @WithMockCustomUser
   void createComment_ReturnsCreatedComment_WhenSuccessfullyCreated() throws Exception {
     Comment comment = new Comment(userId, "Good", postId);
     commentRepository.save(comment);
@@ -136,7 +135,7 @@ class CommentControllerTest {
   }
 
   @Test
-  @WithMockCustomUser
+  // @WithMockCustomUser
   void createComment_ThrowsPostNotFoundException_WhenPostDoesNotExist() throws Exception {
     CommentRequest commentRequest = new CommentRequest("New comment", 0L);
     ObjectMapper objectMapper = new ObjectMapper();
@@ -152,7 +151,7 @@ class CommentControllerTest {
   }
 
   @Test
-  @WithMockCustomUser
+  // @WithMockCustomUser
   void createComment_ThrowsDtoValidationException_WhenInvalidDto() throws Exception {
     CommentRequest commentRequest = new CommentRequest();
     ObjectMapper objectMapper = new ObjectMapper();

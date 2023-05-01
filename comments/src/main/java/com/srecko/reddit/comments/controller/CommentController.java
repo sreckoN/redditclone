@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -163,8 +164,31 @@ public class CommentController {
     return ResponseEntity.ok(commentDtoEntityModel);
   }
 
+  /**
+   * Check if exists.
+   *
+   * @param commentId the comment id
+   */
   @RequestMapping(method = RequestMethod.HEAD, value = "/checkIfExists")
   public void checkIfExists(@RequestBody Long commentId) {
     commentService.checkIfExists(commentId);
+  }
+
+  /**
+   * Search comments paged model.
+   *
+   * @param query     the query
+   * @param pageable  the pageable
+   * @param assembler the assembler
+   * @return the paged model
+   */
+  @PostMapping("/search")
+  public PagedModel<EntityModel<CommentDto>> searchComments(@RequestBody String query,
+      @PageableDefault(sort = "name", direction = Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<CommentDto> assembler) {
+    Page<CommentDto> page = commentService.search(query, pageable);
+    PagedModel<EntityModel<CommentDto>> pagedModel = assembler.toModel(page, commentModelAssembler);
+    logger.info("Returning a page {}/{} of users", page.getNumber(), page.getTotalPages());
+    return pagedModel;
   }
 }

@@ -135,4 +135,15 @@ public class CommentServiceImpl implements CommentService {
       throw new CommentNotFoundException(commentId);
     }
   }
+
+  @Override
+  public Page<CommentDto> search(String query, Pageable pageable) {
+    logger.info("Searching for comments that match query: {}", query);
+    PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable,
+        List.of("text", "created"),
+        Sort.by(Direction.ASC, "text"));
+    Page<Comment> users = commentRepository.findByTextContainingIgnoreCase(query,
+        pageRequest);
+    return ModelPageToDtoPageConverter.convertComments(pageable, users, modelMapper);
+  }
 }

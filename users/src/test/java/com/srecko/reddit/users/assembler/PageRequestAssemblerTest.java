@@ -1,7 +1,8 @@
-package com.srecko.reddit.assembler;
+package com.srecko.reddit.users.assembler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.srecko.reddit.users.assembler.PageRequestAssembler;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

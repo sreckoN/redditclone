@@ -3,6 +3,7 @@ package com.srecko.reddit.users.service;
 import com.srecko.reddit.users.dto.UserDto;
 import com.srecko.reddit.users.entity.User;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -88,4 +89,13 @@ public interface UserService {
    * @return the user id by username
    */
   Long getUserIdByUsername(String username);
+
+  /**
+   * Search page.
+   *
+   * @param q        the q
+   * @param pageable the pageable
+   * @return the page
+   */
+  PageImpl<UserDto> search(String q, Pageable pageable);
 }
