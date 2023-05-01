@@ -3,6 +3,8 @@ package com.srecko.reddit.votes.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
 import com.srecko.reddit.votes.dto.VoteCommentDto;
 import com.srecko.reddit.votes.dto.VoteCommentRequest;
@@ -17,6 +19,7 @@ import com.srecko.reddit.votes.service.client.CommentsFeignClient;
 import com.srecko.reddit.votes.service.client.PostsFeignClient;
 import com.srecko.reddit.votes.service.client.UsersFeignClient;
 import com.srecko.reddit.votes.service.utils.TestConfig;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,7 +113,7 @@ class VoteServiceImplTest {
   void deletePostVote_ReturnsPostVote_WhenSuccessfullyDeleted() {
     // given
     VotePost vote = new VotePost(userId, VoteType.UPVOTE, postId);
-    // given(voteRepository.findById(any())).willReturn(Optional.of(vote));
+    given(voteRepository.findById(any())).willReturn(Optional.of(vote));
 
     // when
     VotePostDto deleted = voteService.deletePostVote(vote.getId());
@@ -134,7 +137,7 @@ class VoteServiceImplTest {
   void deleteCommentVote_ReturnsCommentVote_WhenSuccessfullyDeleted() {
     // given
     VoteComment vote = new VoteComment(userId, VoteType.UPVOTE, commentId);
-    // given(voteRepository.findById(any())).willReturn(Optional.of(vote));
+    given(voteRepository.findById(any())).willReturn(Optional.of(vote));
 
     // when
     VoteCommentDto deleted = voteService.deleteCommentVote(vote.getId());
