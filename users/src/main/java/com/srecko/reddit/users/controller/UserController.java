@@ -73,11 +73,25 @@ public class UserController {
   /**
    * Gets user.
    *
+   * @param userId the user id
+   * @return the user
+   */
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<EntityModel<UserDto>> getUser(@PathVariable("userId") Long userId) {
+    UserDto user = userService.getUser(userId);
+    EntityModel<UserDto> userDtoEntityModel = userModelAssembler.toModel(user);
+    logger.info("Returning user with id: {}", user.getId());
+    return ResponseEntity.ok().body(userDtoEntityModel);
+  }
+
+  /**
+   * Gets user by username.
+   *
    * @param username the username
    * @return the user
    */
   @GetMapping("/{username}")
-  public ResponseEntity<EntityModel<UserDto>> getUser(@PathVariable("username") String username) {
+  public ResponseEntity<EntityModel<UserDto>> getUserByUsername(@PathVariable("username") String username) {
     UserDto user = userService.getUserByUsername(username);
     EntityModel<UserDto> userDtoEntityModel = userModelAssembler.toModel(user);
     logger.info("Returning user with id: {}", user.getId());
@@ -94,7 +108,7 @@ public class UserController {
   public ResponseEntity<EntityModel<UserDto>> delete(@PathVariable("username") String username) {
     UserDto deleted = userService.deleteUser(username);
     EntityModel<UserDto> userDtoEntityModel = EntityModel.of(deleted,
-        linkTo(methodOn(UserController.class).getUser(deleted.getUsername())).withSelfRel(),
+        linkTo(methodOn(UserController.class).getUserByUsername(deleted.getUsername())).withSelfRel(),
         linkTo(methodOn(UserController.class).getUsers(null, null)).withRel("users"));
     logger.info("Deleted user with id: {}", deleted.getId());
     return ResponseEntity.ok().body(userDtoEntityModel);

@@ -75,7 +75,7 @@ class UserControllerTest {
   void getUser_ReturnsUser_WhenUserIsFound() throws Exception {
     userRepository.save(user);
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", user.getUsername())
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/user/{userId}", user.getId())
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -84,6 +84,26 @@ class UserControllerTest {
 
   @Test
   void getUser_ThrowsUserNotFoundException_WhenUserNotFound() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/user/{userId}", 0L)
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("User with id 0 is not found.")));
+  }
+
+  @Test
+  void getUserByUsername_ReturnsUser_WhenUserIsFound() throws Exception {
+    userRepository.save(user);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", user.getUsername())
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.username", is(user.getUsername())));
+  }
+
+  @Test
+  void getUserByUsername_ThrowsUserNotFoundException_WhenUserNotFound() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{username}", "janinedoe")
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().is4xxClientError())
@@ -109,5 +129,65 @@ class UserControllerTest {
         .andExpect(status().is4xxClientError())
         .andExpect(content().contentType(APPLICATION_JSON))
         .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
+  }
+
+  @Test
+  void getUserIdByUsername_ReturnsUserId() throws Exception {
+    userRepository.save(user);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/getUserIdByUsername")
+        .header("AUTHORIZATION", "Bearer " + jwt)
+        .contentType(APPLICATION_JSON)
+        .content(user.getUsername()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$", is(user.getId().intValue())));
+  }
+
+  @Test
+  void getUserIdByUsername_ThrowsUserNotFoundException_WhenUserIsNotFound() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/users/getUserIdByUsername")
+            .header("AUTHORIZATION", "Bearer " + jwt)
+            .contentType(APPLICATION_JSON)
+            .content("bob"))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("User with username bob is not found.")));
+  }
+
+  @Test
+  void search_ReturnsUsers_WhenTheyMatchQuery() throws Exception {
+    User user1 = new User("Jane", "Smith", "jane.smith@example.org", "janesmith", "iloveyou", "GB", true);
+    userRepository.saveAll(List.of(user, user1));
+    String query = "jane";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/users/search")
+        .contentType(APPLICATION_JSON)
+        .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].userDtoList", hasSize(2)))
+        .andExpect(jsonPath("$._embedded.userDtoList[0].username", is(user.getUsername())))
+        .andExpect(jsonPath("$._embedded.userDtoList[1].username", is(user1.getUsername())))
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void search_ReturnsEmptyPage_WhenNoUserMatchesQuery() throws Exception {
+    User user1 = new User("Jane", "Smith", "jane.smith@example.org", "janesmith", "iloveyou", "GB", true);
+    userRepository.saveAll(List.of(user, user1));
+    String query = "john";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/users/search")
+            .contentType(APPLICATION_JSON)
+            .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].userDtoList").doesNotExist())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(0)))
+        .andExpect(jsonPath("$.page.totalPages", is(0)));
   }
 }

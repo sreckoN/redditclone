@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
  * @author Srecko Nikolic
  */
 @Component
-public class ModelPageToDtoPageConverter {
+public class UserPageMapper {
 
-  private static final Logger logger = LogManager.getLogger(ModelPageToDtoPageConverter.class);
+  private static final Logger logger = LogManager.getLogger(UserPageMapper.class);
 
   /**
    * Convert users page.

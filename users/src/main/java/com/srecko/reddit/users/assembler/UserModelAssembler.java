@@ -21,7 +21,7 @@ public class UserModelAssembler implements
   @Override
   public EntityModel<UserDto> toModel(UserDto user) {
     return EntityModel.of(user,
-        linkTo(methodOn(UserController.class).getUser(user.getUsername())).withSelfRel());
+        linkTo(methodOn(UserController.class).getUserByUsername(user.getUsername())).withSelfRel());
     /*return EntityModel.of(user,
         linkTo(methodOn(UserController.class).getUser(user.getUsername())).withSelfRel(),
         linkTo(methodOn(PostController.class)

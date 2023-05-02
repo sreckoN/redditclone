@@ -27,7 +27,7 @@ public class UserNotFoundException extends RuntimeException {
    * @param id the id
    */
   public UserNotFoundException(Long id) {
-    super("User with id " + id + " is not found");
+    super("User with id " + id + " is not found.");
     logger.error("User not found: {}", id);
   }
 }

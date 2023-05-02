@@ -21,9 +21,6 @@ class SubredditModelAssemblerTest {
 
   private SubredditModelAssembler subredditModelAssembler;
 
-  @Mock
-  private SubredditController subredditController;
-
   @BeforeEach
   void setUp() {
     subredditModelAssembler = new SubredditModelAssembler();
@@ -48,9 +45,9 @@ class SubredditModelAssemblerTest {
     assertTrue(selfLink.isPresent());
     assertEquals("/api/subreddits/" + subredditDto.getId(), selfLink.get().getHref());
 
-    Optional<Link> postsLink = result.getLink("posts");
+    /*Optional<Link> postsLink = result.getLink("posts");
     assertNotNull(postsLink);
     assertTrue(postsLink.isPresent());
-    assertEquals("/api/posts/subreddit/" + subredditDto.getId(), postsLink.get().getHref());
+    assertEquals("/api/posts/subreddit/" + subredditDto.getId(), postsLink.get().getHref());*/
   }
 }

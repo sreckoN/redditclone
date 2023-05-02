@@ -22,6 +22,14 @@ public interface UserService {
   Page<UserDto> getUsers(Pageable pageable);
 
   /**
+   * Gets user.
+   *
+   * @param userId the user id
+   * @return the user
+   */
+  UserDto getUser(Long userId);
+
+  /**
    * Gets user by username.
    *
    * @param username the username
@@ -36,14 +44,6 @@ public interface UserService {
    * @return the user by username
    */
   User getUserByUsernameInternal(String username);
-
-  /**
-   * Gets user by email internal.
-   *
-   * @param email the email
-   * @return the user by email internal
-   */
-  User getUserByEmail(String email);
 
   /**
    * Delete user user.

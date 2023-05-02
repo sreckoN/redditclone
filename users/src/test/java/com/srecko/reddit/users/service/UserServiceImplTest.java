@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import com.srecko.reddit.users.assembler.PageRequestAssembler;
 import com.srecko.reddit.users.dto.UserDto;
 import com.srecko.reddit.users.entity.User;
 import com.srecko.reddit.users.exception.UserNotFoundException;
@@ -28,7 +29,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -101,6 +104,51 @@ class UserServiceImplTest {
     assertNotNull(page);
     assertEquals(1, page.getTotalElements());
     assertTrue(page.getContent().contains(modelMapper.map(user, UserDto.class)));
+  }
+
+  @Test
+  void getUser_ReturnsUser() {
+    // given
+    given(userRepository.findById(any(Long.class))).willReturn(Optional.ofNullable(user));
+
+    // when
+    UserDto actual = userService.getUser(user.getId());
+
+    // then
+    assertNotNull(actual);
+    assertEquals(modelMapper.map(user, UserDto.class), actual);
+  }
+
+  @Test
+  void getUser_ThrowsUserNotFoundException_WhenUserIsNotFound() {
+    // given
+    given(userRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+    // when then
+    assertThrows(UserNotFoundException.class, () -> userService.getUser(user.getId()));
+  }
+
+  @Test
+  void getUserByUsername() {
+    // given
+    given(userRepository.findUserByUsername(any(String.class))).willReturn(
+        Optional.ofNullable(user));
+
+    // when
+    UserDto user = userService.getUserByUsername(this.user.getUsername());
+
+    // then
+    assertNotNull(user);
+    assertEquals(modelMapper.map(user, UserDto.class), user);
+  }
+
+  @Test
+  void getUserByUsername_ThrowsUserNotFoundException_WhenUserIsNotFound() {
+    // given
+    given(userRepository.findUserByUsername(any(String.class))).willReturn(Optional.empty());
+
+    // when then
+    assertThrows(UserNotFoundException.class, () -> userService.getUserByUsername(user.getUsername()));
   }
 
   @Test
@@ -184,5 +232,49 @@ class UserServiceImplTest {
     // then
     assertNotNull(savedUser);
     assertEquals(user.getUsername(), savedUser.getUsername());
+  }
+
+  @Test
+  void getUserIdByUsername_ReturnsUserId_WhenFound() {
+    // given
+    given(userRepository.findUserByUsername(any(String.class))).willReturn(Optional.ofNullable(user));
+
+    // when
+    Long actualId = userService.getUserIdByUsername(user.getUsername());
+
+    // then
+    assertNotNull(actualId);
+    assertEquals(user.getId(), actualId);
+  }
+
+  @Test
+  void getUserIdByUsername_ThrowsUserNotFoundException_WhenNotFound() {
+    // given
+    given(userRepository.findUserByUsername(any(String.class))).willReturn(Optional.empty());
+
+    // when then
+    assertThrows(UserNotFoundException.class, () -> userService.getUserIdByUsername(user.getUsername()));
+  }
+
+  @Test
+  void search_ReturnsPageOfUsers() {
+    // given
+    User user1 = new User("Jane", "Smith", "jane.smith@example.org", "janesmith", "iloveyou", "GB", true);
+    user1.setId(124L);
+    String query = "jane";
+    Pageable pageable = PageRequest.of(1, 1, Sort.by(Direction.ASC, "username"));
+    given(userRepository.findByUsernameContainingIgnoreCase(any(String.class), any(PageRequest.class)))
+        .willReturn(new PageImpl<>(List.of(user, user1)));
+
+    // when
+    PageImpl<UserDto> actual = userService.search(query, pageable);
+
+    // then
+    assertNotNull(actual);
+    assertEquals(2, actual.getNumberOfElements());
+    assertEquals(2, actual.getTotalPages());
+    assertEquals(2, actual.getContent().size());
+    assertTrue(actual.getContent().contains(modelMapper.map(user, UserDto.class)));
+    assertTrue(actual.getContent().contains(modelMapper.map(user1, UserDto.class)));
   }
 }

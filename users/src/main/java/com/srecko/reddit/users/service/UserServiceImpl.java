@@ -1,7 +1,7 @@
 package com.srecko.reddit.users.service;
 
 import com.srecko.reddit.users.assembler.PageRequestAssembler;
-import com.srecko.reddit.users.dto.ModelPageToDtoPageConverter;
+import com.srecko.reddit.users.dto.UserPageMapper;
 import com.srecko.reddit.users.dto.UserDto;
 import com.srecko.reddit.users.entity.User;
 import com.srecko.reddit.users.exception.UserNotFoundException;
@@ -68,7 +68,14 @@ public class UserServiceImpl implements UserService {
     PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("username"),
         Sort.by(Direction.ASC, "username"));
     Page<User> users = userRepository.findAll(pageRequest);
-    return ModelPageToDtoPageConverter.convertUsers(pageable, users, modelMapper);
+    return UserPageMapper.convertUsers(pageable, users, modelMapper);
+  }
+
+  @Override
+  public UserDto getUser(Long userId) {
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (userOptional.isEmpty()) throw new UserNotFoundException(userId);
+    return modelMapper.map(userOptional.get(), UserDto.class);
   }
 
   @Override
@@ -84,16 +91,6 @@ public class UserServiceImpl implements UserService {
       throw new UserNotFoundException(username);
     }
     return user.get();
-  }
-
-  @Override
-  public User getUserByEmail(String email) {
-    logger.info("Getting by email: {}", email);
-    Optional<User> userByEmail = userRepository.findUserByEmail(email);
-    if (userByEmail.isEmpty()) {
-      throw new UserNotFoundException(email);
-    }
-    return userByEmail.get();
   }
 
   @Override
@@ -153,6 +150,6 @@ public class UserServiceImpl implements UserService {
         Sort.by(Direction.ASC, "username"));
     Page<User> users = userRepository.findByUsernameContainingIgnoreCase(q,
         pageRequest);
-    return ModelPageToDtoPageConverter.convertUsers(pageable, users, modelMapper);
+    return UserPageMapper.convertUsers(pageable, users, modelMapper);
   }
 }
