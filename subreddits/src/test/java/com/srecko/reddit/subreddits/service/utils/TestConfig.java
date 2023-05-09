@@ -1,4 +1,4 @@
-package com.srecko.subreddit.subredditsservice.service.utils;
+package com.srecko.reddit.subreddits.service.utils;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,7 @@
 package com.srecko.reddit.subreddits.service;
 
 import com.srecko.reddit.subreddits.assembler.PageRequestAssembler;
-import com.srecko.reddit.subreddits.dto.ModelPageToDtoPageConverter;
+import com.srecko.reddit.subreddits.dto.SubredditDtoMapper;
 import com.srecko.reddit.subreddits.dto.SubredditDto;
 import com.srecko.reddit.subreddits.dto.SubredditRequest;
 import com.srecko.reddit.subreddits.entity.Subreddit;
@@ -59,7 +59,7 @@ public class SubredditServiceImpl implements SubredditService {
     PageRequest pageRequest = PageRequestAssembler.getPageRequest(pageable, List.of("name"),
         Sort.by(Direction.ASC, "name"));
     Page<Subreddit> subreddits = subredditRepository.findAll(pageRequest);
-    return ModelPageToDtoPageConverter.convertSubreddits(pageable, subreddits, modelMapper);
+    return SubredditDtoMapper.convertSubreddits(pageable, subreddits, modelMapper);
   }
 
   @Override
@@ -129,6 +129,6 @@ public class SubredditServiceImpl implements SubredditService {
         Sort.by(Direction.ASC, "name"));
     Page<Subreddit> users = subredditRepository.findByNameContainingIgnoreCase(query,
         pageRequest);
-    return ModelPageToDtoPageConverter.convertSubreddits(pageable, users, modelMapper);
+    return SubredditDtoMapper.convertSubreddits(pageable, users, modelMapper);
   }
 }

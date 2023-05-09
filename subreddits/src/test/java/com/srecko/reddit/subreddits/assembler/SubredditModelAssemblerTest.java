@@ -1,4 +1,4 @@
-package com.srecko.subreddit.subredditsservice.assembler;
+package com.srecko.reddit.subreddits.assembler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

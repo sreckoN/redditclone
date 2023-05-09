@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
  * @author Srecko Nikolic
  */
 @Component
-public class ModelPageToDtoPageConverter {
+public class SubredditDtoMapper {
 
-  private static final Logger logger = LogManager.getLogger(ModelPageToDtoPageConverter.class);
+  private static final Logger logger = LogManager.getLogger(SubredditDtoMapper.class);
 
   /**
    * Convert subreddits page.

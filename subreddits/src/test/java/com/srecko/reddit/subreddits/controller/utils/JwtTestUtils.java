@@ -1,4 +1,4 @@
-package com.srecko.subreddit.subredditsservice.controller.utils;
+package com.srecko.reddit.subreddits.controller.utils;
 
 /*
 import io.jsonwebtoken.Jwts;

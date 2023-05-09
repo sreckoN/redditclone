@@ -1,4 +1,4 @@
-package com.srecko.subreddit.subredditsservice.service;
+package com.srecko.reddit.subreddits.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -12,9 +12,8 @@ import com.srecko.reddit.subreddits.dto.SubredditRequest;
 import com.srecko.reddit.subreddits.entity.Subreddit;
 import com.srecko.reddit.subreddits.exception.SubredditNotFoundException;
 import com.srecko.reddit.subreddits.repository.SubredditRepository;
-import com.srecko.reddit.subreddits.service.SubredditService;
-import com.srecko.reddit.subreddits.service.SubredditServiceImpl;
-import com.srecko.subreddit.subredditsservice.service.utils.TestConfig;
+import com.srecko.reddit.subreddits.service.client.UsersFeignClient;
+import com.srecko.reddit.subreddits.service.utils.TestConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -30,7 +29,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -42,6 +43,9 @@ class SubredditServiceImplTest {
 
   @MockBean
   private SubredditRepository subredditRepository;
+
+  @MockBean
+  private UsersFeignClient usersFeignClient;
 
   @Autowired
   private SubredditService subredditService;
@@ -102,6 +106,7 @@ class SubredditServiceImplTest {
   @Test
   void save_ReturnsSavedSubreddit_WhenSuccessfullySaved() {
     // given
+    given(usersFeignClient.getUserId(any())).willReturn(userId);
     given(subredditRepository.save(any())).willReturn(subreddit);
 
     /*Authentication authentication = Mockito.mock(Authentication.class);
@@ -168,5 +173,35 @@ class SubredditServiceImplTest {
     assertThrows(SubredditNotFoundException.class, () -> {
       subredditService.update(new SubredditRequest(subreddit.getId(), "New name", "New description"));
     });
+  }
+
+  @Test
+  void checkIfExists_ThrowsSubredditNotFoundException_WhenSubredditNotFound() {
+    // given when then
+    assertThrows(SubredditNotFoundException.class, () -> {
+      subredditService.checkIfExists(0L);
+    });
+  }
+
+  @Test
+  void search_ReturnsPageOfSubreddits_WhenTheyMatchQuery() {
+    // given
+    String query = "Name";
+    Pageable pageable = PageRequest.of(1, 1, Sort.by(Direction.ASC, "name"));
+    Subreddit subreddit1 = new Subreddit("Named", "The characteristics of someone or something", userId);
+    subreddit1.setId(124L);
+
+    given(subredditRepository.findByNameContainingIgnoreCase(any(), any())).willReturn(
+        new PageImpl<>(List.of(subreddit, subreddit1))
+    );
+
+    // when
+    Page<SubredditDto> actual = subredditService.search(query, pageable);
+
+    // then
+    assertNotNull(actual);
+    assertEquals(2, actual.getContent().size());
+    assertTrue(actual.getContent().contains(modelMapper.map(subreddit, SubredditDto.class)));
+    assertTrue(actual.getContent().contains(modelMapper.map(subreddit1, SubredditDto.class)));
   }
 }

@@ -1,4 +1,4 @@
-package com.srecko.subreddit.subredditsservice;
+package com.srecko.reddit.subreddits;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
