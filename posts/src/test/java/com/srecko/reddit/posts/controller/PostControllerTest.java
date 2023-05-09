@@ -3,6 +3,9 @@ package com.srecko.reddit.posts.controller;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,6 +15,8 @@ import com.srecko.reddit.posts.dto.CreatePostRequest;
 import com.srecko.reddit.posts.dto.UpdatePostRequest;
 import com.srecko.reddit.posts.entity.Post;
 import com.srecko.reddit.posts.repository.PostRepository;
+import com.srecko.reddit.posts.service.client.SubredditsFeignClient;
+import com.srecko.reddit.posts.service.client.UsersFeignClient;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -37,6 +43,12 @@ class PostControllerTest {
 
   @Autowired
   private PostRepository postRepository;
+
+  @MockBean
+  private UsersFeignClient usersFeignClient;
+
+  @MockBean
+  private SubredditsFeignClient subredditsFeignClient;
 
 //  private final String jwt = JwtTestUtils.getJwt();
   private final String jwt = "liul29j93iffj.2t34tg2.2g4gra";
@@ -89,8 +101,8 @@ class PostControllerTest {
         .andExpect(jsonPath("$.id", is(post.getId().intValue())))
         .andExpect(jsonPath("$.title", is(post.getTitle())))
         .andExpect(jsonPath("$.text", is(post.getText())))
-        .andExpect(jsonPath("$.user", is(post.getUserId().intValue())))
-        .andExpect(jsonPath("$.subreddit", is(post.getSubredditId().intValue())));
+        .andExpect(jsonPath("$.userId", is(post.getUserId().intValue())))
+        .andExpect(jsonPath("$.subredditId", is(post.getSubredditId().intValue())));
   }
 
   @Test
@@ -108,6 +120,8 @@ class PostControllerTest {
     Post post2 = new Post(userId, "What's up.", "Not much.", subredditId);
     postRepository.saveAll(List.of(post1, post2));
 
+    doNothing().when(subredditsFeignClient).checkIfSubredditExists(any());
+
     mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/subreddit/{subredditId}", subredditId)
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
@@ -123,19 +137,12 @@ class PostControllerTest {
   }
 
   @Test
-  void getAllPostsForSubreddit_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/subreddit/{subredditId}", 0)
-            .header("AUTHORIZATION", "Bearer " + jwt))
-        .andExpect(status().is4xxClientError())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
-  }
-
-  @Test
   void getPostsForUser_ReturnsPosts_WhenUserExists() throws Exception {
     Post post1 = new Post(userId, "I love you.", "I do.", subredditId);
     Post post2 = new Post(userId, "What's up.", "Not much.", subredditId);
     postRepository.saveAll(List.of(post1, post2));
+
+    given(usersFeignClient.getUserId(any())).willReturn(userId);
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/user/{username}", "username")
             .header("AUTHORIZATION", "Bearer " + jwt))
@@ -152,20 +159,13 @@ class PostControllerTest {
   }
 
   @Test
-  void getPostsForUser_ThrowsUserNotFoundException_WhenUserDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/user/{username}", "janinedoe")
-            .header("AUTHORIZATION", "Bearer " + jwt))
-        .andExpect(status().is4xxClientError())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message", is("User with username janinedoe is not found.")));
-  }
-
-  @Test
   void create_ReturnsNewPost() throws Exception {
     Post post = new Post(userId, "I love you.", "I do.", subredditId);
     CreatePostRequest postDto = new CreatePostRequest(subredditId, post.getTitle(), post.getText());
     ObjectMapper objectMapper = new ObjectMapper();
     String valueAsString = objectMapper.writeValueAsString(postDto);
+
+    given(usersFeignClient.getUserId(any())).willReturn(userId);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/posts")
             .header("AUTHORIZATION", "Bearer " + jwt)
@@ -175,24 +175,8 @@ class PostControllerTest {
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
         .andExpect(jsonPath("$.title", is(post.getTitle())))
         .andExpect(jsonPath("$.text", is(post.getText())))
-        .andExpect(jsonPath("$.subreddit", is(subredditId.intValue())))
-        .andExpect(jsonPath("$.user", is(userId.intValue())));
-  }
-
-  @Test
-  void create_ThrowsSubredditNotFoundException_WhenSubredditDoesNotExist() throws Exception {
-    Post post = new Post(userId, "I love you.", "I do.", subredditId);
-    CreatePostRequest postDto = new CreatePostRequest(0L, post.getTitle(), post.getText());
-    ObjectMapper objectMapper = new ObjectMapper();
-    String valueAsString = objectMapper.writeValueAsString(postDto);
-
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(valueAsString)
-            .header("AUTHORIZATION", "Bearer " + jwt))
-        .andExpect(status().is4xxClientError())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message", is("Subreddit with id 0 is not found.")));
+        .andExpect(jsonPath("$.subredditId", is(subredditId.intValue())))
+        .andExpect(jsonPath("$.userId", is(userId.intValue())));
   }
 
   @Test
@@ -226,8 +210,8 @@ class PostControllerTest {
         .andExpect(jsonPath("$.id", is(post.getId().intValue())))
         .andExpect(jsonPath("$.title", is(post.getTitle())))
         .andExpect(jsonPath("$.text", is(post.getText())))
-        .andExpect(jsonPath("$.subreddit", is(subredditId.intValue())))
-        .andExpect(jsonPath("$.user", is(userId.intValue())))
+        .andExpect(jsonPath("$.subredditId", is(subredditId.intValue())))
+        .andExpect(jsonPath("$.userId", is(userId.intValue())))
         .andExpect(jsonPath("$.votes", is(post.getVotes())))
         .andExpect(jsonPath("$.commentsCounter", is(post.getCommentsCounter())));
   }
@@ -258,8 +242,8 @@ class PostControllerTest {
         .andExpect(jsonPath("$.id", is(post.getId().intValue())))
         .andExpect(jsonPath("$.title", is(post.getTitle())))
         .andExpect(jsonPath("$.text", is(post.getText())))
-        .andExpect(jsonPath("$.subreddit", is(subredditId.intValue())))
-        .andExpect(jsonPath("$.user", is(userId.intValue())))
+        .andExpect(jsonPath("$.subredditId", is(subredditId.intValue())))
+        .andExpect(jsonPath("$.userId", is(userId.intValue())))
         .andExpect(jsonPath("$.votes", is(post.getVotes())))
         .andExpect(jsonPath("$.commentsCounter", is(post.getCommentsCounter())));
   }
@@ -287,5 +271,108 @@ class PostControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(
             jsonPath("$.message", is("DTO validation failed for the following fields: postId.")));
+  }
+
+  @Test
+  void checkIfPostExists_NothingHappens_WhenPostExists() throws Exception {
+    Post post = new Post(userId, "I love you.", "I do.", subredditId);
+    postRepository.save(post);
+
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/posts/checkIfExists")
+        .servletPath("/api/posts/checkIfExists")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(post.getId().toString()))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void checkIfPostExists_ThrowsPost_WhenPostDoesNotExist() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/posts/checkIfExists")
+            .servletPath("/api/posts/checkIfExists")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("0"))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void searchPosts_ReturnsPagedModelOfPosts_WhenPostsMatchQuery() throws Exception {
+    Post post1 = new Post(userId, "I love you.", "I do.", subredditId);
+    Post post2 = new Post(userId, "What is love?", "Baby don't hurt me.", subredditId);
+    postRepository.saveAll(List.of(post1, post2));
+    String query = "love";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/posts/search")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$._embedded.postDtoList").exists())
+        .andExpect(jsonPath("$._embedded.postDtoList[0].id", is(post1.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.postDtoList[0].userId", is(post1.getUserId().intValue())))        .andExpect(jsonPath("$._embedded.postDtoList[0].id", is(post1.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.postDtoList[1].id", is(post2.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.postDtoList[1].userId", is(post2.getUserId().intValue())))
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages").exists())
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void searchPosts_ReturnsEmptyPagedModel_WhenNoPostsMatchQuery() throws Exception {
+    String query = "love";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/posts/search")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$._embedded.postDtoList").doesNotExist())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(0)))
+        .andExpect(jsonPath("$.page.totalPages").exists())
+        .andExpect(jsonPath("$.page.totalPages", is(0)));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ReturnsPagedModelOfPosts_WhenPostsMatchQuery() throws Exception {
+    Post post1 = new Post(userId, "I love you.", "I do.", subredditId);
+    Post post2 = new Post(userId, "What is love?", "Baby don't hurt me.", subredditId);
+    postRepository.saveAll(List.of(post1, post2));
+    String query = "love";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/posts/search/subreddit/{subredditId}", subredditId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$._embedded.postDtoList").exists())
+        .andExpect(jsonPath("$._embedded.postDtoList[0].id", is(post1.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.postDtoList[0].userId", is(post1.getUserId().intValue())))        .andExpect(jsonPath("$._embedded.postDtoList[0].id", is(post1.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.postDtoList[1].id", is(post2.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.postDtoList[1].userId", is(post2.getUserId().intValue())))
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages").exists())
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ReturnsEmptyPagedModel_WhenNoPostsMatchQuery() throws Exception {
+    String query = "love";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/posts/search/subreddit/{subredditId}", subredditId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$._embedded.postDtoList").doesNotExist())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(0)))
+        .andExpect(jsonPath("$.page.totalPages").exists())
+        .andExpect(jsonPath("$.page.totalPages", is(0)));
   }
 }

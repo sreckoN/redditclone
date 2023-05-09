@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 
 import com.srecko.reddit.posts.dto.CreatePostRequest;
 import com.srecko.reddit.posts.dto.PostDto;
@@ -33,6 +34,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -85,6 +87,7 @@ class PostServiceImplTest {
     UserMediator userMediator = new UserMediator(user);
     when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(
         userMediator);*/
+    given(postRepository.save(any())).willReturn(post);
 
     // when
     PostDto saved = postService.save(
@@ -136,9 +139,8 @@ class PostServiceImplTest {
   @Test
   void getAllPostsForSubreddit_ReturnsPosts() {
     // given
-    /*given(subredditRepository.findById(any())).willReturn(Optional.ofNullable(subreddit));
-    given(postRepository.findAllBySubreddit(any(), any(PageRequest.class)))
-        .willReturn(new PageImpl<>(List.of(post)));*/
+    given(postRepository.findAllBySubredditId(any(), any(PageRequest.class)))
+        .willReturn(new PageImpl<>(List.of(post)));
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
@@ -152,8 +154,7 @@ class PostServiceImplTest {
   @Test
   void getAllPostsForUser_ReturnsPosts() {
     // given
-    /*given(userRepository.findUserByUsername(any())).willReturn(Optional.ofNullable(user));
-    given(postRepository.findAllByUser(any(), any())).willReturn(new PageImpl<>(List.of(post)));*/
+    given(postRepository.findAllByUserId(any(), any())).willReturn(new PageImpl<>(List.of(post)));
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "title"));
 
     // when
@@ -207,5 +208,72 @@ class PostServiceImplTest {
     // given when then
     assertThrows(PostNotFoundException.class, () ->
         postService.update(new UpdatePostRequest(post.getId(), post.getTitle(), post.getText())));
+  }
+
+  @Test
+  void checkIfExists_NothingHappens_WhenPostExists() {
+    // given
+    given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
+
+    // when then
+    postService.checkIfExists(post.getId());
+  }
+
+  @Test
+  void checkIfExists_ThrowsPostNotFoundException_WhenPostDoesNotExist() {
+    // given
+    given(postRepository.findById(any())).willReturn(Optional.empty());
+
+    // when then
+    assertThrows(PostNotFoundException.class, () -> {
+      postService.checkIfExists(post.getId());
+    });
+  }
+
+  @Test
+  void searchPosts_ReturnsPageOfPosts_WhenTheyMatchQuery() {
+    // given
+    String query = "post";
+    Pageable pageable = PageRequest.of(1, 1, Sort.by(Direction.ASC, "dateOfCreation"));
+    Post post1 = new Post(userId, "New Post 2", "This is a new post", subredditId);
+    post1.setId(12L);
+
+    given(postRepository.findByTitleContainingIgnoreCase(any(), any())).willReturn(
+        new PageImpl<>(List.of(post, post1))
+    );
+
+    // when
+    Page<PostDto> actual = postService.searchPosts(query, pageable);
+
+    // then
+    assertNotNull(actual);
+    List<PostDto> content = actual.getContent();
+    assertEquals(2, content.size());
+    assertTrue(content.contains(modelMapper.map(post, PostDto.class)));
+    assertTrue(content.contains(modelMapper.map(post1, PostDto.class)));
+  }
+
+  @Test
+  void searchPostsInSubreddit_ReturnsPageOfPosts_WhenTheyMatchQuery() {
+    // given
+    String query = "post";
+    Pageable pageable = PageRequest.of(1, 1, Sort.by(Direction.ASC, "dateOfCreation"));
+    Post post1 = new Post(userId, "New Post 2", "This is a new post", subredditId);
+    post1.setId(12L);
+
+    doNothing().when(subredditsFeignClient).checkIfSubredditExists(any());
+    given(postRepository.findBySubredditIdAndTitleContainingIgnoreCase(any(), any(), any())).willReturn(
+        new PageImpl<>(List.of(post, post1))
+    );
+
+    // when
+    Page<PostDto> actual = postService.searchPostsInSubreddit(subredditId, query, pageable);
+
+    // then
+    assertNotNull(actual);
+    List<PostDto> content = actual.getContent();
+    assertEquals(2, content.size());
+    assertTrue(content.contains(modelMapper.map(post, PostDto.class)));
+    assertTrue(content.contains(modelMapper.map(post1, PostDto.class)));
   }
 }
