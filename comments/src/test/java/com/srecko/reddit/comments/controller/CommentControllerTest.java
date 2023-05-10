@@ -3,6 +3,9 @@ package com.srecko.reddit.comments.controller;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.comments.dto.CommentRequest;
 import com.srecko.reddit.comments.entity.Comment;
 import com.srecko.reddit.comments.repository.CommentRepository;
+import com.srecko.reddit.comments.service.client.PostsFeignClient;
+import com.srecko.reddit.comments.service.client.UsersFeignClient;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -36,6 +42,12 @@ class CommentControllerTest {
 
   @Autowired
   private CommentRepository commentRepository;
+
+  @MockBean
+  private UsersFeignClient usersFeignClient;
+
+  @MockBean
+  private PostsFeignClient postsFeignClient;
 
   // private final String jwt = JwtTestUtils.getJwt();
   private final String jwt = "dfgegoidsaid.sdvnsdOVNISD.Djvndovisdn";
@@ -62,6 +74,8 @@ class CommentControllerTest {
     Comment comment2 = new Comment(userId, "Not bad", postId);
     commentRepository.saveAll(List.of(comment1, comment2));
 
+    doNothing().when(postsFeignClient).checkIfPostExists(any());
+
     mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", postId)
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
@@ -77,18 +91,12 @@ class CommentControllerTest {
   }
 
   @Test
-  void getCommentsForPost_ThrowsPostNotFoundException_WhenPostDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/post/{postId}", 0)
-            .header("AUTHORIZATION", "Bearer " + jwt))
-        .andExpect(status().is4xxClientError())
-        .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
-  }
-
-  @Test
   void getCommentsForUsername_ReturnsComments() throws Exception {
     Comment comment1 = new Comment(userId, "Good", postId);
     Comment comment2 = new Comment(userId, "Not bad", postId);
     commentRepository.saveAll(List.of(comment1, comment2));
+
+    given(usersFeignClient.getUserId(any())).willReturn(userId);
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", userId)
             .header("AUTHORIZATION", "Bearer " + jwt))
@@ -105,14 +113,6 @@ class CommentControllerTest {
   }
 
   @Test
-  void getCommentsForUsername_ThrowsUserNotFoundException_WhenUserDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", "jakedoe")
-            .header("AUTHORIZATION", "Bearer " + jwt))
-        .andExpect(status().is4xxClientError())
-        .andExpect(jsonPath("$.message", is("User with username jakedoe is not found.")));
-  }
-
-  @Test
   // @WithMockCustomUser
   void createComment_ReturnsCreatedComment_WhenSuccessfullyCreated() throws Exception {
     Comment comment = new Comment(userId, "Good", postId);
@@ -122,6 +122,9 @@ class CommentControllerTest {
     ObjectMapper objectMapper = new ObjectMapper();
     String json = objectMapper.writeValueAsString(commentRequest);
 
+    given(usersFeignClient.getUserId(any())).willReturn(userId);
+    doNothing().when(postsFeignClient).checkIfPostExists(any());
+
     mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
             .header("AUTHORIZATION", "Bearer " + jwt)
             .contentType(MediaType.APPLICATION_JSON)
@@ -130,24 +133,8 @@ class CommentControllerTest {
         .andExpect(status().is2xxSuccessful())
         .andExpect(jsonPath("$.text", is(comment.getText())))
         .andExpect(jsonPath("$.votes", is(comment.getVotes())))
-        .andExpect(jsonPath("$.post", is(comment.getPostId().intValue())))
-        .andExpect(jsonPath("$.user", is(comment.getUserId().intValue())));
-  }
-
-  @Test
-  // @WithMockCustomUser
-  void createComment_ThrowsPostNotFoundException_WhenPostDoesNotExist() throws Exception {
-    CommentRequest commentRequest = new CommentRequest("New comment", 0L);
-    ObjectMapper objectMapper = new ObjectMapper();
-    String json = objectMapper.writeValueAsString(commentRequest);
-
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/comments")
-            .header("AUTHORIZATION", "Bearer " + jwt)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().is4xxClientError())
-        .andExpect(jsonPath("$.message", is("Post with id 0 is not found.")));
+        .andExpect(jsonPath("$.postId", is(comment.getPostId().intValue())))
+        .andExpect(jsonPath("$.userId", is(comment.getUserId().intValue())));
   }
 
   @Test
@@ -179,7 +166,7 @@ class CommentControllerTest {
         .andExpect(jsonPath("$.id", is(comment.getId().intValue())))
         .andExpect(jsonPath("$.text", is(comment.getText())))
         .andExpect(jsonPath("$.votes", is(comment.getVotes())))
-        .andExpect(jsonPath("$.post", is(comment.getPostId().intValue())));
+        .andExpect(jsonPath("$.postId", is(comment.getPostId().intValue())));
   }
 
   @Test
@@ -202,7 +189,7 @@ class CommentControllerTest {
         .andExpect(jsonPath("$.id", is(comment.getId().intValue())))
         .andExpect(jsonPath("$.text", is(comment.getText())))
         .andExpect(jsonPath("$.votes", is(comment.getVotes())))
-        .andExpect(jsonPath("$.post", is(comment.getPostId().intValue())));
+        .andExpect(jsonPath("$.postId", is(comment.getPostId().intValue())));
   }
 
   @Test
@@ -232,5 +219,67 @@ class CommentControllerTest {
         .andExpect(jsonPath("$.page.size", is(10)))
         .andExpect(jsonPath("$.page.totalElements", is(2)))
         .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void checkIfExists_Returns200_IfCommentExists() throws Exception {
+    Comment comment = new Comment(userId, "Good", postId);
+    commentRepository.save(comment);
+
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/comments/checkIfExists")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(comment.getId().toString()))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void checkIfExists_ThrowsCommentNotFoundException_IfCommentDoesNotExist() throws Exception {
+    long id = 123L;
+
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/comments/checkIfExists")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(Long.toString(id)))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void search_ReturnsPagedModelOfComments_WhenTheyMatchQuery() throws Exception {
+    Comment comment1 = new Comment(userId, "Good", postId);
+    Comment comment2 = new Comment(userId, "Very good", postId);
+    commentRepository.saveAll(List.of(comment1, comment2));
+    String query = "good";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/comments/search")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$._embedded.commentDtoList").exists())
+        .andExpect(jsonPath("$._embedded.commentDtoList[0].id", is(comment1.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.commentDtoList[0].userId", is(comment1.getUserId().intValue())))
+        .andExpect(jsonPath("$._embedded.commentDtoList[1].id", is(comment2.getId().intValue())))
+        .andExpect(jsonPath("$._embedded.commentDtoList[1].userId", is(comment2.getUserId().intValue())))
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(2)))
+        .andExpect(jsonPath("$.page.totalPages").exists())
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void search_ReturnsEmptyPagedModel_WhenNoCommentsMatchQuery() throws Exception {
+    String query = "good";
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/comments/search")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(query))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$._embedded.commentDtoList").doesNotExist())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.totalElements").exists())
+        .andExpect(jsonPath("$.page.totalElements", is(0)))
+        .andExpect(jsonPath("$.page.totalPages").exists())
+        .andExpect(jsonPath("$.page.totalPages", is(0)));
   }
 }

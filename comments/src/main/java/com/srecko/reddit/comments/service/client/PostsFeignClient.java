@@ -6,17 +6,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * The interface Subreddits feign client.
+ * The interface Post feign client.
  */
-@FeignClient("subreddits")
-public interface SubredditsFeignClient {
+@FeignClient("posts")
+public interface PostsFeignClient {
 
   /**
-   * Check if subreddit exists.
+   * Check if post exists.
    *
-   * @param subredditId the subreddit id
+   * @param postId the post id
    */
-  @RequestMapping(method = RequestMethod.HEAD, value = "/api/subreddits/checkIfSubredditExists",
+  @RequestMapping(method = RequestMethod.HEAD, value = "/api/posts/checkIfExists",
       consumes = "application/json")
-  void checkIfSubredditExists(@RequestBody Long subredditId);
+  void checkIfPostExists(@RequestBody Long postId);
 }

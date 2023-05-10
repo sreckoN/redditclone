@@ -7,7 +7,7 @@ import com.srecko.reddit.comments.dto.ModelPageToDtoPageConverter;
 import com.srecko.reddit.comments.entity.Comment;
 import com.srecko.reddit.comments.exception.CommentNotFoundException;
 import com.srecko.reddit.comments.repository.CommentRepository;
-import com.srecko.reddit.comments.service.client.PostFeignClient;
+import com.srecko.reddit.comments.service.client.PostsFeignClient;
 import com.srecko.reddit.comments.service.client.UsersFeignClient;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
 
   private final CommentRepository commentRepository;
   private final UsersFeignClient usersFeignClient;
-  private final PostFeignClient postFeignClient;
+  private final PostsFeignClient postsFeignClient;
   private final ModelMapper modelMapper;
 
   private static final Logger logger = LogManager.getLogger(CommentServiceImpl.class);
@@ -44,24 +44,24 @@ public class CommentServiceImpl implements CommentService {
    *
    * @param commentRepository the comment repository
    * @param usersFeignClient  the users feign client
-   * @param postFeignClient   the post feign client
+   * @param postsFeignClient   the post feign client
    * @param modelMapper       the model mapper
    */
   @Autowired
   public CommentServiceImpl(CommentRepository commentRepository,
       UsersFeignClient usersFeignClient,
-      PostFeignClient postFeignClient,
+      PostsFeignClient postsFeignClient,
       ModelMapper modelMapper) {
     this.commentRepository = commentRepository;
     this.usersFeignClient = usersFeignClient;
-    this.postFeignClient = postFeignClient;
+    this.postsFeignClient = postsFeignClient;
     this.modelMapper = modelMapper;
   }
 
   @Override
   public Page<CommentDto> getAllCommentsForPost(Long postId, Pageable pageable) {
     logger.info("Getting all comments for post: {}", postId);
-    postFeignClient.checkIfPostExists(postId);
+    postsFeignClient.checkIfPostExists(postId);
     PageRequest pageRequest =
         PageRequestAssembler.getPageRequest(pageable, List.of("text", "created"),
             Sort.by(Direction.ASC, "text"));
@@ -86,7 +86,7 @@ public class CommentServiceImpl implements CommentService {
         .getAuthentication().getPrincipal();
     Long userId = usersFeignClient.getUserId(userMediator.getUsername());*/
     Long userId = usersFeignClient.getUserId("username");
-    postFeignClient.checkIfPostExists(commentRequest.getPostId());
+    postsFeignClient.checkIfPostExists(commentRequest.getPostId());
     Comment comment = new Comment(userId, commentRequest.getText(), commentRequest.getPostId());
     // todo: increase comment counter for a post
     Comment saved = commentRepository.save(comment);

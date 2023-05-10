@@ -1,5 +1,6 @@
 package com.srecko.reddit.comments.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,6 +13,8 @@ import com.srecko.reddit.comments.dto.CommentRequest;
 import com.srecko.reddit.comments.entity.Comment;
 import com.srecko.reddit.comments.exception.CommentNotFoundException;
 import com.srecko.reddit.comments.repository.CommentRepository;
+import com.srecko.reddit.comments.service.client.PostsFeignClient;
+import com.srecko.reddit.comments.service.client.UsersFeignClient;
 import com.srecko.reddit.service.utils.TestConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +31,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -42,7 +47,13 @@ class CommentServiceImplTest {
   private CommentRepository commentRepository;
 
   @Autowired
-  private CommentServiceImpl commentServiceImpl;
+  private CommentServiceImpl commentService;
+
+  @MockBean
+  private UsersFeignClient usersFeignClient;
+
+  @MockBean
+  private PostsFeignClient postsFeignClient;
 
   @Autowired
   private final ModelMapper modelMapper = new ModelMapper();
@@ -65,7 +76,7 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void testGetAllCommentsForPost_ReturnsComments() {
+  void getAllCommentsForPost_ReturnsComments() {
     // given
     Comment comment2 = new Comment(userId, "Yeah, me neither", postId);
     comment2.setId(222L);
@@ -73,7 +84,7 @@ class CommentServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
 
     // when
-    Page<CommentDto> page = commentServiceImpl.getAllCommentsForPost(postId, pageRequest);
+    Page<CommentDto> page = commentService.getAllCommentsForPost(postId, pageRequest);
 
     // then
     assertEquals(2, page.getTotalElements());
@@ -91,7 +102,7 @@ class CommentServiceImplTest {
     PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "text"));
 
     // when
-    Page<CommentDto> page = commentServiceImpl.getAllCommentsForUsername(
+    Page<CommentDto> page = commentService.getAllCommentsForUsername(
         "username", pageRequest);
 
     // then
@@ -113,9 +124,10 @@ class CommentServiceImplTest {
     UserMediator userMediator = new UserMediator(user);
     when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(
         userMediator);*/
+    given(commentRepository.save(any())).willReturn(comment);
 
     // when
-    CommentDto savedComment = commentServiceImpl.save(
+    CommentDto savedComment = commentService.save(
         new CommentRequest(comment.getText(), postId));
 
     // then
@@ -130,7 +142,7 @@ class CommentServiceImplTest {
     given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
 
     // when
-    CommentDto deleted = commentServiceImpl.delete(comment.getId());
+    CommentDto deleted = commentService.delete(comment.getId());
 
     // then
     assertNotNull(deleted);
@@ -143,6 +155,92 @@ class CommentServiceImplTest {
   @Test
   void delete_ThrowsCommentNotFoundException_WhenCommentNotFound() {
     // given when then
-    assertThrows(CommentNotFoundException.class, () -> commentServiceImpl.delete(comment.getId()));
+    assertThrows(CommentNotFoundException.class, () -> commentService.delete(comment.getId()));
+  }
+
+  @Test
+  void getComment_ReturnsCommentDto_WhenFound() {
+    // given
+    given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
+
+    // when
+    CommentDto actual = commentService.getComment(this.comment.getId());
+
+    // then
+    assertNotNull(actual);
+    assertEquals(comment.getId(), actual.getId());
+    assertEquals(comment.getUserId(), actual.getUserId());
+    assertEquals(comment.getPostId(), actual.getPostId());
+  }
+
+  @Test
+  void getComment_ThrowsCommentNotFoundException_WhenNotFound() {
+    // given when then
+    assertThrows(CommentNotFoundException.class, () -> {
+      commentService.getComment(comment.getId());
+    });
+  }
+
+  @Test
+  void getAllComments_ReturnsPageOfCommentDtos() {
+    // given
+    Comment comment1 = new Comment(userId, "Yeah, me neither", postId);
+    comment1.setId(222L);
+    Pageable pageable = PageRequest.of(1, 1, Sort.by(Direction.ASC, "text"));
+    given(commentRepository.findAll(any(PageRequest.class))).willReturn(
+        new PageImpl<>(List.of(comment, comment1))
+    );
+
+    // when
+    Page<CommentDto> actual = commentService.getAllComments(pageable);
+
+    // then
+    assertNotNull(actual);
+    assertEquals(2, actual.getTotalElements());
+    assertEquals(2, actual.getTotalPages());
+    List<CommentDto> content = actual.getContent();
+    assertTrue(content.contains(modelMapper.map(comment, CommentDto.class)));
+    assertTrue(content.contains(modelMapper.map(comment1, CommentDto.class)));
+  }
+
+  @Test
+  void checkIfExists_NothingHappens_WhenCommentExists() {
+    // given
+    given(commentRepository.findById(any())).willReturn(Optional.ofNullable(comment));
+
+    // when then
+    assertDoesNotThrow(() -> commentService.checkIfExists(comment.getId()));
+  }
+
+  @Test
+  void checkIfExists_ThrowsCommentNotFoundException_WhenCommentDoesNotExist() {
+    // given
+    given(commentRepository.findById(any())).willReturn(Optional.empty());
+
+    // when then
+    assertThrows(CommentNotFoundException.class, () -> commentService.checkIfExists(comment.getId()));
+  }
+
+  @Test
+  void search_ReturnsPageOfCommentDtos_WhenTheyMatchQuery() {
+    // given
+    String query = "believe";
+    Pageable pageable = PageRequest.of(1, 10, Sort.by(Direction.ASC, "text"));
+    Comment comment1 = new Comment(userId, "Do you believe?", postId);
+    comment1.setId(124L);
+
+    given(commentRepository.findByTextContainingIgnoreCase(any(), any())).willReturn(
+        new PageImpl<>(List.of(comment, comment1))
+    );
+
+    // when
+    Page<CommentDto> actual = commentService.search(query, pageable);
+
+    // then
+    assertNotNull(actual);
+    List<CommentDto> content = actual.getContent();
+    assertEquals(2, content.size());
+    assertTrue(content.contains(modelMapper.map(comment, CommentDto.class)));
+    assertTrue(content.contains(modelMapper.map(comment1, CommentDto.class)));
   }
 }

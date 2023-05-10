@@ -183,7 +183,7 @@ public class CommentController {
    * @return the paged model
    */
   @PostMapping("/search")
-  public PagedModel<EntityModel<CommentDto>> searchComments(@RequestBody String query,
+  public PagedModel<EntityModel<CommentDto>> search(@RequestBody String query,
       @PageableDefault(sort = "name", direction = Direction.ASC) Pageable pageable,
       PagedResourcesAssembler<CommentDto> assembler) {
     Page<CommentDto> page = commentService.search(query, pageable);
