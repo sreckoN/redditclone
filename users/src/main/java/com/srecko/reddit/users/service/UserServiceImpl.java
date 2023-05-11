@@ -1,8 +1,8 @@
 package com.srecko.reddit.users.service;
 
 import com.srecko.reddit.users.assembler.PageRequestAssembler;
-import com.srecko.reddit.users.dto.UserPageMapper;
 import com.srecko.reddit.users.dto.UserDto;
+import com.srecko.reddit.users.dto.UserPageMapper;
 import com.srecko.reddit.users.entity.User;
 import com.srecko.reddit.users.exception.UserNotFoundException;
 import com.srecko.reddit.users.repository.UserRepository;
@@ -74,7 +74,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserDto getUser(Long userId) {
     Optional<User> userOptional = userRepository.findById(userId);
-    if (userOptional.isEmpty()) throw new UserNotFoundException(userId);
+    if (userOptional.isEmpty()) {
+      throw new UserNotFoundException(userId);
+    }
     return modelMapper.map(userOptional.get(), UserDto.class);
   }
 

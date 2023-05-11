@@ -1,8 +1,8 @@
 package com.srecko.reddit.subreddits.service;
 
 import com.srecko.reddit.subreddits.assembler.PageRequestAssembler;
-import com.srecko.reddit.subreddits.dto.SubredditDtoMapper;
 import com.srecko.reddit.subreddits.dto.SubredditDto;
+import com.srecko.reddit.subreddits.dto.SubredditDtoMapper;
 import com.srecko.reddit.subreddits.dto.SubredditRequest;
 import com.srecko.reddit.subreddits.entity.Subreddit;
 import com.srecko.reddit.subreddits.exception.SubredditNotFoundException;
