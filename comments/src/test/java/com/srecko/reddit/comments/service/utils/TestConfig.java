@@ -1,4 +1,4 @@
-package com.srecko.reddit.service.utils;
+package com.srecko.reddit.comments.service.utils;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("test")
+@Profile("dev")
 public class TestConfig {
 
   @Bean("testModelMapper")
