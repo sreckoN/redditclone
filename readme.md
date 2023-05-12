@@ -3,7 +3,7 @@ This is a Reddit clone.
 
 ### Tech:
 Language: Java  
-Framework: Spring Framework  
+Framework: Spring Framework, Spring Cloud  
 Database: MySql + Hibernate  
 Authentication: jwt  
 Testing: jUnit5, Mockito  
@@ -22,7 +22,10 @@ Tests: ~160
 - Pagination ✅ 
 - Secure endpoints ✅
 - HATEOAS ✅
-- Switch to Microservices architecture ⏳
+- Switch to Microservices architecture ✅
+- Add Cloud Configuration server ✅
+- Add Gateway server
+- Add Auth server
 - Ability to add photos to Posts
 - User profile additional settings
 - API Docs
