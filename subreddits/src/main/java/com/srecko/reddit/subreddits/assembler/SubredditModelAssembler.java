@@ -22,7 +22,5 @@ public class SubredditModelAssembler implements
   public EntityModel<SubredditDto> toModel(SubredditDto subreddit) {
     return EntityModel.of(subreddit,
         linkTo(methodOn(SubredditController.class).getSubreddit(subreddit.getId())).withSelfRel());
-    /*linkTo(methodOn(PostController.class)
-        .getAllPostsForSubreddit(subreddit.getId(), null, null)).withRel("posts"))*/
   }
 }
