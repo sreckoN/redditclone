@@ -41,7 +41,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ContextConfiguration(classes = {PostServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 class PostServiceImplTest {
 
   @MockBean
@@ -275,5 +275,41 @@ class PostServiceImplTest {
     assertEquals(2, content.size());
     assertTrue(content.contains(modelMapper.map(post, PostDto.class)));
     assertTrue(content.contains(modelMapper.map(post1, PostDto.class)));
+  }
+
+  @Test
+  void updateCommentsCounter_IncreasesCommentsCounter_WhenGivenPositiveValue() {
+    // given
+    given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
+    given(postRepository.save(any())).willReturn(post);
+    int value = 4;
+
+    // when
+    postService.updateCommentsCounter(post.getId(), value);
+
+    // then
+    assertEquals(5, post.getCommentsCounter());
+  }
+
+  @Test
+  void updateCommentsCounter_DecreasesCommentsCounter_WhenGivenNegativeValue() {
+    // given
+    given(postRepository.findById(any())).willReturn(Optional.ofNullable(post));
+    given(postRepository.save(any())).willReturn(post);
+    int value = -6;
+
+    // when
+    postService.updateCommentsCounter(post.getId(), value);
+
+    // then
+    assertEquals(-5, post.getCommentsCounter());
+  }
+
+  @Test
+  void updateCommentsCounter_ThrowsPostNotFoundException_WhenPostNotFound() {
+    // given when then
+    assertThrows(PostNotFoundException.class, () -> {
+      postService.updateCommentsCounter(post.getId(), 5);
+    });
   }
 }

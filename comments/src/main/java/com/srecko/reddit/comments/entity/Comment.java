@@ -28,13 +28,19 @@ public class Comment {
 
   private int votes;
 
+  @NotNull
   private Date created;
 
   @NotNull
   private Long userId;
 
   @NotNull
-  private Long postId;
+  private CommentParentType parentType;
+
+  @NotNull
+  private Long parentId;
+
+  private int commentsCounter;
 
   /**
    * Instantiates a new Comment.
@@ -45,16 +51,19 @@ public class Comment {
   /**
    * Instantiates a new Comment.
    *
-   * @param userId the user id
-   * @param text   the text
-   * @param postId the post id
+   * @param userId     the user id
+   * @param text       the text
+   * @param parentType the entity type
+   * @param entityId   the post id
    */
-  public Comment(Long userId, String text, Long postId) {
+  public Comment(Long userId, String text, CommentParentType parentType, Long entityId) {
     this.userId = userId;
     this.text = text;
-    this.postId = postId;
+    this.parentType = parentType;
+    this.parentId = entityId;
     this.votes = 0;
     this.created = new Date();
+    this.commentsCounter = 0;
   }
 
   /**
@@ -152,8 +161,8 @@ public class Comment {
    *
    * @return the post id
    */
-  public Long getPostId() {
-    return postId;
+  public Long getParentId() {
+    return parentId;
   }
 
   /**
@@ -161,7 +170,43 @@ public class Comment {
    *
    * @param postId the post id
    */
-  public void setPostId(Long postId) {
-    this.postId = postId;
+  public void setParentId(Long postId) {
+    this.parentId = postId;
+  }
+
+  /**
+   * Gets entity type.
+   *
+   * @return the entity type
+   */
+  public CommentParentType getParentType() {
+    return parentType;
+  }
+
+  /**
+   * Sets entity type.
+   *
+   * @param entityType the entity type
+   */
+  public void setParentType(CommentParentType entityType) {
+    this.parentType = entityType;
+  }
+
+  /**
+   * Gets comments counter.
+   *
+   * @return the comments counter
+   */
+  public int getCommentsCounter() {
+    return commentsCounter;
+  }
+
+  /**
+   * Sets comments counter.
+   *
+   * @param commentsCounter the comments counter
+   */
+  public void setCommentsCounter(int commentsCounter) {
+    this.commentsCounter = commentsCounter;
   }
 }

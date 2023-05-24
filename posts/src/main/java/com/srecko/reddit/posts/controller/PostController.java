@@ -234,4 +234,24 @@ public class PostController {
     logger.info("Returning a page {}/{} of users", page.getNumber(), page.getTotalPages());
     return pagedModel;
   }
+
+  /**
+   * Increase comment counter.
+   *
+   * @param postId the post id
+   */
+  @RequestMapping(method = RequestMethod.HEAD, value = "/increaseCommentsCounter/{postId}")
+  public void increaseCommentCounter(@PathVariable("postId") Long postId) {
+    postService.updateCommentsCounter(postId, 1);
+  }
+
+  /**
+   * Decrease comment counter.
+   *
+   * @param postId the post id
+   */
+  @RequestMapping(method = RequestMethod.HEAD, value = "/decreaseCommentsCounter/{postId}")
+  public void decreaseCommentCounter(@PathVariable("postId") Long postId) {
+    postService.updateCommentsCounter(postId, -1);
+  }
 }

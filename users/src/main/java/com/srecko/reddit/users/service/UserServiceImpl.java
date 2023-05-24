@@ -154,4 +154,12 @@ public class UserServiceImpl implements UserService {
         pageRequest);
     return UserPageMapper.convertUsers(pageable, users, modelMapper);
   }
+
+  @Override
+  public void checkIfExists(Long userId) {
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (userOptional.isEmpty()) {
+      throw new UserNotFoundException(userId);
+    }
+  }
 }

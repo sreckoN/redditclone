@@ -1,5 +1,6 @@
 package com.srecko.reddit.comments.dto;
 
+import com.srecko.reddit.comments.entity.CommentParentType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -14,17 +15,22 @@ public class CommentRequest {
   private String text;
 
   @NotNull
-  private Long postId;
+  private CommentParentType parentType;
+
+  @NotNull
+  private Long parentId;
 
   /**
    * Instantiates a new Comment dto.
    *
-   * @param text the text
-   * @param post the post
+   * @param text       the text
+   * @param parentType the entity type
+   * @param parentId   the parent id
    */
-  public CommentRequest(String text, Long post) {
+  public CommentRequest(String text, CommentParentType parentType, Long parentId) {
     this.text = text;
-    this.postId = post;
+    this.parentType = parentType;
+    this.parentId = parentId;
   }
 
   /**
@@ -52,20 +58,38 @@ public class CommentRequest {
   }
 
   /**
-   * Gets post id.
+   * Gets parent type.
    *
-   * @return the post id
+   * @return the parent type
    */
-  public Long getPostId() {
-    return postId;
+  public CommentParentType getParentType() {
+    return parentType;
   }
 
   /**
-   * Sets post id.
+   * Sets parent type.
    *
-   * @param postId the post id
+   * @param parentType the parent type
    */
-  public void setPostId(Long postId) {
-    this.postId = postId;
+  public void setParentType(CommentParentType parentType) {
+    this.parentType = parentType;
+  }
+
+  /**
+   * Gets parent id.
+   *
+   * @return the parent id
+   */
+  public Long getParentId() {
+    return parentId;
+  }
+
+  /**
+   * Sets parent id.
+   *
+   * @param parentId the parent id
+   */
+  public void setParentId(Long parentId) {
+    this.parentId = parentId;
   }
 }

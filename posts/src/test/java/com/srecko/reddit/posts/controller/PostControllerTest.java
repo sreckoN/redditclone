@@ -3,6 +3,9 @@ package com.srecko.reddit.posts.controller;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -18,6 +21,7 @@ import com.srecko.reddit.posts.repository.PostRepository;
 import com.srecko.reddit.posts.service.client.SubredditsFeignClient;
 import com.srecko.reddit.posts.service.client.UsersFeignClient;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -286,7 +290,7 @@ class PostControllerTest {
   }
 
   @Test
-  void checkIfPostExists_ThrowsPost_WhenPostDoesNotExist() throws Exception {
+  void checkIfPostExists_ThrowsPostNotFound_WhenPostDoesNotExist() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.head("/api/posts/checkIfExists")
             .servletPath("/api/posts/checkIfExists")
             .contentType(MediaType.APPLICATION_JSON)
@@ -374,5 +378,49 @@ class PostControllerTest {
         .andExpect(jsonPath("$.page.totalElements", is(0)))
         .andExpect(jsonPath("$.page.totalPages").exists())
         .andExpect(jsonPath("$.page.totalPages", is(0)));
+  }
+
+  @Test
+  void increaseCommentCounter_IncreasesCommentsCounter_WhenPostExists() throws Exception {
+    Post post = new Post(userId, "I love you.", "I do.", subredditId);
+    post.setCommentsCounter(4);
+    postRepository.save(post);
+
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/posts/increaseCommentsCounter/{postId}", post.getId()))
+        .andExpect(status().isOk());
+
+    Optional<Post> savedOptional = postRepository.findById(post.getId());
+
+    assertNotNull(savedOptional);
+    assertFalse(savedOptional.isEmpty());
+    assertEquals(5, savedOptional.get().getCommentsCounter());
+  }
+
+  @Test
+  void increaseCommentCounter_ThrowsPostNotFound_WhenPostDoesNotExist() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/posts/increaseCommentsCounter/{postId}", 0L))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void decreaseCommentCounter_DecreasesCommentsCounter_WhenPostExists() throws Exception {
+    Post post = new Post(userId, "I love you.", "I do.", subredditId);
+    post.setCommentsCounter(5);
+    postRepository.save(post);
+
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/posts/decreaseCommentsCounter/{postId}", post.getId()))
+        .andExpect(status().isOk());
+
+    Optional<Post> savedOptional = postRepository.findById(post.getId());
+
+    assertNotNull(savedOptional);
+    assertFalse(savedOptional.isEmpty());
+    assertEquals(4, savedOptional.get().getCommentsCounter());
+  }
+
+  @Test
+  void decreaseCommentCounter_ThrowsPostNotFound_WhenPostDoesNotExist() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/posts/decreaseCommentsCounter/{postId}", 0L))
+        .andExpect(status().is4xxClientError());
   }
 }

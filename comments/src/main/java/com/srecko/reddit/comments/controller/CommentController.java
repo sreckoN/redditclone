@@ -77,21 +77,42 @@ public class CommentController {
   }
 
   /**
+   * Gets comments for comment.
+   *
+   * @param commentId the comment id
+   * @param pageable  the pageable
+   * @param assembler the assembler
+   * @return the comments for comment
+   */
+  @GetMapping("/comment/{commentId}")
+  public ResponseEntity<PagedModel<EntityModel<CommentDto>>> getCommentsForComment(
+      @PathVariable("commentId") Long commentId,
+      @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<CommentDto> assembler) {
+    Page<CommentDto> page = commentService.getAllCommentsForComment(commentId, pageable);
+    PagedModel<EntityModel<CommentDto>> pagedModel = assembler.toModel(page, commentModelAssembler);
+    logger.info("Returning all comments for comment with id: {}", commentId);
+    return ResponseEntity.ok(pagedModel);
+  }
+
+  // todo: get comments for comment
+
+  /**
    * Gets comments for username.
    *
-   * @param username  the username
+   * @param userId    the user id
    * @param pageable  the pageable
    * @param assembler the assembler
    * @return the comments for username
    */
-  @GetMapping("/user/{username}")
-  public ResponseEntity<PagedModel<EntityModel<CommentDto>>> getCommentsForUsername(
-      @PathVariable("username") String username,
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<PagedModel<EntityModel<CommentDto>>> getCommentsForUser(
+      @PathVariable("userId") Long userId,
       @PageableDefault(sort = "text", direction = Sort.Direction.ASC) Pageable pageable,
       PagedResourcesAssembler<CommentDto> assembler) {
-    Page<CommentDto> page = commentService.getAllCommentsForUsername(username, pageable);
+    Page<CommentDto> page = commentService.getAllCommentsForUser(userId, pageable);
     PagedModel<EntityModel<CommentDto>> pagedModel = assembler.toModel(page, commentModelAssembler);
-    logger.info("Returning all comments for username: {}", username);
+    logger.info("Returning all comments for user: {}", userId);
     return ResponseEntity.ok(pagedModel);
   }
 

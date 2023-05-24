@@ -176,4 +176,15 @@ public class PostServiceImpl implements PostService {
         query, pageRequest);
     return ModelPageToDtoPageConverter.convertPosts(pageable, users, modelMapper);
   }
+
+  @Override
+  public void updateCommentsCounter(Long postId, Integer value) {
+    Optional<Post> postOptional = postRepository.findById(postId);
+    if (postOptional.isEmpty()) {
+      throw new PostNotFoundException(postId);
+    }
+    Post post = postOptional.get();
+    post.setCommentsCounter(post.getCommentsCounter() + value);
+    postRepository.save(post);
+  }
 }

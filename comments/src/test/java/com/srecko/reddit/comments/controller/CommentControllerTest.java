@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srecko.reddit.comments.dto.CommentRequest;
 import com.srecko.reddit.comments.entity.Comment;
+import com.srecko.reddit.comments.entity.CommentParentType;
 import com.srecko.reddit.comments.repository.CommentRepository;
 import com.srecko.reddit.comments.service.client.PostsFeignClient;
 import com.srecko.reddit.comments.service.client.UsersFeignClient;
@@ -70,8 +71,8 @@ class CommentControllerTest {
 
   @Test
   void getCommentsForPost_ReturnsComments() throws Exception {
-    Comment comment1 = new Comment(userId, "Good", postId);
-    Comment comment2 = new Comment(userId, "Not bad", postId);
+    Comment comment1 = new Comment(userId, "Good", CommentParentType.POST, postId);
+    Comment comment2 = new Comment(userId, "Not bad", CommentParentType.POST, postId);
     commentRepository.saveAll(List.of(comment1, comment2));
 
     doNothing().when(postsFeignClient).checkIfPostExists(any());
@@ -91,14 +92,36 @@ class CommentControllerTest {
   }
 
   @Test
-  void getCommentsForUsername_ReturnsComments() throws Exception {
-    Comment comment1 = new Comment(userId, "Good", postId);
-    Comment comment2 = new Comment(userId, "Not bad", postId);
+  void getCommentsForComment_ReturnsComments() throws Exception {
+    Comment comment1 = new Comment(userId, "Good", CommentParentType.POST, postId);
+    commentRepository.save(comment1);
+    Comment comment2 = new Comment(userId, "Not bad", CommentParentType.COMMENT, comment1.getId());
+    commentRepository.save(comment2);
+
+    doNothing().when(postsFeignClient).checkIfPostExists(any());
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/comment/{commentId}", comment1.getId())
+            .header("AUTHORIZATION", "Bearer " + jwt))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaTypes.HAL_JSON))
+        .andExpect(jsonPath("$.['_embedded'].commentDtoList", hasSize(1)))
+        .andExpect(jsonPath("$._embedded.commentDtoList[0].text", is(comment2.getText())))
+        .andExpect(jsonPath("$._links.self").exists())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.size", is(10)))
+        .andExpect(jsonPath("$.page.totalElements", is(1)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)));
+  }
+
+  @Test
+  void getCommentsForUser_ReturnsComments() throws Exception {
+    Comment comment1 = new Comment(userId, "Good", CommentParentType.POST, postId);
+    Comment comment2 = new Comment(userId, "Not bad", CommentParentType.POST, postId);
     commentRepository.saveAll(List.of(comment1, comment2));
 
-    given(usersFeignClient.getUserId(any())).willReturn(userId);
+    doNothing().when(usersFeignClient).checkIfExists(any());
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{username}", userId)
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/user/{userId}", userId)
             .header("AUTHORIZATION", "Bearer " + jwt))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -115,10 +138,10 @@ class CommentControllerTest {
   @Test
   // @WithMockCustomUser
   void createComment_ReturnsCreatedComment_WhenSuccessfullyCreated() throws Exception {
-    Comment comment = new Comment(userId, "Good", postId);
+    Comment comment = new Comment(userId, "Good", CommentParentType.POST, postId);
     commentRepository.save(comment);
 
-    CommentRequest commentRequest = new CommentRequest(comment.getText(), postId);
+    CommentRequest commentRequest = new CommentRequest(comment.getText(), comment.getParentType(), comment.getParentId());
     ObjectMapper objectMapper = new ObjectMapper();
     String json = objectMapper.writeValueAsString(commentRequest);
 
@@ -133,7 +156,7 @@ class CommentControllerTest {
         .andExpect(status().is2xxSuccessful())
         .andExpect(jsonPath("$.text", is(comment.getText())))
         .andExpect(jsonPath("$.votes", is(comment.getVotes())))
-        .andExpect(jsonPath("$.postId", is(comment.getPostId().intValue())))
+        .andExpect(jsonPath("$.parentId", is(comment.getParentId().intValue())))
         .andExpect(jsonPath("$.userId", is(comment.getUserId().intValue())));
   }
 
@@ -151,12 +174,13 @@ class CommentControllerTest {
         .andExpect(status().is4xxClientError())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").value(containsString("text")))
-        .andExpect(jsonPath("$.message").value(containsString("post")));
+        .andExpect(jsonPath("$.message").value(containsString("parentType")))
+        .andExpect(jsonPath("$.message").value(containsString("parentId")));
   }
 
   @Test
   void deleteComment_ReturnsDeletedComment_WhenSuccessfullyDeleted() throws Exception {
-    Comment comment = new Comment(userId, "Good", postId);
+    Comment comment = new Comment(userId, "Good", CommentParentType.POST, postId);
     commentRepository.save(comment);
 
     mockMvc.perform(MockMvcRequestBuilders.delete("/api/comments/{commentId}", comment.getId())
@@ -166,7 +190,7 @@ class CommentControllerTest {
         .andExpect(jsonPath("$.id", is(comment.getId().intValue())))
         .andExpect(jsonPath("$.text", is(comment.getText())))
         .andExpect(jsonPath("$.votes", is(comment.getVotes())))
-        .andExpect(jsonPath("$.postId", is(comment.getPostId().intValue())));
+        .andExpect(jsonPath("$.parentId", is(comment.getParentId().intValue())));
   }
 
   @Test
@@ -179,7 +203,7 @@ class CommentControllerTest {
 
   @Test
   void getComment_ReturnsComment() throws Exception {
-    Comment comment = new Comment(userId, "Good", postId);
+    Comment comment = new Comment(userId, "Good", CommentParentType.POST, postId);
     commentRepository.save(comment);
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/comments/{commentId}", comment.getId())
@@ -189,7 +213,7 @@ class CommentControllerTest {
         .andExpect(jsonPath("$.id", is(comment.getId().intValue())))
         .andExpect(jsonPath("$.text", is(comment.getText())))
         .andExpect(jsonPath("$.votes", is(comment.getVotes())))
-        .andExpect(jsonPath("$.postId", is(comment.getPostId().intValue())));
+        .andExpect(jsonPath("$.parentId", is(comment.getParentId().intValue())));
   }
 
   @Test
@@ -203,8 +227,8 @@ class CommentControllerTest {
 
   @Test
   void getAllComments() throws Exception {
-    Comment comment1 = new Comment(userId, "Good", postId);
-    Comment comment2 = new Comment(userId, "Not bad", postId);
+    Comment comment1 = new Comment(userId, "Good", CommentParentType.POST, postId);
+    Comment comment2 = new Comment(userId, "Not bad", CommentParentType.POST, postId);
     commentRepository.saveAll(List.of(comment1, comment2));
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/comments")
@@ -223,7 +247,7 @@ class CommentControllerTest {
 
   @Test
   void checkIfExists_Returns200_IfCommentExists() throws Exception {
-    Comment comment = new Comment(userId, "Good", postId);
+    Comment comment = new Comment(userId, "Good", CommentParentType.POST, postId);
     commentRepository.save(comment);
 
     mockMvc.perform(MockMvcRequestBuilders.head("/api/comments/checkIfExists")
@@ -244,8 +268,8 @@ class CommentControllerTest {
 
   @Test
   void search_ReturnsPagedModelOfComments_WhenTheyMatchQuery() throws Exception {
-    Comment comment1 = new Comment(userId, "Good", postId);
-    Comment comment2 = new Comment(userId, "Very good", postId);
+    Comment comment1 = new Comment(userId, "Good", CommentParentType.POST, postId);
+    Comment comment2 = new Comment(userId, "Very good", CommentParentType.POST, postId);
     commentRepository.saveAll(List.of(comment1, comment2));
     String query = "good";
 

@@ -38,7 +38,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ContextConfiguration(classes = {UserServiceImpl.class, TestConfig.class})
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 class UserServiceImplTest {
 
   @MockBean
@@ -276,5 +276,22 @@ class UserServiceImplTest {
     assertEquals(2, actual.getContent().size());
     assertTrue(actual.getContent().contains(modelMapper.map(user, UserDto.class)));
     assertTrue(actual.getContent().contains(modelMapper.map(user1, UserDto.class)));
+  }
+
+  @Test
+  void checkIfExists_NothingHappens_WhenUserExists() {
+    // given
+    given(userRepository.findById(any())).willReturn(Optional.ofNullable(user));
+
+    // when then
+    userService.checkIfExists(user.getId());
+  }
+
+  @Test
+  void checkIfExists_ThrowsUserNotFoundException_WhenUserDoesNotExist() {
+    // given when then
+    assertThrows(UserNotFoundException.class, () -> {
+      userService.checkIfExists(0L);
+    });
   }
 }
