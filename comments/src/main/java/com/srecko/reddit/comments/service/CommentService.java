@@ -22,13 +22,22 @@ public interface CommentService {
   Page<CommentDto> getAllCommentsForPost(Long postId, Pageable pageable);
 
   /**
+   * Gets all comments for comment.
+   *
+   * @param commentId the comment id
+   * @param pageable  the pageable
+   * @return the all comments for comment
+   */
+  Page<CommentDto> getAllCommentsForComment(Long commentId, Pageable pageable);
+
+  /**
    * Gets all comments for username.
    *
    * @param username the username
    * @param pageable the pageable
    * @return the all comments for username
    */
-  Page<CommentDto> getAllCommentsForUsername(String username, Pageable pageable);
+  Page<CommentDto> getAllCommentsForUser(Long username, Pageable pageable);
 
   /**
    * Save comment.
@@ -77,4 +86,18 @@ public interface CommentService {
    * @return the page
    */
   Page<CommentDto> search(String query, Pageable pageable);
+
+  /**
+   * Increase comment counter.
+   *
+   * @param parentId the parent id
+   */
+  void increaseCommentCounter(Long parentId);
+
+  /**
+   * Decrease comment counter.
+   *
+   * @param parentId the parent id
+   */
+  void decreaseCommentCounter(Long parentId);
 }

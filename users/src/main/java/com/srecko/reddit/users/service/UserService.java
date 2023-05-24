@@ -98,4 +98,11 @@ public interface UserService {
    * @return the page
    */
   PageImpl<UserDto> search(String q, Pageable pageable);
+
+  /**
+   * Check if exists.
+   *
+   * @param userId the user id
+   */
+  void checkIfExists(Long userId);
 }

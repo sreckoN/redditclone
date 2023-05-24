@@ -1,6 +1,7 @@
 package com.srecko.reddit.comments;
 
 import com.srecko.reddit.comments.entity.Comment;
+import com.srecko.reddit.comments.entity.CommentParentType;
 import com.srecko.reddit.comments.repository.CommentRepository;
 import java.util.List;
 import org.springframework.boot.CommandLineRunner;
@@ -31,8 +32,8 @@ public class DataLoader implements CommandLineRunner {
   @Override
   @Transactional
   public void run(String... args) {
-    Comment comment1 = new Comment(1L, "Novi Sad", 1L);
-    Comment comment2 = new Comment(1L, "Zlatibor", 1L);
+    Comment comment1 = new Comment(1L, "Novi Sad", CommentParentType.POST, 1L);
+    Comment comment2 = new Comment(1L, "Zlatibor", CommentParentType.POST, 1L);
     commentRepository.saveAll(List.of(comment1, comment2));
   }
 }

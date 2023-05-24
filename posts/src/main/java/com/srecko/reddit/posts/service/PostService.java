@@ -96,4 +96,12 @@ public interface PostService {
    * @return the page
    */
   Page<PostDto> searchPostsInSubreddit(Long subredditId, String query, Pageable pageable);
+
+  /**
+   * Update comments counter.
+   *
+   * @param postId the post id
+   * @param value  the value
+   */
+  void updateCommentsCounter(Long postId, Integer value);
 }

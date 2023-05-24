@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.srecko.reddit.comments.controller.CommentController;
 import com.srecko.reddit.comments.dto.CommentDto;
+import com.srecko.reddit.comments.entity.CommentParentType;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +30,12 @@ class CommentModelAssemblerTest {
   }
 
   @Test
-  void toModel_ReturnsValidEntityModel() {
+  void toModel_ReturnsValidEntityModelForPost() {
     // given
     CommentDto commentDto = new CommentDto();
     commentDto.setId(1L);
-    commentDto.setPostId(1L);
+    commentDto.setParentType(CommentParentType.POST);
+    commentDto.setParentId(1L);
 
     // when
     EntityModel<CommentDto> result = commentModelAssembler.toModel(commentDto);
@@ -48,9 +50,36 @@ class CommentModelAssemblerTest {
     assertTrue(selfLink.isPresent());
     assertEquals("/api/comments/" + commentDto.getId(), selfLink.get().getHref());
 
-   /* Optional<Link> postsLink = result.getLink("all_comments_for_post");
+    Optional<Link> postsLink = result.getLink("all_comments_for_post");
     assertNotNull(postsLink);
     assertTrue(postsLink.isPresent());
-    assertEquals("/api/comments/post/" + commentDto.getPostId(), postsLink.get().getHref());*/
+    assertEquals("/api/comments/post/" + commentDto.getParentId(), postsLink.get().getHref());
+  }
+
+  @Test
+  void toModel_ReturnsValidEntityModelForComment() {
+    // given
+    CommentDto commentDto = new CommentDto();
+    commentDto.setId(1L);
+    commentDto.setParentType(CommentParentType.COMMENT);
+    commentDto.setParentId(1L);
+
+    // when
+    EntityModel<CommentDto> result = commentModelAssembler.toModel(commentDto);
+
+    // then
+    assertNotNull(result);
+    assertEquals(commentDto, result.getContent());
+    assertNotNull(result.getLinks());
+
+    Optional<Link> selfLink = result.getLink("self");
+    assertNotNull(selfLink);
+    assertTrue(selfLink.isPresent());
+    assertEquals("/api/comments/" + commentDto.getId(), selfLink.get().getHref());
+
+    Optional<Link> postsLink = result.getLink("all_comments_for_comment");
+    assertNotNull(postsLink);
+    assertTrue(postsLink.isPresent());
+    assertEquals("/api/comments/comment/" + commentDto.getParentId(), postsLink.get().getHref());
   }
 }

@@ -190,4 +190,21 @@ class UserControllerTest {
         .andExpect(jsonPath("$.page.totalElements", is(0)))
         .andExpect(jsonPath("$.page.totalPages", is(0)));
   }
+
+  @Test
+  void checkIfExist_Returns200_WhenUserExists() throws Exception {
+    userRepository.save(user);
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/users/checkIfExists")
+        .contentType(APPLICATION_JSON)
+        .content(String.valueOf(user.getId())))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void checkIfExist_ThrowsUserNotFoundException_WhenUserDoesNotExist() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.head("/api/users/checkIfExists")
+            .contentType(APPLICATION_JSON)
+            .content(String.valueOf(0L)))
+        .andExpect(status().is4xxClientError());
+  }
 }

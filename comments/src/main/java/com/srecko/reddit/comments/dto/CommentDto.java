@@ -1,5 +1,6 @@
 package com.srecko.reddit.comments.dto;
 
+import com.srecko.reddit.comments.entity.CommentParentType;
 import java.util.Date;
 import java.util.Objects;
 
@@ -20,7 +21,11 @@ public class CommentDto {
 
   private Long userId;
 
-  private Long postId;
+  private CommentParentType parentType;
+
+  private Long parentId;
+
+  private int commentsCounter;
 
   /**
    * Instantiates a new Comment dto.
@@ -38,12 +43,13 @@ public class CommentDto {
     }
     CommentDto that = (CommentDto) o;
     return id.equals(that.id) && text.equals(that.text) && Objects.equals(created, that.created)
-        && Objects.equals(userId, that.userId) && Objects.equals(postId, that.postId);
+        && Objects.equals(userId, that.userId) && Objects.equals(parentType, that.parentType)
+        && Objects.equals(parentId, that.parentId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, text, votes, created, userId, postId);
+    return Objects.hash(id, text, votes, created, userId, parentType, parentId);
   }
 
   /**
@@ -137,20 +143,56 @@ public class CommentDto {
   }
 
   /**
-   * Gets post id.
+   * Gets parent type.
    *
-   * @return the post id
+   * @return the parent type
    */
-  public Long getPostId() {
-    return postId;
+  public CommentParentType getParentType() {
+    return parentType;
   }
 
   /**
-   * Sets post id.
+   * Sets parent type.
    *
-   * @param postId the post id
+   * @param parentType the parent type
    */
-  public void setPostId(Long postId) {
-    this.postId = postId;
+  public void setParentType(CommentParentType parentType) {
+    this.parentType = parentType;
+  }
+
+  /**
+   * Gets parent id.
+   *
+   * @return the parent id
+   */
+  public Long getParentId() {
+    return parentId;
+  }
+
+  /**
+   * Sets parent id.
+   *
+   * @param parentId the parent id
+   */
+  public void setParentId(Long parentId) {
+    this.parentId = parentId;
+  }
+
+  /**
+   * Gets comments counter.
+   *
+   * @return the comments counter
+   */
+  public int getCommentsCounter() {
+    return commentsCounter;
+  }
+
+  /**
+   * Sets comments counter.
+   *
+   * @param commentsCounter the comments counter
+   */
+  public void setCommentsCounter(int commentsCounter) {
+    this.commentsCounter = commentsCounter;
   }
 }
